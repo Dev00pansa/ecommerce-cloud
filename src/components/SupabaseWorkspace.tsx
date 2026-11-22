@@ -28,6 +28,7 @@ import {
   Lock,
   LogIn,
   LogOut,
+  Monitor,
   Moon,
   Package,
   Percent,
@@ -53,7 +54,7 @@ import {
 import { translateSupabaseError } from "@/lib/authErrors";
 
 type AuthMode = "login" | "signup";
-type ThemeMode = "light" | "dark";
+type ThemeMode = "default" | "white" | "black";
 
 type PlatformPreset = {
   id: string;
@@ -63,10 +64,10 @@ type PlatformPreset = {
 };
 
 const PLATFORM_PRESETS: PlatformPreset[] = [
-  { id: "Shopee", label: "Shopee 13%", badge: "Marketplace", feePercent: 13 },
-  { id: "TikTok Shop", label: "TikTok Shop 12%", badge: "Social Commerce", feePercent: 12 },
-  { id: "Lazada", label: "Lazada 12%", badge: "Marketplace", feePercent: 12 },
-  { id: "ขายผ่านเพจ/แชต", label: "ขายผ่านเพจ/แชต 0%", badge: "Direct Sales", feePercent: 0 },
+  { id: "Shopee", label: "Shopee (13%)", badge: "Marketplace", feePercent: 13 },
+  { id: "TikTok Shop", label: "TikTok Shop (12%)", badge: "Social Commerce", feePercent: 12 },
+  { id: "Lazada", label: "Lazada (12%)", badge: "Marketplace", feePercent: 12 },
+  { id: "ขายผ่านเพจ/แชต", label: "ขายผ่านเพจ/แชต (0%)", badge: "Direct Sales", feePercent: 0 },
 ];
 
 const THEME_STORAGE_KEY = "ecom_theme_mode";
@@ -87,14 +88,17 @@ function subscribeTheme(onStoreChange: () => void): () => void {
 
 function getThemeSnapshot(): ThemeMode {
   if (typeof window === "undefined") {
-    return "dark";
+    return "default";
   }
   const saved = window.localStorage.getItem(THEME_STORAGE_KEY);
-  return saved === "light" ? "light" : "dark";
+  if (saved === "white" || saved === "black" || saved === "default") {
+    return saved;
+  }
+  return "default";
 }
 
 function getThemeServerSnapshot(): ThemeMode {
-  return "dark";
+  return "default";
 }
 
 function formatNumber(value: number, decimals = 2): string {
@@ -116,11 +120,10 @@ export default function SupabaseWorkspace() {
     getThemeSnapshot,
     getThemeServerSnapshot
   );
-  const isDark = theme === "dark";
+  const isDark = theme === "black";
 
-  const toggleTheme = useCallback(() => {
+  const selectTheme = useCallback((next: ThemeMode) => {
     if (typeof window === "undefined") return;
-    const next: ThemeMode = getThemeSnapshot() === "dark" ? "light" : "dark";
     window.localStorage.setItem(THEME_STORAGE_KEY, next);
     window.dispatchEvent(new Event(THEME_EVENT_NAME));
   }, []);
@@ -660,24 +663,37 @@ export default function SupabaseWorkspace() {
     URL.revokeObjectURL(url);
   }
 
-  // Dynamic theme classes (Pure Black #000000 vs Clean Light #FFFFFF / #F8FAFC)
-  const pageBg = isDark
-    ? "bg-[#000000] text-zinc-100"
-    : "bg-[#F8FAFC] text-slate-900";
-  const navBg = isDark
-    ? "bg-[#000000]/90 border-zinc-800"
-    : "bg-[#FFFFFF]/90 border-slate-200";
-  const cardBg = isDark
-    ? "bg-[#050505] border-zinc-800/90"
-    : "bg-[#FFFFFF] border-slate-200/90 shadow-sm";
-  const subCardBg = isDark
-    ? "bg-[#0A0A0A] border-zinc-800/80"
-    : "bg-[#F8FAFC] border-slate-200";
-  const inputBg = isDark
-    ? "bg-[#000000] border-zinc-800 text-zinc-100 placeholder-zinc-600 focus:border-emerald-500"
-    : "bg-[#FFFFFF] border-slate-300 text-slate-900 placeholder-slate-400 focus:border-emerald-600";
-  const mutedText = isDark ? "text-zinc-400" : "text-slate-600";
-  const subtleText = isDark ? "text-zinc-500" : "text-slate-500";
+  // Dynamic 3-Theme classes: Default (#F1F5F9), Pure White (#FFFFFF), Pure Black (#000000)
+  const pageBg =
+    theme === "black"
+      ? "bg-[#000000] text-zinc-100"
+      : theme === "white"
+        ? "bg-[#FFFFFF] text-slate-950"
+        : "bg-[#F1F5F9] text-slate-900";
+  const navBg =
+    theme === "black"
+      ? "bg-[#000000]/90 border-zinc-800"
+      : theme === "white"
+        ? "bg-[#FFFFFF]/95 border-slate-200"
+        : "bg-[#FFFFFF]/90 border-slate-200";
+  const cardBg =
+    theme === "black"
+      ? "bg-[#050505] border-zinc-800/90"
+      : theme === "white"
+        ? "bg-[#FFFFFF] border-slate-200 shadow-none"
+        : "bg-[#FFFFFF] border-slate-200/90 shadow-sm";
+  const subCardBg =
+    theme === "black"
+      ? "bg-[#0A0A0A] border-zinc-800/80"
+      : theme === "white"
+        ? "bg-[#FFFFFF] border-slate-200"
+        : "bg-[#F8FAFC] border-slate-200";
+  const inputBg =
+    theme === "black"
+      ? "bg-[#000000] border-zinc-800 text-zinc-100 placeholder-zinc-600 focus:border-emerald-500"
+      : "bg-[#FFFFFF] border-slate-300 text-slate-900 placeholder-slate-400 focus:border-emerald-600";
+  const mutedText = theme === "black" ? "text-zinc-400" : "text-slate-600";
+  const subtleText = theme === "black" ? "text-zinc-500" : "text-slate-500";
 
   // SVG Donut chart calculations
   const donutRadius = 64;
@@ -746,7 +762,7 @@ export default function SupabaseWorkspace() {
           <nav className="hidden md:flex items-center gap-1 lg:gap-2">
             {[
               { href: "#intro", label: "แนะนำการใช้งาน" },
-              { href: "#how-to-use", label: "วิธีการใช้" },
+              { href: "#how-to", label: "วิธีการใช้" },
               { href: "#calculator", label: "เครื่องมือคำนวณ" },
               { href: "#history", label: "ประวัติบน Cloud" },
             ].map((item) => (
@@ -764,35 +780,48 @@ export default function SupabaseWorkspace() {
             ))}
           </nav>
 
-          {/* Right: Theme Toggle & Login/User Action */}
+          {/* Right: 3-Theme Switcher & Login/User Action */}
           <div className="flex items-center gap-2 sm:gap-2.5">
-            <button
-              type="button"
-              onClick={toggleTheme}
-              aria-label="สลับโหมดสี"
-              title={
+            <div
+              role="group"
+              aria-label="เลือกโหมดสี 3 รูปแบบ"
+              className={`inline-flex items-center rounded-xl border p-1 ${
                 isDark
-                  ? "สลับเป็นโหมดสว่าง (Light Mode)"
-                  : "สลับเป็นโหมดมืด (Pure Black)"
-              }
-              className={`inline-flex items-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-medium transition-all ${
-                isDark
-                  ? "border-zinc-800 bg-zinc-950 text-zinc-200 hover:border-zinc-700 hover:bg-zinc-900"
-                  : "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50"
+                  ? "border-zinc-800 bg-zinc-950"
+                  : "border-slate-200 bg-slate-100/80"
               }`}
             >
-              {isDark ? (
-                <>
-                  <Sun className="h-4 w-4 text-amber-400" />
-                  <span className="hidden sm:inline">โหมดสว่าง</span>
-                </>
-              ) : (
-                <>
-                  <Moon className="h-4 w-4 text-slate-700" />
-                  <span className="hidden sm:inline">โหมดมืด</span>
-                </>
-              )}
-            </button>
+              {(
+                [
+                  { id: "default", label: "ปกติ", title: "โหมดปกติ (Default #F1F5F9)", Icon: Monitor },
+                  { id: "white", label: "ขาว", title: "โหมดสีขาว (Pure White #FFFFFF)", Icon: Sun },
+                  { id: "black", label: "ดำ", title: "โหมดสีดำ (Pure Black #000000)", Icon: Moon },
+                ] as const
+              ).map(({ id, label, title, Icon }) => {
+                const active = theme === id;
+                return (
+                  <button
+                    key={id}
+                    type="button"
+                    onClick={() => selectTheme(id)}
+                    aria-pressed={active}
+                    title={title}
+                    className={`inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs font-medium transition-all ${
+                      active
+                        ? id === "black"
+                          ? "bg-zinc-800 text-white shadow-sm"
+                          : "bg-white text-slate-950 shadow-sm"
+                        : isDark
+                          ? "text-zinc-400 hover:text-zinc-200"
+                          : "text-slate-600 hover:text-slate-900"
+                    }`}
+                  >
+                    <Icon className="h-3.5 w-3.5" />
+                    <span className="hidden sm:inline">{label}</span>
+                  </button>
+                );
+              })}
+            </div>
 
             {authChecking ? (
               <div
@@ -860,7 +889,7 @@ export default function SupabaseWorkspace() {
           <a href="#intro" className="px-2 py-1 hover:text-emerald-500">
             แนะนำ
           </a>
-          <a href="#how-to-use" className="px-2 py-1 hover:text-emerald-500">
+          <a href="#how-to" className="px-2 py-1 hover:text-emerald-500">
             วิธีใช้
           </a>
           <a href="#calculator" className="px-2 py-1 hover:text-emerald-500">
@@ -916,11 +945,11 @@ export default function SupabaseWorkspace() {
                   className="inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-6 py-3.5 text-sm font-semibold text-slate-950 shadow-sm transition-all hover:bg-emerald-400 hover:-translate-y-0.5"
                 >
                   <Calculator className="h-4 w-4" />
-                  <span>เริ่มทดลองคำนวณ</span>
+                  <span>เริ่มคำนวณทันที</span>
                   <ArrowRight className="h-4 w-4" />
                 </a>
                 <a
-                  href="#how-to-use"
+                  href="#how-to"
                   className={`inline-flex items-center gap-2 rounded-xl border px-5 py-3.5 text-sm font-semibold transition-all ${
                     isDark
                       ? "border-zinc-800 bg-zinc-950 text-zinc-200 hover:border-zinc-700 hover:bg-zinc-900"
@@ -974,8 +1003,8 @@ export default function SupabaseWorkspace() {
           </div>
         </section>
 
-        {/* SECTION 2: #how-to-use (Step-by-Step Guide) */}
-        <section id="how-to-use" className="scroll-mt-24 space-y-6">
+        {/* SECTION 2: #how-to (Step-by-Step Guide) */}
+        <section id="how-to" className="scroll-mt-24 space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
             <div>
               <span className="text-xs font-semibold uppercase tracking-wider text-emerald-500">
@@ -1261,8 +1290,8 @@ export default function SupabaseWorkspace() {
                     {saving
                       ? "กำลังบันทึก..."
                       : user
-                        ? "บันทึกการคำนวณนี้ลง Cloud"
-                        : "เข้าสู่ระบบเพื่อบันทึกลง Cloud"}
+                        ? "บันทึกการคำนวณลง Cloud"
+                        : "เข้าสู่ระบบเพื่อบันทึกข้อมูล"}
                   </span>
                 </button>
                 <button
@@ -1286,14 +1315,26 @@ export default function SupabaseWorkspace() {
               {metrics.netProfitPerUnit < 0 && (
                 <div
                   role="alert"
-                  className="flex items-center gap-3 rounded-2xl border-2 border-rose-500 bg-rose-500/15 px-5 py-4 text-rose-400 shadow-lg"
+                  className={`flex items-center gap-3 rounded-2xl border-2 border-rose-500 px-5 py-4 shadow-lg ${
+                    isDark
+                      ? "bg-rose-500/15 text-rose-300"
+                      : "bg-rose-50 text-rose-800"
+                  }`}
                 >
                   <AlertTriangle className="h-6 w-6 shrink-0 text-rose-500" />
                   <div>
-                    <p className="text-sm sm:text-base font-bold text-rose-400">
+                    <p
+                      className={`text-sm sm:text-base font-bold ${
+                        isDark ? "text-rose-400" : "text-rose-700"
+                      }`}
+                    >
                       ขาดทุน! ควรปรับราคาขายเพิ่ม
                     </p>
-                    <p className="text-xs sm:text-sm text-rose-300/90">
+                    <p
+                      className={`text-xs sm:text-sm ${
+                        isDark ? "text-rose-300/90" : "text-rose-700"
+                      }`}
+                    >
                       ราคาขายปัจจุบัน ({formatNumber(sellingPrice)} บาท) ต่ำกว่าต้นทุนรวมต่อชิ้น (
                       {formatNumber(metrics.totalCostPerUnit)} บาท) ทำให้ขาดทุนชิ้นละ{" "}
                       {formatNumber(Math.abs(metrics.netProfitPerUnit))} บาท
@@ -1427,7 +1468,13 @@ export default function SupabaseWorkspace() {
                       ตัวจำลองการจัดโปรโมชัน (Promo Discount Simulator)
                     </h3>
                   </div>
-                  <span className="inline-flex items-center self-start sm:self-auto rounded-xl bg-emerald-500/15 px-3 py-1 font-mono text-xs sm:text-sm font-bold text-emerald-400">
+                  <span
+                    className={`inline-flex items-center self-start sm:self-auto rounded-xl border px-3 py-1 font-mono text-xs sm:text-sm font-bold ${
+                      isDark
+                        ? "border-emerald-500/30 bg-emerald-500/15 text-emerald-400"
+                        : "border-emerald-600/30 bg-emerald-50 text-emerald-700"
+                    }`}
+                  >
                     ลดราคา {discountPercent}%
                   </span>
                 </div>
@@ -1490,7 +1537,9 @@ export default function SupabaseWorkspace() {
                         ? isDark
                           ? "border-emerald-500/30 bg-emerald-500/10 text-zinc-200"
                           : "border-emerald-500/30 bg-emerald-50 text-slate-800"
-                        : "border-rose-500/40 bg-rose-500/10 text-rose-300"
+                        : isDark
+                          ? "border-rose-500/40 bg-rose-500/10 text-rose-300"
+                          : "border-rose-500/40 bg-rose-50 text-rose-800"
                     }`}
                   >
                     {metrics.discountedProfitPerUnit > 0 &&
@@ -1502,7 +1551,11 @@ export default function SupabaseWorkspace() {
                         (Margin {formatNumber(metrics.discountedMarginPercent, 1)}%) — เพื่อให้ได้กำไรรวมเท่ากับการขายราคาปกติ{" "}
                         {metrics.baselineUnits} ชิ้น (฿
                         {formatNumber(metrics.baselineTotalProfit, 0)}) คุณต้องขายให้ได้{" "}
-                        <strong className="text-emerald-400 underline">
+                        <strong
+                          className={`underline ${
+                            isDark ? "text-emerald-400" : "text-emerald-700"
+                          }`}
+                        >
                           {metrics.requiredUnitsForSameProfit.toLocaleString("th-TH")} ชิ้น
                         </strong>{" "}
                         (คิดเป็น {formatNumber(metrics.volumeMultiplier ?? 1, 2)} เท่าของยอดขายเดิม)
@@ -1679,7 +1732,7 @@ export default function SupabaseWorkspace() {
                 ) : (
                   <CloudUpload className="h-4 w-4" />
                 )}
-                <span>บันทึกการคำนวณนี้ลง Cloud</span>
+                <span>บันทึกการคำนวณลง Cloud</span>
               </button>
 
               <button
@@ -1692,7 +1745,7 @@ export default function SupabaseWorkspace() {
                 }`}
               >
                 <Download className="h-4 w-4" />
-                <span>ส่งออกข้อมูล (Export CSV)</span>
+                <span>ส่งออกไฟล์ CSV</span>
               </button>
 
               {user && (
@@ -1767,7 +1820,7 @@ export default function SupabaseWorkspace() {
                   className="inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-6 py-3 text-sm font-semibold text-slate-950 shadow-sm transition hover:bg-emerald-400"
                 >
                   <LogIn className="h-4 w-4" />
-                  <span>เข้าสู่ระบบเพื่อบันทึกข้อมูลบน Cloud</span>
+                  <span>เข้าสู่ระบบเพื่อบันทึกข้อมูล</span>
                 </button>
               </div>
             </div>
