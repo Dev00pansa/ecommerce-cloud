@@ -20,18 +20,18 @@ export const PLATFORM_PRESETS: PlatformPreset[] = [
 export const CSV_EXPORT_COLUMNS: readonly CsvExportColumnOption[] = [
   { key: "product_name", label: "ชื่อสินค้า", defaultSelected: true },
   { key: "platform", label: "แพลตฟอร์ม", defaultSelected: true },
+  { key: "total_cost_per_unit", label: "ต้นทุนรวมต่อชิ้น (บาท)", defaultSelected: true },
+  { key: "selling_price", label: "ราคาขาย (บาท)", defaultSelected: true },
+  { key: "net_profit_per_unit", label: "กำไรสุทธิต่อชิ้น (บาท)", defaultSelected: true },
+  { key: "net_margin_percent", label: "Net Margin (%)", defaultSelected: true },
+  { key: "created_at", label: "วันที่บันทึก", defaultSelected: true },
   { key: "cost_price", label: "ต้นทุนสินค้า (บาท)", defaultSelected: false },
   { key: "packaging_cost", label: "ค่าแพ็ก (บาท)", defaultSelected: false },
   { key: "ads_cost", label: "ค่าแอด (บาท)", defaultSelected: false },
   { key: "platform_fee_percent", label: "ค่าธรรมเนียม (%)", defaultSelected: false },
   { key: "platform_fee_baht", label: "ค่าธรรมเนียม (บาท)", defaultSelected: false },
-  { key: "total_cost_per_unit", label: "ต้นทุนรวมต่อชิ้น (บาท)", defaultSelected: true },
-  { key: "selling_price", label: "ราคาขาย (บาท)", defaultSelected: true },
-  { key: "net_profit_per_unit", label: "กำไรสุทธิต่อชิ้น (บาท)", defaultSelected: true },
-  { key: "net_margin_percent", label: "Net Margin (%)", defaultSelected: true },
   { key: "fixed_cost", label: "ต้นทุนคงที่รวม (บาท)", defaultSelected: false },
   { key: "break_even_units", label: "จุดคุ้มทุน (ชิ้น)", defaultSelected: false },
-  { key: "created_at", label: "วันที่บันทึก", defaultSelected: true },
 ];
 
 export const DEFAULT_CSV_EXPORT_KEYS: CsvExportColumnKey[] = CSV_EXPORT_COLUMNS

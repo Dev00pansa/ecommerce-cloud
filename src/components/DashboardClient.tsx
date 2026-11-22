@@ -504,23 +504,54 @@ export function DashboardClient({
         <div className="animate-dashboard-glow-a absolute -top-28 right-[8%] h-[440px] w-[40vw] min-w-[280px] rounded-full bg-gradient-to-b from-emerald-400/18 via-emerald-500/8 to-transparent blur-3xl" />
       </div>
 
-      <main className="relative z-10 w-full max-w-3xl mx-auto flex-1 px-6 py-10 sm:py-12 space-y-8">
+      <main
+        className={`relative z-10 w-full max-w-6xl mx-auto flex-1 px-4 sm:px-6 lg:px-8 pt-10 sm:pt-12 space-y-8 ${
+          activeTab === "history" ? "pb-28" : "pb-14"
+        }`}
+      >
         <div
           ref={topFormRef}
-          className="scroll-mt-20 flex flex-col sm:flex-row sm:items-end justify-between gap-4"
+          className="scroll-mt-20 flex flex-col lg:flex-row lg:items-end justify-between gap-5"
         >
-          <div className="space-y-1">
-            <span className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-emerald-400">
-              KhumLab Profit Planner
-            </span>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
-              {isEn
-                ? "Step-by-Step Profit & Break-Even Planner"
-                : "คำนวณต้นทุนและกำไรสุทธิทีละขั้น"}
-            </h1>
-          </div>
+          {activeTab === "calculator" ? (
+            <div className="space-y-1">
+              <span className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-emerald-400">
+                KhumLab Profit Planner
+              </span>
+              <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white">
+                {isEn
+                  ? "Step-by-Step Profit & Break-Even Planner"
+                  : "คำนวณต้นทุนและกำไรสุทธิทีละขั้น"}
+              </h1>
+            </div>
+          ) : (
+            <div className="space-y-2 max-w-2xl">
+              <div className="flex flex-wrap items-center gap-3">
+                <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white">
+                  {isEn
+                    ? `Cloud Storage (${records.length}/${MAX_CLOUD_RECORDS})`
+                    : `คลาวด์เก็บข้อมูล (${records.length}/${MAX_CLOUD_RECORDS})`}
+                </h1>
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-[#050505] px-2.5 py-1 text-[11px] font-mono text-emerald-400">
+                  <span
+                    className={`h-1.5 w-1.5 rounded-full ${
+                      realtimeConnected
+                        ? "bg-emerald-400 animate-pulse"
+                        : "bg-amber-400"
+                    }`}
+                  />
+                  <span>{realtimeConnected ? "Cloud Synced" : "Cloud Ready"}</span>
+                </span>
+              </div>
+              <p className="text-sm text-zinc-400 leading-relaxed">
+                {isEn
+                  ? `Store up to ${MAX_CLOUD_RECORDS} pricing plans. Open any item to edit or download your selected records as a single table file.`
+                  : `บันทึกแผนคำนวณได้สูงสุด ${MAX_CLOUD_RECORDS} รายการ กดเปิดดูเพื่อแก้ไข หรือเลือกรายการที่ต้องการแล้วดาวน์โหลดรวมเป็นไฟล์ตารางเดียว (เปิดใน Excel / Google Sheets ได้ทันที)`}
+              </p>
+            </div>
+          )}
 
-          <div className="inline-flex shrink-0 self-start rounded-2xl border border-emerald-500/25 bg-[#050505] p-1 shadow-[0_0_20px_-6px_rgba(16,185,129,0.16)]">
+          <div className="inline-flex shrink-0 self-start lg:self-auto rounded-2xl border border-emerald-500/25 bg-[#050505] p-1 shadow-[0_0_20px_-6px_rgba(16,185,129,0.16)]">
             <button
               type="button"
               onClick={() => handleSwitchTab("calculator")}
@@ -614,7 +645,6 @@ export function DashboardClient({
             records={records}
             loading={refreshing}
             deletingId={deletingId}
-            realtimeConnected={realtimeConnected}
             onRefresh={fetchHistory}
             onExportCsv={handleExportCloudCsv}
             onLoadRecord={handleLoadRecord}

@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useRef, useState, type MouseEvent } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useRef, useState, type MouseEvent } from "react";
 import {
   Calculator,
   Calendar,
@@ -26,6 +26,122 @@ interface NavbarProps {
   avatarUrl?: string | null;
   createdAt?: string | null;
   isAuthenticated?: boolean;
+}
+
+interface ToolsDropdownItemsProps {
+  pathname: string;
+  isEn: boolean;
+  calculatorTabHref: string;
+  cloudTabHref: string;
+  onSelect: () => void;
+}
+
+function ToolsDropdownItems({
+  pathname,
+  isEn,
+  calculatorTabHref,
+  cloudTabHref,
+  onSelect,
+}: ToolsDropdownItemsProps) {
+  const searchParams = useSearchParams();
+  const isOnDashboard = pathname.startsWith("/dashboard");
+  const activeTabParam = searchParams.get("tab");
+  const isCalculatorActive = isOnDashboard && activeTabParam !== "history";
+  const isCloudActive = isOnDashboard && activeTabParam === "history";
+
+  return (
+    <div className="p-2 space-y-1">
+      <Link
+        href={calculatorTabHref}
+        scroll={false}
+        onClick={onSelect}
+        className={`group flex items-start gap-3 rounded-xl px-3.5 py-3 border transition-colors ${
+          isCalculatorActive
+            ? "bg-emerald-500/12 border-emerald-500/35"
+            : "border-transparent hover:bg-white/[0.05]"
+        }`}
+      >
+        <span
+          className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition-colors ${
+            isCalculatorActive
+              ? "bg-emerald-500/25 text-emerald-300"
+              : "bg-emerald-500/15 text-emerald-400 group-hover:bg-emerald-500/25"
+          }`}
+        >
+          <Calculator className="h-4 w-4" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center justify-between gap-2">
+            <span
+              className={`block text-sm font-semibold transition-colors ${
+                isCalculatorActive
+                  ? "text-emerald-400"
+                  : "text-zinc-100 group-hover:text-emerald-300"
+              }`}
+            >
+              {isEn ? "Calculator" : "เครื่องมือคำนวณ"}
+            </span>
+            {isCalculatorActive && (
+              <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-semibold text-emerald-300">
+                <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]" />
+                <span>{isEn ? "Active" : "กำลังใช้งาน"}</span>
+              </span>
+            )}
+          </div>
+          <span className="mt-0.5 block text-xs text-zinc-400 leading-snug">
+            {isEn
+              ? "Calculate costs, selling price, and net profit"
+              : "คำนวณต้นทุน ราคาขาย และกำไรสุทธิ"}
+          </span>
+        </div>
+      </Link>
+
+      <Link
+        href={cloudTabHref}
+        scroll={false}
+        onClick={onSelect}
+        className={`group flex items-start gap-3 rounded-xl px-3.5 py-3 border transition-colors ${
+          isCloudActive
+            ? "bg-emerald-500/12 border-emerald-500/35"
+            : "border-transparent hover:bg-white/[0.05]"
+        }`}
+      >
+        <span
+          className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition-colors ${
+            isCloudActive
+              ? "bg-emerald-500/25 text-emerald-300"
+              : "bg-emerald-500/15 text-emerald-400 group-hover:bg-emerald-500/25"
+          }`}
+        >
+          <Cloud className="h-4 w-4" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center justify-between gap-2">
+            <span
+              className={`block text-sm font-semibold transition-colors ${
+                isCloudActive
+                  ? "text-emerald-400"
+                  : "text-zinc-100 group-hover:text-emerald-300"
+              }`}
+            >
+              {isEn ? "Cloud Storage" : "คลาวด์เก็บข้อมูล"}
+            </span>
+            {isCloudActive && (
+              <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-semibold text-emerald-300">
+                <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]" />
+                <span>{isEn ? "Active" : "กำลังใช้งาน"}</span>
+              </span>
+            )}
+          </div>
+          <span className="mt-0.5 block text-xs text-zinc-400 leading-snug">
+            {isEn
+              ? "View saved calculations and product images"
+              : "ดูประวัติรายการและรูปสินค้าที่บันทึกไว้"}
+          </span>
+        </div>
+      </Link>
+    </div>
+  );
 }
 
 function formatJoinedDate(
@@ -244,49 +360,15 @@ export function Navbar({
                     className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-400/75 to-transparent"
                   />
 
-                  <div className="p-2 space-y-1">
-                    <Link
-                      href={calculatorTabHref}
-                      scroll={false}
-                      onClick={() => setToolsDropdownOpen(false)}
-                      className="group flex items-start gap-3 rounded-xl px-3.5 py-3 transition-colors hover:bg-white/[0.05]"
-                    >
-                      <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-400 transition-colors group-hover:bg-emerald-500/25">
-                        <Calculator className="h-4 w-4" />
-                      </span>
-                      <div className="min-w-0">
-                        <span className="block text-sm font-semibold text-zinc-100 group-hover:text-emerald-300 transition-colors">
-                          {isEn ? "Calculator" : "เครื่องมือคำนวณ"}
-                        </span>
-                        <span className="mt-0.5 block text-xs text-zinc-400 leading-snug">
-                          {isEn
-                            ? "Calculate costs, selling price, and net profit"
-                            : "คำนวณต้นทุน ราคาขาย และกำไรสุทธิ"}
-                        </span>
-                      </div>
-                    </Link>
-
-                    <Link
-                      href={cloudTabHref}
-                      scroll={false}
-                      onClick={() => setToolsDropdownOpen(false)}
-                      className="group flex items-start gap-3 rounded-xl px-3.5 py-3 transition-colors hover:bg-white/[0.05]"
-                    >
-                      <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-400 transition-colors group-hover:bg-emerald-500/25">
-                        <Cloud className="h-4 w-4" />
-                      </span>
-                      <div className="min-w-0">
-                        <span className="block text-sm font-semibold text-zinc-100 group-hover:text-emerald-300 transition-colors">
-                          {isEn ? "Cloud Storage" : "คลาวด์เก็บข้อมูล"}
-                        </span>
-                        <span className="mt-0.5 block text-xs text-zinc-400 leading-snug">
-                          {isEn
-                            ? "View saved calculations and product images"
-                            : "ดูประวัติรายการและรูปสินค้าที่บันทึกไว้"}
-                        </span>
-                      </div>
-                    </Link>
-                  </div>
+                  <Suspense fallback={<div className="p-4 h-36" />}>
+                    <ToolsDropdownItems
+                      pathname={pathname}
+                      isEn={isEn}
+                      calculatorTabHref={calculatorTabHref}
+                      cloudTabHref={cloudTabHref}
+                      onSelect={() => setToolsDropdownOpen(false)}
+                    />
+                  </Suspense>
                 </div>
               </div>
             </nav>
