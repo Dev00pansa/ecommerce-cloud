@@ -1,27 +1,27 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
-import {
-  ArrowDown,
-  ArrowRight,
-  Calculator,
-  CheckCircle2,
-  CloudUpload,
-  Sliders,
-  Store,
-  Target,
-} from "lucide-react";
+import { useEffect, useRef } from "react";
+import { ArrowDown, ArrowRight, Calculator } from "lucide-react";
 
 interface WorkflowShowcaseProps {
   isAuthenticated?: boolean;
 }
 
-const WORKFLOW_STEPS = [
+interface WorkflowStepItem {
+  step: string;
+  align: "left" | "right";
+  image: string;
+  tag: string;
+  title: string;
+  desc: string;
+  highlight: string;
+}
+
+const WORKFLOW_STEPS: WorkflowStepItem[] = [
   {
     step: "01",
-    align: "left" as const,
-    icon: Store,
+    align: "left",
     image: "/images/workflow/step-1.jpg",
     tag: "Platform & Cost Structure",
     title: "เลือกแพลตฟอร์ม & กรอกต้นทุน",
@@ -30,8 +30,7 @@ const WORKFLOW_STEPS = [
   },
   {
     step: "02",
-    align: "right" as const,
-    icon: Target,
+    align: "right",
     image: "/images/workflow/step-2.jpg",
     tag: "Net Margin & Break-Even Analysis",
     title: "ตรวจกำไรสุทธิ & จุดคุ้มทุน",
@@ -40,8 +39,7 @@ const WORKFLOW_STEPS = [
   },
   {
     step: "03",
-    align: "left" as const,
-    icon: Sliders,
+    align: "left",
     image: "/images/workflow/step-3.jpg",
     tag: "Flash Sale & Promo Simulation",
     title: "จำลองส่วนลดโปรโมชัน",
@@ -50,8 +48,7 @@ const WORKFLOW_STEPS = [
   },
   {
     step: "04",
-    align: "right" as const,
-    icon: CloudUpload,
+    align: "right",
     image: "/images/workflow/step-4.jpg",
     tag: "Cloud Storage & CSV Report",
     title: "บันทึก Cloud & Export CSV",
@@ -61,74 +58,83 @@ const WORKFLOW_STEPS = [
 ];
 
 /**
- * ส่วนแสดงขั้นตอนการใช้งาน 4 ขั้นตอนแบบ Vertical Scroll Storytelling
- * - Fade-to-Black: เมื่อเปลี่ยนขั้นตอน ภาพเดิมจะจางผ่านม่านสีดำสนิท (#000000) ก่อนเปิดภาพใหม่
- * - Staggered Reveal: ข้อความในแต่ละขั้นตอนค่อยๆ โผล่ขึ้นมาทีละส่วน (0ms, 100ms, 200ms, 300ms)
+ * คำนวณค่า Smoothstep (0 ถึง 1) อย่างปลอดภัย ไม่เกิด NaN หรือค่าติดลบ
+ */
+function clampSmoothProgress(raw: number): number {
+  if (!Number.isFinite(raw)) return 0;
+  const clamped = Math.max(0, Math.min(1, raw));
+  return clamped * clamped * (3 - 2 * clamped);
+}
+
+/**
+ * ส่วนแสดงขั้นตอนการใช้งาน 4 ขั้นตอนแบบ Frameless Editorial Vertical Storytelling
+ * - ใช้ Passive Scroll Listener + requestAnimationFrame คำนวณ Continuous Scroll Progress
+ *   เพื่อให้ภาพพื้นหลังและข้อความค่อยๆ สว่างขึ้นและจางลงสู่สีดำอย่างต่อเนื่องไร้รอยต่อแข็งๆ
  */
 export function WorkflowShowcase({
   isAuthenticated = false,
 }: WorkflowShowcaseProps) {
-  const [activeStep, setActiveStep] = useState<number>(0);
-  const [isFadingBlack, setIsFadingBlack] = useState<boolean>(false);
-  const [revealedSteps, setRevealedSteps] = useState<Record<number, boolean>>({
-    0: true,
-  });
-
   const stepRefs = useRef<Array<HTMLElement | null>>([]);
-  const activeStepRef = useRef<number>(0);
-  const fadeTimeoutRef = useRef<number | null>(null);
+  const bgRefs = useRef<Array<HTMLDivElement | null>>([]);
+  const contentRefs = useRef<Array<HTMLDivElement | null>>([]);
 
   useEffect(() => {
-    const elements = stepRefs.current.filter(
-      (el): el is HTMLElement => el !== null
-    );
-    if (elements.length === 0 || typeof IntersectionObserver === "undefined") {
-      return;
-    }
+    if (typeof window === "undefined") return;
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const indexAttr = entry.target.getAttribute("data-step-index");
-            const parsed = Number(indexAttr);
-            if (
-              Number.isInteger(parsed) &&
-              parsed >= 0 &&
-              parsed < WORKFLOW_STEPS.length
-            ) {
-              setRevealedSteps((prev) =>
-                prev[parsed] ? prev : { ...prev, [parsed]: true }
-              );
+    let rafId: number | null = null;
 
-              if (parsed !== activeStepRef.current) {
-                activeStepRef.current = parsed;
-                // จังหวะ Fade-to-Black: ดึงม่านสีดำสนิทขึ้นมาคั่นกลางสั้นๆ ก่อนเปิดภาพขั้นตอนถัดไป
-                setIsFadingBlack(true);
-                if (fadeTimeoutRef.current !== null) {
-                  window.clearTimeout(fadeTimeoutRef.current);
-                }
-                fadeTimeoutRef.current = window.setTimeout(() => {
-                  setActiveStep(parsed);
-                  setIsFadingBlack(false);
-                }, 180);
-              }
-            }
-          }
-        });
-      },
-      {
-        rootMargin: "-38% 0px -38% 0px",
-        threshold: 0,
+    const updateScrollScene = () => {
+      rafId = null;
+      const viewportHeight = Math.max(window.innerHeight, 1);
+      const viewportCenter = viewportHeight / 2;
+      const fadeDistance = Math.max(viewportHeight * 0.62, 1);
+
+      for (let i = 0; i < WORKFLOW_STEPS.length; i += 1) {
+        const stepEl = stepRefs.current[i];
+        const bgEl = bgRefs.current[i];
+        const contentEl = contentRefs.current[i];
+
+        if (!stepEl) continue;
+
+        const rect = stepEl.getBoundingClientRect();
+        const stepCenter = rect.top + rect.height / 2;
+        const offsetFromCenter = stepCenter - viewportCenter;
+        const distanceRatio = Math.abs(offsetFromCenter) / fadeDistance;
+
+        const rawProgress = 1 - distanceRatio;
+        const progress = clampSmoothProgress(rawProgress);
+
+        if (bgEl) {
+          const scale = 1.04 - 0.04 * progress;
+          bgEl.style.opacity = progress.toFixed(3);
+          bgEl.style.transform = `scale(${scale.toFixed(4)})`;
+        }
+
+        if (contentEl) {
+          const textProgress = clampSmoothProgress(1 - Math.abs(offsetFromCenter) / (fadeDistance * 0.92));
+          const direction = offsetFromCenter > 0 ? 1 : -1;
+          const translateY = (1 - textProgress) * 26 * direction;
+          contentEl.style.opacity = textProgress.toFixed(3);
+          contentEl.style.transform = `translate3d(0, ${translateY.toFixed(1)}px, 0)`;
+        }
       }
-    );
+    };
 
-    elements.forEach((el) => observer.observe(el));
+    const scheduleUpdate = () => {
+      if (rafId === null) {
+        rafId = window.requestAnimationFrame(updateScrollScene);
+      }
+    };
+
+    scheduleUpdate();
+    window.addEventListener("scroll", scheduleUpdate, { passive: true });
+    window.addEventListener("resize", scheduleUpdate, { passive: true });
 
     return () => {
-      observer.disconnect();
-      if (fadeTimeoutRef.current !== null) {
-        window.clearTimeout(fadeTimeoutRef.current);
+      window.removeEventListener("scroll", scheduleUpdate);
+      window.removeEventListener("resize", scheduleUpdate);
+      if (rafId !== null) {
+        window.cancelAnimationFrame(rafId);
       }
     };
   }, []);
@@ -136,11 +142,11 @@ export function WorkflowShowcase({
   const startHref = isAuthenticated ? "/dashboard" : "/login";
 
   return (
-    <section className="w-full">
+    <section id="workflow" className="w-full scroll-mt-16 pt-16">
       {/* ส่วนเปิดหัวข้อก่อนเข้าสู่ Vertical Storytelling */}
-      <div className="w-full max-w-[1440px] mx-auto px-8 lg:px-16 pb-12">
+      <div className="w-full max-w-[1440px] mx-auto px-8 lg:px-16 pb-14">
         <div className="max-w-3xl space-y-3">
-          <span className="text-xs font-semibold uppercase tracking-widest text-emerald-400">
+          <span className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-emerald-400">
             Step-by-Step Vertical Walkthrough
           </span>
           <h2 className="py-1 text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-zinc-100 leading-[1.2]">
@@ -148,74 +154,51 @@ export function WorkflowShowcase({
           </h2>
           <p className="flex items-center gap-2 text-base sm:text-lg text-zinc-400">
             <span>เลื่อนหน้าจอลงเพื่อดูขั้นตอนการทำงานทีละขั้น</span>
-            <ArrowDown className="h-4 w-4 text-emerald-400 animate-bounce" />
+            <ArrowDown className="h-4 w-4 text-emerald-400" />
           </p>
         </div>
       </div>
 
-      {/* โครงสร้าง Sticky Full-Bleed Background + 4 Vertical Full-Screen Steps */}
+      {/* โครงสร้าง Sticky Full-Bleed Background + 4 Frameless Editorial Steps */}
       <div className="relative w-full bg-black">
-        {/* ชั้นพื้นหลัง Sticky เต็มจอ สลับภาพผ่านม่านสีดำสนิท (Fade-to-Black) */}
+        {/* ชั้นพื้นหลัง Sticky เต็มจอ สว่างขึ้นและจางมืดลงตาม Continuous Scroll Progress */}
         <div className="sticky top-0 h-screen w-full overflow-hidden z-0 bg-black">
-          {WORKFLOW_STEPS.map((item, idx) => {
-            const isActive = activeStep === idx && !isFadingBlack;
-            return (
-              <div
-                key={item.step}
-                className={`absolute inset-0 transition-all duration-700 ease-out ${
-                  isActive
-                    ? "opacity-100 scale-100"
-                    : "opacity-0 scale-105 pointer-events-none"
-                }`}
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={item.image}
-                  alt={item.title}
-                  className="h-full w-full object-cover object-center"
-                />
-              </div>
-            );
-          })}
+          {WORKFLOW_STEPS.map((item, idx) => (
+            <div
+              key={item.step}
+              ref={(el) => {
+                bgRefs.current[idx] = el;
+              }}
+              style={{
+                opacity: idx === 0 ? 1 : 0,
+                transform: idx === 0 ? "scale(1)" : "scale(1.04)",
+              }}
+              className="pointer-events-none absolute inset-0 will-change-[opacity,transform]"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={item.image}
+                alt={item.title}
+                className="h-full w-full object-cover object-center"
+              />
+            </div>
+          ))}
 
-          {/* ม่าน Fade-to-Black คั่นจังหวะเปลี่ยนภาพระหว่างขั้นตอน */}
+          {/* ชั้นคลุมความมืดและ Gradient กลืนขอบบน-ล่างอย่างนุ่มนวล */}
           <div
             aria-hidden="true"
-            className={`pointer-events-none absolute inset-0 bg-black transition-opacity duration-300 ${
-              isFadingBlack ? "opacity-95" : "opacity-60"
-            }`}
+            className="pointer-events-none absolute inset-0 bg-black/55"
           />
-
-          {/* Gradient Mask สีดำสนิทตรงขอบบนและขอบล่างเพื่อกลืนรอยต่อให้เนียน 100% */}
           <div
             aria-hidden="true"
             className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black via-transparent to-black"
           />
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-black via-black/70 to-transparent"
-          />
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-black via-black/70 to-transparent"
-          />
-
-          {/* ตัวบอกลำดับขั้นตอนมุมขวาล่างของ Sticky Viewport */}
-          <div className="absolute bottom-8 right-8 hidden sm:flex items-center gap-2 rounded-lg border border-zinc-800 bg-black/85 px-4 py-2 text-xs font-mono text-zinc-300 backdrop-blur-md">
-            <span className="text-emerald-400 font-bold">
-              0{activeStep + 1}
-            </span>
-            <span className="text-zinc-600">/</span>
-            <span>0{WORKFLOW_STEPS.length}</span>
-          </div>
         </div>
 
-        {/* รายการ 4 ขั้นตอน เรียงแนวตั้งทีละขั้น (1 ขั้นตอนต่อ 1 จอ สลับซ้าย-ขวา) */}
+        {/* รายการ 4 ขั้นตอนแบบไร้กรอบ (Frameless Editorial) สลับซ้าย-ขวา */}
         <div className="relative z-10 -mt-[100vh]">
           {WORKFLOW_STEPS.map((item, idx) => {
-            const Icon = item.icon;
             const isLeft = item.align === "left";
-            const isRevealed = Boolean(revealedSteps[idx]);
 
             return (
               <article
@@ -223,122 +206,78 @@ export function WorkflowShowcase({
                 ref={(el) => {
                   stepRefs.current[idx] = el;
                 }}
-                data-step-index={idx}
                 className="relative min-h-screen w-full flex items-center"
               >
-                {/* แถบเชื่อมสีดำสนิทตรงรอยต่อบน-ล่างของแต่ละขั้นตอน */}
+                {/* แผ่นไล่เฉดสีดำทึบด้านหลังตัวหนังสือ: มือถือคลุมเต็มจอ, Desktop ไล่เฉดตามฝั่งซ้าย/ขวา */}
                 <div
                   aria-hidden="true"
-                  className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black to-transparent"
-                />
-                <div
-                  aria-hidden="true"
-                  className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-black to-transparent"
-                />
-
-                {/* แผ่น Gradient สีดำสนิทไล่จากฝั่งที่มีกล่องเนื้อหาไปโปร่งใสอีกฝั่ง */}
-                <div
-                  aria-hidden="true"
-                  className={`pointer-events-none absolute inset-0 ${
+                  className={`pointer-events-none absolute inset-0 bg-black/80 lg:bg-transparent ${
                     isLeft
-                      ? "bg-gradient-to-r from-black/95 via-black/65 to-transparent"
-                      : "bg-gradient-to-l from-black/95 via-black/65 to-transparent"
+                      ? "lg:bg-gradient-to-r lg:from-black lg:via-black/92 lg:to-transparent"
+                      : "lg:bg-gradient-to-l lg:from-black lg:via-black/92 lg:to-transparent"
                   }`}
                 />
 
                 <div
-                  className={`relative z-10 w-full max-w-[1440px] mx-auto px-6 md:px-12 lg:px-16 py-24 flex ${
-                    isLeft ? "justify-start" : "justify-end"
+                  className={`relative z-10 w-full max-w-[1440px] mx-auto px-6 md:px-12 lg:px-16 py-24 flex justify-start ${
+                    isLeft ? "lg:justify-start" : "lg:justify-end"
                   }`}
                 >
                   <div
-                    className={`w-full max-w-2xl rounded-xl border bg-black/95 p-7 sm:p-10 shadow-2xl transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-                      isRevealed
-                        ? "border-emerald-500/45 opacity-100 translate-y-0"
-                        : "border-zinc-800 opacity-0 translate-y-8"
-                    }`}
+                    ref={(el) => {
+                      contentRefs.current[idx] = el;
+                    }}
+                    style={{
+                      opacity: idx === 0 ? 1 : 0,
+                      transform: "translate3d(0, 0px, 0)",
+                    }}
+                    className="w-full max-w-xl text-left will-change-[opacity,transform]"
                   >
-                    {/* จังหวะที่ 1 (delay 0ms): ป้ายเลขขั้น STEP 01 - 04 */}
-                    <div
-                      style={{ transitionDelay: "0ms" }}
-                      className={`flex items-center justify-between gap-4 mb-6 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-                        isRevealed
-                          ? "opacity-100 translate-y-0 blur-0"
-                          : "opacity-0 translate-y-4 blur-xs"
-                      }`}
-                    >
-                      <div className="inline-flex items-center gap-3">
-                        <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-400">
-                          <Icon className="h-5 w-5" />
-                        </div>
-                        <span className="text-xs font-mono uppercase tracking-wider text-emerald-400">
-                          {item.tag}
-                        </span>
-                      </div>
-
-                      <span className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3.5 py-1.5 font-mono text-sm sm:text-base font-bold text-emerald-400 tabular-nums">
-                        STEP {item.step} / 04
+                    {/* 1. เลขขั้นตอนสไตล์ Editorial */}
+                    <div className="flex items-center gap-3">
+                      <span className="font-mono text-sm font-semibold tracking-[0.2em] text-emerald-400">
+                        {item.step}
+                      </span>
+                      <span aria-hidden="true" className="text-zinc-600">
+                        —
+                      </span>
+                      <span className="font-mono text-xs sm:text-sm uppercase tracking-wider text-zinc-400">
+                        {item.tag}
                       </span>
                     </div>
 
-                    {/* จังหวะที่ 2 (delay 100ms): หัวข้อหลัก */}
-                    <h3
-                      style={{ transitionDelay: "100ms" }}
-                      className={`py-1 text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-zinc-100 leading-[1.25] mb-4 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-                        isRevealed
-                          ? "opacity-100 translate-y-0 blur-0"
-                          : "opacity-0 translate-y-4 blur-xs"
-                      }`}
-                    >
+                    {/* 2. หัวข้อหลัก */}
+                    <h3 className="py-1 text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-white leading-[1.2] mt-4">
                       {item.title}
                     </h3>
 
-                    {/* จังหวะที่ 3 (delay 200ms): เนื้อหาคำอธิบาย */}
-                    <p
-                      style={{ transitionDelay: "200ms" }}
-                      className={`text-base sm:text-lg leading-relaxed text-zinc-300 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-                        isRevealed
-                          ? "opacity-100 translate-y-0 blur-0"
-                          : "opacity-0 translate-y-4 blur-xs"
-                      }`}
-                    >
+                    {/* 3. เนื้อหาคำอธิบาย */}
+                    <p className="text-base sm:text-lg text-zinc-300 leading-relaxed mt-5 max-w-xl">
                       {item.desc}
                     </p>
 
-                    {/* จังหวะที่ 4 (delay 300ms): รายละเอียดเสริมและปุ่มดำเนินการ */}
-                    <div
-                      style={{ transitionDelay: "300ms" }}
-                      className={`mt-6 pt-5 border-t border-zinc-800/90 space-y-5 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-                        isRevealed
-                          ? "opacity-100 translate-y-0 blur-0"
-                          : "opacity-0 translate-y-4 blur-xs"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2 text-xs sm:text-sm text-emerald-400 font-medium">
-                        <CheckCircle2 className="h-4 w-4 shrink-0" />
-                        <span>{item.highlight}</span>
-                      </div>
+                    {/* 4. จุดเน้นสำคัญด้านล่างด้วยเส้นขอบตั้งสีเขียว */}
+                    <p className="border-l-2 border-emerald-500/80 pl-4 mt-6 text-sm sm:text-base text-zinc-400">
+                      {item.highlight}
+                    </p>
 
-                      {idx === WORKFLOW_STEPS.length - 1 && (
-                        <div className="pt-2 flex flex-wrap items-center justify-between gap-4">
-                          <span className="text-sm text-zinc-400">
-                            พร้อมเริ่มคำนวณกำไรและจุดคุ้มทุนของร้านคุณแล้วหรือยัง?
+                    {/* 5. ปุ่ม CTA ปิดท้ายใน Step 04 */}
+                    {idx === WORKFLOW_STEPS.length - 1 && (
+                      <div className="mt-8 pt-2">
+                        <Link
+                          href={startHref}
+                          className="inline-flex items-center gap-2.5 rounded-lg bg-emerald-500 px-6 py-3.5 text-sm sm:text-base font-semibold text-slate-950 transition-all hover:bg-emerald-400"
+                        >
+                          <Calculator className="h-4 w-4" />
+                          <span>
+                            {isAuthenticated
+                              ? "เปิดเครื่องมือคำนวณทันที"
+                              : "เข้าสู่ระบบเพื่อเริ่มใช้งานจริง"}
                           </span>
-                          <Link
-                            href={startHref}
-                            className="inline-flex items-center gap-2 rounded-lg bg-emerald-500 px-6 py-3.5 text-sm sm:text-base font-semibold text-slate-950 transition-all hover:bg-emerald-400"
-                          >
-                            <Calculator className="h-4 w-4" />
-                            <span>
-                              {isAuthenticated
-                                ? "เปิดเครื่องมือคำนวณทันที"
-                                : "เข้าสู่ระบบเพื่อเริ่มใช้งานจริง"}
-                            </span>
-                            <ArrowRight className="h-4 w-4" />
-                          </Link>
-                        </div>
-                      )}
-                    </div>
+                          <ArrowRight className="h-4 w-4" />
+                        </Link>
+                      </div>
+                    )}
                   </div>
                 </div>
               </article>

@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Sans_Thai, JetBrains_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/ThemeProvider";
-import { CursorGlow } from "@/components/CursorGlow";
 import "./globals.css";
 
 const ibmPlexThai = IBM_Plex_Sans_Thai({
@@ -33,10 +32,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${ibmPlexThai.variable} ${jetbrainsMono.variable} h-full scroll-smooth antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <ThemeProvider>
-          <CursorGlow />
-          {children}
-        </ThemeProvider>
+        <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>
   );

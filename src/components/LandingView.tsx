@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import type { MouseEvent } from "react";
 import {
+  ArrowDown,
   ArrowRight,
   BarChart3,
   Calculator,
@@ -19,13 +21,20 @@ interface LandingViewProps {
 
 /**
  * หน้าแรก (/) แบรนด์ KhumLab:
- * - ลำแสงสีเขียวด้านบนกระจาย 4 จุดเคลื่อนไหวตลอดเวลา
- * - ส่วน Hero 2 คอลัมน์ (ซ้ายข้อความ lg:col-span-7 / ขวาโลโก้ 3D เรืองแสง lg:col-span-5)
- * - ส่วนขั้นตอนการใช้งานแบบ Vertical Scroll Storytelling ทีละขั้น
- * - ส่วนท้ายเว็บ Footer พื้นหลังสีเทาเข้มทึบ
+ * - ส่วน Hero จัดความสูง min-h-[calc(100vh-4rem)] ให้แสดงครบพอดีใน 1 หน้าจอ
+ *   โดยไม่ให้หัวข้อ 4 ขั้นตอนด้านล่างโผล่แหว่งขึ้นมา
+ * - มีปุ่มรอง "ดูวิธีใช้งาน (4 ขั้นตอน)" และแถบสัญญาณเลื่อนลงด้านล่างสุดของจอแรก
  */
 export function LandingView({ isAuthenticated }: LandingViewProps) {
   const startHref = isAuthenticated ? "/dashboard" : "/login";
+
+  function handleScrollToWorkflow(event: MouseEvent<HTMLAnchorElement>) {
+    const target = document.getElementById("workflow");
+    if (target) {
+      event.preventDefault();
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }
 
   return (
     <div className="relative overflow-x-clip flex-1 flex flex-col">
@@ -42,11 +51,11 @@ export function LandingView({ isAuthenticated }: LandingViewProps) {
 
       {/* Main Wrapper: ห้ามใช้ overflow-hidden เพื่อให้ Sticky Storytelling ทำงานได้ 100% */}
       <main className="relative z-10 w-full flex-1">
-        {/* ส่วนที่ 1: Hero Section 2 คอลัมน์ (ซ้ายเนื้อหา / ขวาโลโก้ KhumLab 3D) */}
-        <section className="w-full max-w-[1440px] mx-auto px-8 lg:px-16 pt-12 pb-20 sm:pt-16 sm:pb-28">
-          <div className="grid grid-cols-1 lg:grid-cols-12 items-center gap-10">
-            {/* ฝั่งซ้าย (lg:col-span-7): ข้อความ Hero ชิดซ้าย */}
-            <div className="animate-enter lg:col-span-7 text-left space-y-6">
+        {/* ส่วนที่ 1: Hero Section พอดี 1 หน้าจอ (min-h-[calc(100vh-4rem)]) */}
+        <section className="w-full max-w-[1440px] mx-auto min-h-[calc(100vh-4rem)] flex flex-col justify-between px-8 lg:px-16 pt-10 pb-8">
+          {/* แถวบน: 2 คอลัมน์ (ซ้ายข้อความ Hero / ขวาโลโก้ KhumLab 3D) */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 items-center gap-8 lg:gap-10 my-auto">
+            <div className="animate-enter lg:col-span-7 text-left space-y-5">
               <div className="inline-flex items-center gap-2 rounded-md border border-emerald-500/30 bg-emerald-500/10 px-3.5 py-1.5 text-xs font-semibold text-emerald-400">
                 <Sparkles className="h-3.5 w-3.5" />
                 <span>โครงงานวิชา ดิจิทัลฟอร์อีคอมเมิร์ซ</span>
@@ -68,10 +77,10 @@ export function LandingView({ isAuthenticated }: LandingViewProps) {
                 และผลกระทบจากโปรโมชันก่อนเปิดขายจริงในไม่กี่วินาที
               </p>
 
-              <div className="flex flex-wrap items-center gap-4 pt-2">
+              <div className="flex flex-wrap items-center gap-3.5 pt-2">
                 <Link
                   href={startHref}
-                  className="inline-flex items-center gap-2.5 rounded-lg bg-emerald-500 px-7 py-4 text-sm sm:text-base font-semibold text-slate-950 transition-all hover:bg-emerald-400 hover:-translate-y-0.5"
+                  className="inline-flex items-center gap-2.5 rounded-lg bg-emerald-500 px-6 py-3.5 text-sm sm:text-base font-semibold text-slate-950 transition-all hover:bg-emerald-400 hover:-translate-y-0.5"
                 >
                   <Calculator className="h-5 w-5" />
                   <span>
@@ -81,52 +90,74 @@ export function LandingView({ isAuthenticated }: LandingViewProps) {
                   </span>
                   <ArrowRight className="h-5 w-5" />
                 </Link>
+
+                <a
+                  href="#workflow"
+                  onClick={handleScrollToWorkflow}
+                  className="inline-flex items-center gap-2 rounded-lg border border-zinc-800 bg-zinc-950/90 px-5 py-3.5 text-sm sm:text-base font-medium text-zinc-200 transition-all hover:border-emerald-500/50 hover:text-emerald-400"
+                >
+                  <span>ดูวิธีใช้งาน (4 ขั้นตอน)</span>
+                  <ArrowDown className="h-4 w-4 text-emerald-400" />
+                </a>
               </div>
             </div>
 
-            {/* ฝั่งขวา (lg:col-span-5): โลโก้ KhumLab พื้นหลังโปร่งใสพร้อมเอฟเฟกต์ 3D & วงโคจรแสง */}
             <div className="animate-enter-delay-1 lg:col-span-5 flex items-center justify-center">
               <KhumLabLogo variant="hero" />
             </div>
           </div>
 
-          {/* แถวการ์ดจุดเด่น 3 ใบ กว้างเต็ม Container max-w-[1440px] */}
-          <div className="animate-enter-delay-2 mt-14 grid grid-cols-1 gap-5 md:grid-cols-3">
-            {[
-              {
-                icon: Percent,
-                title: "หักค่า GP แพลตฟอร์มแม่นยำ",
-                desc: "มี Preset Shopee 13%, TikTok Shop 12%, Lazada 12% และขายตรง 0% พร้อมปรับแก้ตัวเลขได้อิสระ",
-              },
-              {
-                icon: Sliders,
-                title: "จำลองโปรโมชัน 0%–50%",
-                desc: "รู้ทันทีว่าถ้าลดราคาลง กำไรต่อชิ้นเหลือเท่าไหร่ และต้องขายเพิ่มกี่ชิ้นจึงจะได้กำไรรวมเท่าเดิม",
-              },
-              {
-                icon: BarChart3,
-                title: "บันทึกแผนราคาบน Cloud",
-                desc: "บันทึกข้อมูลส่วนตัวบน Cloud โหลดกลับมาปรับราคาและส่งออกไฟล์ CSV ได้ทันที",
-              },
-            ].map((item) => {
-              const Icon = item.icon;
-              return (
-                <div
-                  key={item.title}
-                  className="rounded-xl border border-zinc-800/90 bg-[#050505]/90 p-6 transition-all hover:border-emerald-500/40"
-                >
-                  <div className="mb-3.5 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500/15 text-emerald-400">
-                    <Icon className="h-5 w-5" />
+          {/* แถวล่างของหน้าจอแรก: การ์ดจุดเด่น 3 ใบ + แถบสัญญาณเลื่อนลงดูวิธีใช้งาน */}
+          <div className="space-y-6 pt-8">
+            <div className="animate-enter-delay-2 grid grid-cols-1 gap-4 md:grid-cols-3">
+              {[
+                {
+                  icon: Percent,
+                  title: "หักค่า GP แพลตฟอร์มแม่นยำ",
+                  desc: "มี Preset Shopee 13%, TikTok Shop 12%, Lazada 12% และขายตรง 0% พร้อมปรับแก้ตัวเลขได้อิสระ",
+                },
+                {
+                  icon: Sliders,
+                  title: "จำลองโปรโมชัน 0%–50%",
+                  desc: "รู้ทันทีว่าถ้าลดราคาลง กำไรต่อชิ้นเหลือเท่าไหร่ และต้องขายเพิ่มกี่ชิ้นจึงจะได้กำไรรวมเท่าเดิม",
+                },
+                {
+                  icon: BarChart3,
+                  title: "บันทึกแผนราคาบน Cloud",
+                  desc: "บันทึกข้อมูลส่วนตัวบน Cloud โหลดกลับมาปรับราคาและส่งออกไฟล์ CSV ได้ทันที",
+                },
+              ].map((item) => {
+                const Icon = item.icon;
+                return (
+                  <div
+                    key={item.title}
+                    className="rounded-xl border border-zinc-800/90 bg-[#050505]/90 p-5 transition-all hover:border-emerald-500/40"
+                  >
+                    <div className="mb-2.5 inline-flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-500/15 text-emerald-400">
+                      <Icon className="h-4 w-4" />
+                    </div>
+                    <h2 className="text-base sm:text-lg font-bold text-zinc-100 mb-1">
+                      {item.title}
+                    </h2>
+                    <p className="text-xs sm:text-sm leading-relaxed text-zinc-400">
+                      {item.desc}
+                    </p>
                   </div>
-                  <h2 className="text-lg font-bold text-zinc-100 mb-2">
-                    {item.title}
-                  </h2>
-                  <p className="text-sm sm:text-base leading-relaxed text-zinc-400">
-                    {item.desc}
-                  </p>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
+
+            {/* แถบสัญญาณขนาดกะทัดรัดด้านล่างสุดของหน้าจอ Hero */}
+            <div className="animate-enter-delay-3 flex justify-center pt-1">
+              <a
+                href="#workflow"
+                onClick={handleScrollToWorkflow}
+                className="group inline-flex items-center gap-2 rounded-full border border-zinc-800/90 bg-zinc-950/80 px-4 py-1.5 text-xs font-medium text-zinc-400 transition-colors hover:border-emerald-500/40 hover:text-emerald-400"
+              >
+                <span>เลื่อนลงเพื่อดูวิธีใช้งาน 4 ขั้นตอน</span>
+                <ArrowDown className="h-3.5 w-3.5 text-emerald-400 animate-bounce" />
+              </a>
+            </div>
           </div>
         </section>
 
