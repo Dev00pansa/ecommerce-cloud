@@ -5,10 +5,55 @@ html {
 }
 
 @theme inline {
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-ibm-plex-thai), "IBM Plex Sans Thai", sans-serif;
+  --font-mono: var(--font-jetbrains-mono), "JetBrains Mono", monospace;
 }
 
 body {
-  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+}
+
+/* ลายจุด Dot-Grid สำหรับโหมดสว่างและโหมดมืด */
+.bg-dot-light {
+  background-color: #f8fafc;
+  background-image:
+    radial-gradient(ellipse 80% 45% at 50% -10%, rgba(16, 185, 129, 0.12), transparent),
+    radial-gradient(rgba(15, 23, 42, 0.08) 1px, transparent 1px);
+  background-size: 100% 100%, 22px 22px;
+}
+
+.bg-dot-dark {
+  background-color: #000000;
+  background-image:
+    radial-gradient(ellipse 75% 40% at 50% -10%, rgba(16, 185, 129, 0.1), transparent),
+    radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+  background-size: 100% 100%, 22px 22px;
+}
+
+/* Staggered Entrance Animation */
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-enter {
+  animation: fadeSlideUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-enter-delay-1 {
+  animation: fadeSlideUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.08s both;
+}
+
+.animate-enter-delay-2 {
+  animation: fadeSlideUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.16s both;
+}
+
+.animate-enter-delay-3 {
+  animation: fadeSlideUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.24s both;
 }
