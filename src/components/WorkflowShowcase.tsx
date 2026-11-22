@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { ArrowDown, ArrowRight, Calculator } from "lucide-react";
 
 interface WorkflowShowcaseProps {
@@ -65,15 +65,6 @@ const WORKFLOW_STEPS: WorkflowStepItem[] = [
 ];
 
 /**
- * คำนวณค่า Smoothstep (0 ถึง 1) อย่างปลอดภัย ป้องกัน NaN และค่าติดลบ
- */
-function clampSmoothProgress(raw: number): number {
-  if (!Number.isFinite(raw)) return 0;
-  const clamped = Math.max(0, Math.min(1, raw));
-  return clamped * clamped * (3 - 2 * clamped);
-}
-
-/**
  * CSS Mask แนวตั้งสำหรับละลายขอบบน-ล่างของกรอบภาพให้จางเป็นโปร่งใส 100%
  */
 const VERTICAL_FEATHER_MASK: CSSProperties = {
@@ -84,7 +75,7 @@ const VERTICAL_FEATHER_MASK: CSSProperties = {
 };
 
 /**
- * CSS Mask รัศมีวงรีสำหรับละลายขอบซ้าย-ขวาและมุมทั้ง 4 ด้านให้กลืนลงพื้นหลังลายจุด Dot-Grid
+ * CSS Mask รัศมีวงรีสำหรับละลายขอบซ้าย-ขวาและมุมทั้ง 4 ด้านให้กลืนลงพื้นหลังสีดำสนิท
  */
 function getRadialFeatherMask(imageOnLeft: boolean): CSSProperties {
   const gradient = imageOnLeft
@@ -99,79 +90,64 @@ function getRadialFeatherMask(imageOnLeft: boolean): CSSProperties {
 
 /**
  * ส่วนแสดงขั้นตอนการใช้งาน 4 ขั้นตอนแบบ Frameless Editorial:
- * - ใช้พื้นหลังโปร่งใส (bg-transparent) เพื่อคงพื้นหลังสีดำลายจุด Dot-Grid ของเว็บให้ต่อเนื่องเป็นผืนเดียว
- * - แยกแต่ละ Step เป็น Section อิสระ (overflow-hidden) ป้องกันภาพทะลุข้ามขั้น 100%
- * - ใช้ CSS mask-image ละลายขอบภาพทั้ง 4 ด้านให้กลืนเข้ากับพื้นหลังลายจุดโดยไม่ใช้แผ่นดำทึบแปะทับ
+ * - ใช้พื้นหลังสีดำสนิทแยกโซนชัดเจนจากหน้า Hero (bg-[#000000])
+ * - คงระบบวางภาพแยกตาม Section อิสระและ CSS mask-image เบลอขอบทั้ง 4 ด้าน 100%
+ * - เพิ่มแอนิเมชัน Directional Slide-In เลื่อนเข้าจากด้านข้างตามฝั่งของข้อความด้วย IntersectionObserver
  */
 export function WorkflowShowcase({
   isAuthenticated = false,
 }: WorkflowShowcaseProps) {
   const stepRefs = useRef<Array<HTMLElement | null>>([]);
-  const imageWrapRefs = useRef<Array<HTMLDivElement | null>>([]);
-  const contentRefs = useRef<Array<HTMLDivElement | null>>([]);
+  const [visibleSteps, setVisibleSteps] = useState<boolean[]>([
+    false,
+    false,
+    false,
+    false,
+  ]);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined" || !("IntersectionObserver" in window)) {
+      return;
+    }
 
-    let rafId: number | null = null;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        setVisibleSteps((prev) => {
+          let changed = false;
+          const next = [...prev];
 
-    const updateSectionsProgress = () => {
-      rafId = null;
-      const viewportHeight = Math.max(window.innerHeight, 1);
-      const viewportCenter = viewportHeight / 2;
-      const activeRange = Math.max(viewportHeight * 0.72, 1);
+          for (const entry of entries) {
+            const indexAttr = entry.target.getAttribute("data-step-index");
+            if (indexAttr === null) continue;
+            const idx = Number.parseInt(indexAttr, 10);
+            if (!Number.isFinite(idx) || idx < 0 || idx >= next.length) {
+              continue;
+            }
 
-      for (let i = 0; i < WORKFLOW_STEPS.length; i += 1) {
-        const stepEl = stepRefs.current[i];
-        const imageEl = imageWrapRefs.current[i];
-        const contentEl = contentRefs.current[i];
+            if (entry.isIntersecting !== next[idx]) {
+              next[idx] = entry.isIntersecting;
+              changed = true;
+            }
+          }
 
-        if (!stepEl) continue;
-
-        const rect = stepEl.getBoundingClientRect();
-        const stepCenter = rect.top + rect.height / 2;
-        const offsetFromCenter = stepCenter - viewportCenter;
-        const distanceRatio = Math.abs(offsetFromCenter) / activeRange;
-
-        const progress = clampSmoothProgress(1 - distanceRatio);
-
-        if (imageEl) {
-          // จำกัดความสว่างภาพไว้ที่ระดับ ~0.55 เพื่อไม่ให้แย่งสายตาตัวหนังสือ
-          const targetOpacity = 0.08 + progress * 0.47;
-          const scale = 1.04 - progress * 0.04;
-          imageEl.style.opacity = targetOpacity.toFixed(3);
-          imageEl.style.transform = `scale(${scale.toFixed(4)})`;
-        }
-
-        if (contentEl) {
-          const textProgress = clampSmoothProgress(
-            1 - Math.abs(offsetFromCenter) / (activeRange * 0.95)
-          );
-          const direction = offsetFromCenter > 0 ? 1 : -1;
-          const translateY = (1 - textProgress) * 24 * direction;
-          const textOpacity = 0.12 + textProgress * 0.88;
-          contentEl.style.opacity = textOpacity.toFixed(3);
-          contentEl.style.transform = `translate3d(0, ${translateY.toFixed(1)}px, 0)`;
-        }
+          return changed ? next : prev;
+        });
+      },
+      {
+        threshold: 0.18,
+        rootMargin: "0px 0px -8% 0px",
       }
-    };
+    );
 
-    const scheduleUpdate = () => {
-      if (rafId === null) {
-        rafId = window.requestAnimationFrame(updateSectionsProgress);
+    for (let i = 0; i < WORKFLOW_STEPS.length; i += 1) {
+      const el = stepRefs.current[i];
+      if (el) {
+        observer.observe(el);
       }
-    };
-
-    scheduleUpdate();
-    window.addEventListener("scroll", scheduleUpdate, { passive: true });
-    window.addEventListener("resize", scheduleUpdate, { passive: true });
+    }
 
     return () => {
-      window.removeEventListener("scroll", scheduleUpdate);
-      window.removeEventListener("resize", scheduleUpdate);
-      if (rafId !== null) {
-        window.cancelAnimationFrame(rafId);
-      }
+      observer.disconnect();
     };
   }, []);
 
@@ -180,10 +156,16 @@ export function WorkflowShowcase({
   return (
     <section
       id="workflow"
-      className="relative w-full bg-transparent scroll-mt-16 pt-12 pb-16"
+      className="relative w-full overflow-x-clip bg-[#000000] scroll-mt-16 pt-20 pb-20 border-b border-zinc-900/80"
     >
-      {/* หัวข้อเปิดเรื่อง ชิดฝั่งซ้ายเหมือนเดิม */}
-      <div className="w-full max-w-[1440px] mx-auto px-8 lg:px-16 pb-10">
+      {/* เงาไล่ระดับด้านบนสุดเชื่อมรอยต่อจากแถบ Marquee ของหน้า Hero สู่พื้นหลังสีดำสนิท */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-emerald-950/10 to-transparent"
+      />
+
+      {/* หัวข้อเปิดเรื่อง ชิดฝั่งซ้าย */}
+      <div className="relative z-10 w-full max-w-[1440px] mx-auto px-8 lg:px-16 pb-10">
         <div className="max-w-3xl space-y-3 text-left">
           <span className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-emerald-400">
             Step-by-Step Vertical Walkthrough
@@ -198,19 +180,26 @@ export function WorkflowShowcase({
         </div>
       </div>
 
-      {/* รายการ 4 ขั้นตอน: แยกแต่ละขั้นตอนเป็น Section อิสระ (overflow-hidden) บนพื้นหลังโปร่งใสเห็นลายจุด Dot-Grid */}
-      <div className="w-full bg-transparent">
+      {/* รายการ 4 ขั้นตอน: แยกแต่ละขั้นตอนเป็น Section อิสระ (overflow-hidden) บนพื้นหลังสีดำสนิท */}
+      <div className="w-full bg-[#000000]">
         {WORKFLOW_STEPS.map((item, idx) => {
           const isTextRight = item.textSide === "right";
           const isImageLeft = isTextRight;
+          const isVisible = visibleSteps[idx];
+
+          // ทิศทางเลื่อนเข้าตามฝั่งของข้อความ: ขวาเลื่อนจากขวา (translate-x-12), ซ้ายเลื่อนจากซ้าย (-translate-x-12)
+          const hiddenSlideClass = isTextRight
+            ? "translate-x-12 opacity-0"
+            : "-translate-x-12 opacity-0";
 
           return (
             <article
               key={item.step}
+              data-step-index={idx}
               ref={(el) => {
                 stepRefs.current[idx] = el;
               }}
-              className="relative min-h-[85vh] w-full flex items-center overflow-hidden py-20 bg-transparent"
+              className="relative min-h-[85vh] w-full flex items-center overflow-hidden py-20 bg-[#000000]"
             >
               {/* ภาพประกอบประจำขั้นตอน: อยู่เฉพาะใน Section ของตัวเองฝั่งตรงข้ามกับข้อความ และละลายขอบทั้ง 4 ด้านด้วย CSS Mask */}
               <div
@@ -221,15 +210,12 @@ export function WorkflowShowcase({
                 }`}
               >
                 <div
-                  ref={(el) => {
-                    imageWrapRefs.current[idx] = el;
-                  }}
-                  style={{
-                    ...getRadialFeatherMask(isImageLeft),
-                    opacity: 0.55,
-                    transform: "scale(1)",
-                  }}
-                  className="h-full w-full will-change-[opacity,transform]"
+                  style={getRadialFeatherMask(isImageLeft)}
+                  className={`h-full w-full transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] will-change-[opacity,transform] ${
+                    isVisible
+                      ? "opacity-55 scale-100"
+                      : "opacity-10 scale-[1.03]"
+                  }`}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
@@ -241,21 +227,18 @@ export function WorkflowShowcase({
                 </div>
               </div>
 
-              {/* เนื้อหาตัวหนังสือแบบไร้กรอบ (Frameless Editorial Typography) */}
+              {/* เนื้อหาตัวหนังสือแบบไร้กรอบ (Frameless Editorial Typography) + Directional Slide-In */}
               <div
                 className={`relative z-10 w-full max-w-[1440px] mx-auto px-8 lg:px-16 flex ${
                   isTextRight ? "lg:justify-end" : "lg:justify-start"
                 }`}
               >
                 <div
-                  ref={(el) => {
-                    contentRefs.current[idx] = el;
-                  }}
-                  style={{
-                    opacity: 1,
-                    transform: "translate3d(0, 0px, 0)",
-                  }}
-                  className="w-full max-w-xl text-left will-change-[opacity,transform]"
+                  className={`w-full max-w-xl text-left transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] will-change-[opacity,transform] ${
+                    isVisible
+                      ? "translate-x-0 opacity-100"
+                      : hiddenSlideClass
+                  }`}
                 >
                   {/* 1. เลขขั้นตอนสไตล์ Editorial */}
                   <div className="flex items-center gap-3">
