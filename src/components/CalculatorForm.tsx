@@ -5,8 +5,10 @@ import {
   ArrowDown,
   ImagePlus,
   Loader2,
+  Pencil,
   RotateCcw,
   Trash2,
+  X,
 } from "lucide-react";
 import { PLATFORM_PRESETS } from "@/lib/calculator";
 import { formatFileSizeKb } from "@/lib/image-compression";
@@ -22,6 +24,8 @@ interface CalculatorFormProps {
   existingImageUrl: string | null;
   compressingImage: boolean;
   imageError: string | null;
+  editingProductName?: string | null;
+  onCancelEdit?: () => void;
   onChangeField: (field: keyof CalculatorFormStrings, value: string) => void;
   onSelectPreset: (preset: PlatformPreset) => void;
   onSelectImageFile: (file: File) => void;
@@ -47,6 +51,8 @@ export function CalculatorForm({
   existingImageUrl,
   compressingImage,
   imageError,
+  editingProductName = null,
+  onCancelEdit,
   onChangeField,
   onSelectPreset,
   onSelectImageFile,
@@ -81,6 +87,35 @@ export function CalculatorForm({
 
   return (
     <form onSubmit={handleFormSubmit} className="space-y-12">
+      {editingProductName && (
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl border border-emerald-500/40 bg-[#050505] px-5 py-4 shadow-[0_0_24px_-6px_rgba(16,185,129,0.25)]">
+          <div className="flex items-start sm:items-center gap-3 min-w-0">
+            <span className="mt-0.5 sm:mt-0 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-400">
+              <Pencil className="h-4 w-4" />
+            </span>
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-white truncate">
+                กำลังแก้ไขรายการ: {editingProductName}
+              </p>
+              <p className="text-xs text-zinc-400 mt-0.5">
+                เมื่อกดบันทึก ระบบจะอัปเดตทับข้อมูลเดิมในคลาวด์โดยไม่สร้างรายการซ้ำ
+              </p>
+            </div>
+          </div>
+
+          {onCancelEdit && (
+            <button
+              type="button"
+              onClick={onCancelEdit}
+              className="inline-flex shrink-0 self-start sm:self-center items-center gap-1.5 rounded-xl border border-zinc-800 bg-black px-3.5 py-2 text-xs font-medium text-zinc-300 transition-colors hover:border-zinc-600 hover:text-white"
+            >
+              <X className="h-3.5 w-3.5" />
+              <span>ยกเลิกการแก้ไข</span>
+            </button>
+          )}
+        </div>
+      )}
+
       <section className="border-t border-zinc-800/80 pt-8 space-y-5">
         <div className="space-y-1">
           <span className="font-mono text-xs font-semibold uppercase tracking-[0.18em] text-emerald-400">

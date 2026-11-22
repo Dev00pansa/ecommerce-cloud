@@ -47,9 +47,6 @@ const SORT_OPTIONS: readonly { value: HistorySortOrder; label: string }[] = [
   { value: "profit_asc", label: "กำไรสุทธิ: น้อยที่สุด → มากที่สุด" },
 ];
 
-const SURFACE_CARD_CLASS =
-  "rounded-2xl bg-[#050505] border border-emerald-500/25 shadow-[0_0_20px_-6px_rgba(16,185,129,0.16)] transition-all duration-200 hover:border-emerald-400/50 hover:shadow-[0_0_25px_-4px_rgba(16,185,129,0.3)]";
-
 export function HistoryPanel({
   records,
   loading,
@@ -173,7 +170,7 @@ export function HistoryPanel({
 
   return (
     <>
-      <section className="border-t border-zinc-800/80 pt-7 space-y-5">
+      <section className="space-y-5">
         {isCloudFull && (
           <div
             role="alert"
@@ -336,169 +333,171 @@ export function HistoryPanel({
           )}
         </div>
 
-        {records.length > 0 && (
-          <div className="flex flex-wrap items-center justify-between gap-2.5 px-1 pt-1">
-            <button
-              type="button"
-              onClick={handleToggleSelectAllRecords}
-              className={`inline-flex items-center gap-2 rounded-xl border px-3.5 py-2 text-xs sm:text-sm font-medium transition-all duration-200 ${
-                isAllRecordsSelected
-                  ? "border-emerald-500/40 bg-emerald-500/12 text-emerald-300 hover:border-emerald-400"
-                  : "border-zinc-800 bg-[#050505] text-zinc-300 hover:border-emerald-500/40 hover:text-white"
-              }`}
-            >
-              <ListChecks className="h-4 w-4 text-emerald-400 shrink-0" />
-              <span>
-                {isAllRecordsSelected ? "ยกเลิกเลือกทั้งหมด" : "เลือกทั้งหมด"}
+        <div className="rounded-2xl border border-emerald-500/20 bg-[#050505]/90 p-5 sm:p-6 shadow-[0_0_24px_-8px_rgba(16,185,129,0.16)] space-y-4">
+          {records.length > 0 && (
+            <div className="flex flex-wrap items-center justify-between gap-2.5 pb-3 border-b border-zinc-800/70">
+              <button
+                type="button"
+                onClick={handleToggleSelectAllRecords}
+                className={`inline-flex items-center gap-2 rounded-xl border px-3.5 py-2 text-xs sm:text-sm font-medium transition-all duration-200 ${
+                  isAllRecordsSelected
+                    ? "border-emerald-500/40 bg-emerald-500/12 text-emerald-300 hover:border-emerald-400"
+                    : "border-zinc-800 bg-black text-zinc-300 hover:border-emerald-500/40 hover:text-white"
+                }`}
+              >
+                <ListChecks className="h-4 w-4 text-emerald-400 shrink-0" />
+                <span>
+                  {isAllRecordsSelected ? "ยกเลิกเลือกทั้งหมด" : "เลือกทั้งหมด"}
+                </span>
+              </button>
+
+              <span className="font-mono text-xs text-zinc-400">
+                เลือกรายการสำหรับดาวน์โหลด{" "}
+                <strong className="text-emerald-400">
+                  {selectedSortedRecords.length}/{records.length}
+                </strong>{" "}
+                รายการ
               </span>
-            </button>
+            </div>
+          )}
 
-            <span className="font-mono text-xs text-zinc-400">
-              เลือกรายการสำหรับดาวน์โหลด{" "}
-              <strong className="text-emerald-400">
-                {selectedSortedRecords.length}/{records.length}
-              </strong>{" "}
-              รายการ
-            </span>
-          </div>
-        )}
+          {loading && records.length === 0 ? (
+            <div className="py-12 text-center space-y-2">
+              <Loader2 className="mx-auto h-6 w-6 animate-spin text-emerald-400" />
+              <p className="text-sm text-zinc-400">
+                กำลังโหลดรายการที่บันทึกไว้บน Cloud...
+              </p>
+            </div>
+          ) : enrichedSortedRecords.length === 0 ? (
+            <div className="py-12 px-4 text-center space-y-2">
+              <p className="text-base font-semibold text-zinc-200">
+                ยังไม่มีรายการที่บันทึกไว้
+              </p>
+              <p className="text-xs sm:text-sm text-zinc-500">
+                กดปุ่ม “+ คำนวณรายการใหม่” ด้านบน แล้วบันทึกข้อมูลลง Cloud เพื่อเก็บไว้ดูและส่งออกเป็นไฟล์ตารางภายหลัง
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-3.5">
+              {enrichedSortedRecords.map(({ item, metrics }) => {
+                const isLoss = metrics.netProfitPerUnit < 0;
+                const isSelected = !excludedIdSet.has(item.id);
 
-        {loading && records.length === 0 ? (
-          <div className={`py-14 text-center space-y-2 ${SURFACE_CARD_CLASS}`}>
-            <Loader2 className="mx-auto h-6 w-6 animate-spin text-emerald-400" />
-            <p className="text-sm text-zinc-400">
-              กำลังโหลดรายการที่บันทึกไว้บน Cloud...
-            </p>
-          </div>
-        ) : enrichedSortedRecords.length === 0 ? (
-          <div
-            className={`py-14 px-6 text-center space-y-2 ${SURFACE_CARD_CLASS}`}
-          >
-            <p className="text-base font-semibold text-zinc-200">
-              ยังไม่มีรายการที่บันทึกไว้
-            </p>
-            <p className="text-xs sm:text-sm text-zinc-500">
-              คำนวณกำไรในแท็บ “คำนวณรายการใหม่” แล้วกดบันทึกข้อมูลลง Cloud เพื่อเก็บไว้ดูและส่งออกเป็นไฟล์ตารางภายหลัง
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-3.5">
-            {enrichedSortedRecords.map(({ item, metrics }) => {
-              const isLoss = metrics.netProfitPerUnit < 0;
-              const isSelected = !excludedIdSet.has(item.id);
-
-              return (
-                <article
-                  key={item.id}
-                  className={`p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl bg-[#050505] border transition-all duration-200 ${
-                    isSelected
-                      ? "border-emerald-500/35 shadow-[0_0_24px_-6px_rgba(16,185,129,0.2)] hover:border-emerald-400/60"
-                      : "border-zinc-800/90 opacity-75 hover:opacity-100 hover:border-zinc-700"
-                  }`}
-                >
-                  <div className="flex items-center gap-3.5 sm:gap-4 min-w-0">
-                    <button
-                      type="button"
-                      onClick={() => toggleRecordSelection(item.id)}
-                      aria-pressed={isSelected}
-                      aria-label={
-                        isSelected
-                          ? `ยกเลิกเลือก ${item.product_name}`
-                          : `เลือก ${item.product_name} สำหรับดาวน์โหลด`
-                      }
-                      className={`h-8 w-8 shrink-0 rounded-xl border flex items-center justify-center transition-all duration-200 focus:outline-none ${
-                        isSelected
-                          ? "bg-emerald-500/20 border-emerald-400 text-emerald-400 shadow-[0_0_12px_rgba(16,185,129,0.3)]"
-                          : "bg-black border-zinc-800 text-zinc-700 hover:border-zinc-600 hover:text-zinc-400"
-                      }`}
-                    >
-                      <Check
-                        className={`h-4 w-4 transition-transform duration-150 ${
-                          isSelected ? "scale-100 opacity-100" : "scale-75 opacity-35"
+                return (
+                  <article
+                    key={item.id}
+                    className={`p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl bg-black/80 border transition-all duration-200 ${
+                      isSelected
+                        ? "border-emerald-500/35 shadow-[0_0_24px_-6px_rgba(16,185,129,0.2)] hover:border-emerald-400/60"
+                        : "border-zinc-800/90 opacity-75 hover:opacity-100 hover:border-zinc-700"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3.5 sm:gap-4 min-w-0">
+                      <button
+                        type="button"
+                        onClick={() => toggleRecordSelection(item.id)}
+                        aria-pressed={isSelected}
+                        aria-label={
+                          isSelected
+                            ? `ยกเลิกเลือก ${item.product_name}`
+                            : `เลือก ${item.product_name} สำหรับดาวน์โหลด`
+                        }
+                        className={`h-8 w-8 shrink-0 rounded-xl border flex items-center justify-center transition-all duration-200 focus:outline-none ${
+                          isSelected
+                            ? "bg-emerald-500/20 border-emerald-400 text-emerald-400 shadow-[0_0_12px_rgba(16,185,129,0.3)]"
+                            : "bg-black border-zinc-800 text-zinc-700 hover:border-zinc-600 hover:text-zinc-400"
                         }`}
-                      />
-                    </button>
-
-                    {item.product_image_url ? (
-                      <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-emerald-500/25 bg-black">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={item.product_image_url}
-                          alt={item.product_name}
-                          className="h-full w-full object-cover object-center"
-                        />
-                      </div>
-                    ) : (
-                      <div className="h-16 w-16 shrink-0 rounded-xl bg-zinc-900 border border-zinc-800 flex flex-col items-center justify-center gap-1 select-none">
-                        <ImageIcon className="h-5 w-5 text-zinc-500" />
-                        <span className="text-[10px] font-medium tracking-tight text-zinc-500 leading-none">
-                          ไม่มีรูปภาพ
-                        </span>
-                      </div>
-                    )}
-
-                    <div className="min-w-0 space-y-1">
-                      <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-400">
-                        <span className="font-medium text-emerald-400">
-                          {item.platform} (GP {Number(item.platform_fee_percent)}%)
-                        </span>
-                        <span className="text-zinc-700">|</span>
-                        <span>
-                          ราคาขาย ฿{formatCurrency(Number(item.selling_price) || 0)}
-                        </span>
-                        <span className="text-zinc-700">|</span>
-                        <span className="text-zinc-500">
-                          {new Date(item.created_at).toLocaleString("th-TH")}
-                        </span>
-                      </div>
-
-                      <h3 className="text-base sm:text-lg font-semibold text-zinc-100 truncate">
-                        {item.product_name}
-                      </h3>
-
-                      <div className="flex flex-wrap items-center gap-3 text-xs sm:text-sm font-mono tabular-nums">
-                        <span
-                          className={`font-bold ${
-                            isLoss ? "text-rose-400" : "text-emerald-400"
+                      >
+                        <Check
+                          className={`h-4 w-4 transition-transform duration-150 ${
+                            isSelected
+                              ? "scale-100 opacity-100"
+                              : "scale-75 opacity-35"
                           }`}
-                        >
-                          กำไรสุทธิ {metrics.netProfitPerUnit >= 0 ? "+" : "-"}฿
-                          {formatCurrency(Math.abs(metrics.netProfitPerUnit))}/ชิ้น
-                        </span>
-                        <span className="text-zinc-500">
-                          (Margin {formatCurrency(metrics.netMarginPercent, 1)}%)
-                        </span>
+                        />
+                      </button>
+
+                      {item.product_image_url ? (
+                        <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-emerald-500/25 bg-black">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={item.product_image_url}
+                            alt={item.product_name}
+                            className="h-full w-full object-cover object-center"
+                          />
+                        </div>
+                      ) : (
+                        <div className="h-16 w-16 shrink-0 rounded-xl bg-zinc-900 border border-zinc-800 flex flex-col items-center justify-center gap-1 select-none">
+                          <ImageIcon className="h-5 w-5 text-zinc-500" />
+                          <span className="text-[10px] font-medium tracking-tight text-zinc-500 leading-none">
+                            ไม่มีรูปภาพ
+                          </span>
+                        </div>
+                      )}
+
+                      <div className="min-w-0 space-y-1">
+                        <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-400">
+                          <span className="font-medium text-emerald-400">
+                            {item.platform} (GP {Number(item.platform_fee_percent)}%)
+                          </span>
+                          <span className="text-zinc-700">|</span>
+                          <span>
+                            ราคาขาย ฿{formatCurrency(Number(item.selling_price) || 0)}
+                          </span>
+                          <span className="text-zinc-700">|</span>
+                          <span className="text-zinc-500">
+                            {new Date(item.created_at).toLocaleString("th-TH")}
+                          </span>
+                        </div>
+
+                        <h3 className="text-base sm:text-lg font-semibold text-zinc-100 truncate">
+                          {item.product_name}
+                        </h3>
+
+                        <div className="flex flex-wrap items-center gap-3 text-xs sm:text-sm font-mono tabular-nums">
+                          <span
+                            className={`font-bold ${
+                              isLoss ? "text-rose-400" : "text-emerald-400"
+                            }`}
+                          >
+                            กำไรสุทธิ {metrics.netProfitPerUnit >= 0 ? "+" : "-"}฿
+                            {formatCurrency(Math.abs(metrics.netProfitPerUnit))}/ชิ้น
+                          </span>
+                          <span className="text-zinc-500">
+                            (Margin {formatCurrency(metrics.netMarginPercent, 1)}%)
+                          </span>
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  <div className="flex items-center gap-2 shrink-0 pl-11 sm:pl-0">
-                    <button
-                      type="button"
-                      onClick={() => onLoadRecord(item)}
-                      className="rounded-xl border border-emerald-500/30 bg-black px-3.5 py-2 text-xs font-semibold text-zinc-100 transition-all duration-200 hover:border-emerald-400 hover:text-emerald-400"
-                    >
-                      เปิดดู / แก้ไข
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => onDeleteRecord(item)}
-                      disabled={deletingId === item.id}
-                      className="inline-flex items-center justify-center gap-1 rounded-xl border border-zinc-800 bg-black px-3 py-2 text-xs font-medium text-rose-400 transition-colors hover:border-rose-500/60 disabled:opacity-50"
-                    >
-                      {deletingId === item.id ? (
-                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                      ) : (
-                        <Trash2 className="h-3.5 w-3.5" />
-                      )}
-                      <span>{deletingId === item.id ? "กำลังลบ..." : "ลบ"}</span>
-                    </button>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
-        )}
+                    <div className="flex items-center gap-2 shrink-0 pl-11 sm:pl-0">
+                      <button
+                        type="button"
+                        onClick={() => onLoadRecord(item)}
+                        className="rounded-xl border border-emerald-500/30 bg-[#050505] px-3.5 py-2 text-xs font-semibold text-zinc-100 transition-all duration-200 hover:border-emerald-400 hover:text-emerald-400"
+                      >
+                        เปิดดู / แก้ไข
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => onDeleteRecord(item)}
+                        disabled={deletingId === item.id}
+                        className="inline-flex items-center justify-center gap-1 rounded-xl border border-zinc-800 bg-[#050505] px-3 py-2 text-xs font-medium text-rose-400 transition-colors hover:border-rose-500/60 disabled:opacity-50"
+                      >
+                        {deletingId === item.id ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        ) : (
+                          <Trash2 className="h-3.5 w-3.5" />
+                        )}
+                        <span>{deletingId === item.id ? "กำลังลบ..." : "ลบ"}</span>
+                      </button>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </section>
 
       {records.length > 0 && (

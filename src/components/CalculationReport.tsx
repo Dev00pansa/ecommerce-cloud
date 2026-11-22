@@ -26,6 +26,7 @@ interface CalculationReportProps {
   previewImageUrl: string | null;
   saving: boolean;
   isCloudFull: boolean;
+  isEditing?: boolean;
   onChangeDiscount: (next: number) => void;
   onSaveToCloud: () => void;
   onExportCsv: () => void;
@@ -40,12 +41,15 @@ export function CalculationReport({
   previewImageUrl,
   saving,
   isCloudFull,
+  isEditing = false,
   onChangeDiscount,
   onSaveToCloud,
   onExportCsv,
   onEditTop,
 }: CalculationReportProps) {
   const [showPromoSimulator, setShowPromoSimulator] = useState(false);
+
+  const saveBlockedByLimit = isCloudFull && !isEditing;
 
   const productTitle = inputs.productName.trim() || "สินค้าไม่ได้ระบุชื่อ";
   const isLoss = metrics.netProfitPerUnit < 0;
@@ -426,7 +430,7 @@ export function CalculationReport({
         )}
       </div>
 
-      {isCloudFull && (
+      {saveBlockedByLimit && (
         <div
           role="alert"
           className="flex items-center gap-2.5 rounded-xl border border-amber-500/45 bg-amber-950/20 px-4 py-3 text-xs sm:text-sm text-amber-300"
@@ -443,7 +447,7 @@ export function CalculationReport({
           <button
             type="button"
             onClick={onSaveToCloud}
-            disabled={saving || isCloudFull}
+            disabled={saving || saveBlockedByLimit}
             className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-500 px-6 py-3.5 text-sm sm:text-base font-semibold text-slate-950 shadow-[0_0_24px_-4px_rgba(16,185,129,0.45)] transition-all duration-200 hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {saving ? (
@@ -452,11 +456,15 @@ export function CalculationReport({
               <CloudUpload className="h-4 w-4" />
             )}
             <span>
-              {isCloudFull
+              {saveBlockedByLimit
                 ? `พื้นที่คลาวด์เต็ม (${MAX_CLOUD_RECORDS}/${MAX_CLOUD_RECORDS})`
                 : saving
-                  ? "กำลังบันทึกลง Cloud..."
-                  : "บันทึกข้อมูลนี้ลง Cloud"}
+                  ? isEditing
+                    ? "กำลังบันทึกการแก้ไข..."
+                    : "กำลังบันทึกลง Cloud..."
+                  : isEditing
+                    ? "บันทึกการแก้ไขลง Cloud"
+                    : "บันทึกข้อมูลนี้ลง Cloud"}
             </span>
           </button>
 

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { AlertCircle, CheckCircle2 } from "lucide-react";
+import { Cloud, Loader2, Plus, Trash2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { sanitizePlainText, translateSupabaseError } from "@/lib/auth";
 import { useAppLanguage } from "@/lib/language";
@@ -28,6 +28,11 @@ import type {
 import { CalculatorForm } from "@/components/CalculatorForm";
 import { CalculationReport } from "@/components/CalculationReport";
 import { HistoryPanel } from "@/components/HistoryPanel";
+import { FloatingBackgroundDocs } from "@/components/FloatingBackgroundDocs";
+import {
+  DashboardToast,
+  type DashboardToastData,
+} from "@/components/DashboardToast";
 
 interface DashboardClientProps {
   userId: string;
@@ -47,6 +52,17 @@ const DEFAULT_FORM_VALUES: CalculatorFormStrings = {
   fixedCost: "15000",
 };
 
+const EMPTY_FORM_VALUES: CalculatorFormStrings = {
+  productName: "",
+  platform: "Shopee",
+  costPrice: "",
+  packagingCost: "",
+  adsCost: "",
+  platformFeePercent: "13",
+  sellingPrice: "",
+  fixedCost: "",
+};
+
 const RECORD_SELECT_COLUMNS =
   "id, user_id, product_name, platform, cost_price, packaging_cost, ads_cost, platform_fee_percent, selling_price, fixed_cost, product_image_url, created_at";
 
@@ -60,6 +76,7 @@ export function DashboardClient({
   const isEn = language === "en";
 
   const topFormRef = useRef<HTMLDivElement | null>(null);
+  const toastCounterRef = useRef(0);
   const activeTab: DashboardTab =
     searchParams.get("tab") === "history" ? "history" : "calculator";
 
@@ -71,6 +88,8 @@ export function DashboardClient({
     useState<CalculatorFormStrings>(DEFAULT_FORM_VALUES);
   const [discountPercent, setDiscountPercent] = useState<number>(15);
   const [hasCalculated, setHasCalculated] = useState<boolean>(false);
+  const [editingRecord, setEditingRecord] =
+    useState<EcommerceCalculationRecord | null>(null);
 
   const [compressedImage, setCompressedImage] =
     useState<CompressedProductImage | null>(null);
@@ -83,11 +102,28 @@ export function DashboardClient({
   const [refreshing, setRefreshing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [pendingDeleteRecord, setPendingDeleteRecord] =
+    useState<EcommerceCalculationRecord | null>(null);
   const [realtimeConnected, setRealtimeConnected] = useState(false);
-  const [dbError, setDbError] = useState<string | null>(null);
-  const [dbSuccess, setDbSuccess] = useState<string | null>(null);
+  const [toast, setToast] = useState<DashboardToastData | null>(null);
 
   const isCloudFull = records.length >= MAX_CLOUD_RECORDS;
+
+  const showToast = useCallback(
+    (message: string, variant: "success" | "error" = "success") => {
+      toastCounterRef.current += 1;
+      setToast({
+        id: toastCounterRef.current,
+        message,
+        variant,
+      });
+    },
+    []
+  );
+
+  const dismissToast = useCallback(() => {
+    setToast(null);
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -96,6 +132,21 @@ export function DashboardClient({
       }
     };
   }, [compressedImage]);
+
+  useEffect(() => {
+    if (!pendingDeleteRecord) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && !deletingId) {
+        setPendingDeleteRecord(null);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [pendingDeleteRecord, deletingId]);
 
   const numericInputs: CalculatorInputValues = useMemo(
     () => ({
@@ -135,7 +186,6 @@ export function DashboardClient({
     if (!supabase) return;
 
     setRefreshing(true);
-    setDbError(null);
 
     const { data, error } = await supabase
       .from("ecommerce_calculations")
@@ -144,12 +194,12 @@ export function DashboardClient({
       .order("created_at", { ascending: false });
 
     if (error) {
-      setDbError(translateSupabaseError(error));
+      showToast(translateSupabaseError(error), "error");
     } else if (data) {
       setRecords(data as EcommerceCalculationRecord[]);
     }
     setRefreshing(false);
-  }, [userId]);
+  }, [userId, showToast]);
 
   useEffect(() => {
     const supabase = createClient();
@@ -250,7 +300,6 @@ export function DashboardClient({
 
   function handleCalculate() {
     setHasCalculated(true);
-    setDbError(null);
 
     window.requestAnimationFrame(() => {
       window.setTimeout(() => {
@@ -263,21 +312,29 @@ export function DashboardClient({
   }
 
   function handleReset() {
-    setFormValues({
-      productName: "",
-      platform: "Shopee",
-      costPrice: "",
-      packagingCost: "",
-      adsCost: "",
-      platformFeePercent: "13",
-      sellingPrice: "",
-      fixedCost: "",
-    });
+    setFormValues(EMPTY_FORM_VALUES);
     setDiscountPercent(15);
     setHasCalculated(false);
     handleRemoveImage();
-    setDbError(null);
-    setDbSuccess(null);
+  }
+
+  function handleStartNewCalculation() {
+    setEditingRecord(null);
+    setFormValues(EMPTY_FORM_VALUES);
+    setDiscountPercent(15);
+    setHasCalculated(false);
+    handleRemoveImage();
+    handleSwitchTab("calculator");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function handleCancelEdit() {
+    setEditingRecord(null);
+    setFormValues(EMPTY_FORM_VALUES);
+    setDiscountPercent(15);
+    setHasCalculated(false);
+    handleRemoveImage();
+    showToast("ยกเลิกการแก้ไขรายการเดิมแล้ว", "success");
   }
 
   function handleEditTop() {
@@ -292,15 +349,16 @@ export function DashboardClient({
     const supabase = createClient();
     if (!supabase || saving) return;
 
-    if (records.length >= MAX_CLOUD_RECORDS) {
-      setDbError(
-        `พื้นที่คลาวด์เต็ม (${MAX_CLOUD_RECORDS}/${MAX_CLOUD_RECORDS} รายการ) กรุณาลบรายการเก่าออกก่อนบันทึกเพิ่ม`
+    const isEditing = editingRecord !== null;
+
+    if (!isEditing && records.length >= MAX_CLOUD_RECORDS) {
+      showToast(
+        `พื้นที่คลาวด์เต็ม (${MAX_CLOUD_RECORDS}/${MAX_CLOUD_RECORDS} รายการ) กรุณาลบรายการเก่าออกก่อนบันทึกเพิ่ม`,
+        "error"
       );
       return;
     }
 
-    setDbError(null);
-    setDbSuccess(null);
     setSaving(true);
 
     const safeProductName =
@@ -325,8 +383,9 @@ export function DashboardClient({
           });
 
         if (uploadError) {
-          setDbError(
-            `อัปโหลดรูปสินค้าไม่สำเร็จ: ${translateSupabaseError(uploadError)}`
+          showToast(
+            `อัปโหลดรูปสินค้าไม่สำเร็จ: ${translateSupabaseError(uploadError)}`,
+            "error"
           );
           setSaving(false);
           return;
@@ -340,62 +399,119 @@ export function DashboardClient({
         finalImageUrl = publicUrlData.publicUrl;
       }
 
-      const { data, error } = await supabase
-        .from("ecommerce_calculations")
-        .insert({
-          user_id: userId,
-          product_name: safeProductName,
-          platform: safePlatform,
-          cost_price: numericInputs.costPrice,
-          packaging_cost: numericInputs.packagingCost,
-          ads_cost: numericInputs.adsCost,
-          platform_fee_percent: numericInputs.platformFeePercent,
-          selling_price: numericInputs.sellingPrice,
-          fixed_cost: numericInputs.fixedCost,
-          product_image_url: finalImageUrl,
-        })
-        .select(RECORD_SELECT_COLUMNS)
-        .single();
+      if (isEditing && editingRecord) {
+        const previousImageUrl = editingRecord.product_image_url;
 
-      if (error) {
-        if (uploadedStoragePath) {
-          await supabase.storage
-            .from("product-images")
-            .remove([uploadedStoragePath]);
-        }
-        setDbError(translateSupabaseError(error));
-      } else if (data) {
-        const created = data as EcommerceCalculationRecord;
-        setRecords((prev) =>
-          prev.some((item) => item.id === created.id)
-            ? prev
-            : [created, ...prev]
-        );
-        if (created.product_image_url) {
-          setExistingImageUrl(created.product_image_url);
-          setCompressedImage((prev) => {
-            if (prev?.previewUrl) {
-              URL.revokeObjectURL(prev.previewUrl);
+        const { data, error } = await supabase
+          .from("ecommerce_calculations")
+          .update({
+            product_name: safeProductName,
+            platform: safePlatform,
+            cost_price: numericInputs.costPrice,
+            packaging_cost: numericInputs.packagingCost,
+            ads_cost: numericInputs.adsCost,
+            platform_fee_percent: numericInputs.platformFeePercent,
+            selling_price: numericInputs.sellingPrice,
+            fixed_cost: numericInputs.fixedCost,
+            product_image_url: finalImageUrl,
+          })
+          .eq("id", editingRecord.id)
+          .eq("user_id", userId)
+          .select(RECORD_SELECT_COLUMNS)
+          .single();
+
+        if (error) {
+          if (uploadedStoragePath) {
+            await supabase.storage
+              .from("product-images")
+              .remove([uploadedStoragePath]);
+          }
+          showToast(translateSupabaseError(error), "error");
+        } else if (data) {
+          const updated = data as EcommerceCalculationRecord;
+
+          if (previousImageUrl && previousImageUrl !== finalImageUrl) {
+            const oldStoragePath = extractProductImageStoragePath(
+              previousImageUrl,
+              userId
+            );
+            if (oldStoragePath) {
+              await supabase.storage
+                .from("product-images")
+                .remove([oldStoragePath]);
             }
-            return null;
-          });
+          }
+
+          setRecords((prev) =>
+            prev.map((item) => (item.id === updated.id ? updated : item))
+          );
+          setEditingRecord(null);
+          setHasCalculated(false);
+          handleRemoveImage();
+          handleSwitchTab("history");
+          window.scrollTo({ top: 0, behavior: "smooth" });
+          showToast("บันทึกการแก้ไขเรียบร้อยแล้ว", "success");
         }
-        setDbSuccess(`บันทึก "${created.product_name}" ลง Cloud เรียบร้อยแล้ว`);
+      } else {
+        const { data, error } = await supabase
+          .from("ecommerce_calculations")
+          .insert({
+            user_id: userId,
+            product_name: safeProductName,
+            platform: safePlatform,
+            cost_price: numericInputs.costPrice,
+            packaging_cost: numericInputs.packagingCost,
+            ads_cost: numericInputs.adsCost,
+            platform_fee_percent: numericInputs.platformFeePercent,
+            selling_price: numericInputs.sellingPrice,
+            fixed_cost: numericInputs.fixedCost,
+            product_image_url: finalImageUrl,
+          })
+          .select(RECORD_SELECT_COLUMNS)
+          .single();
+
+        if (error) {
+          if (uploadedStoragePath) {
+            await supabase.storage
+              .from("product-images")
+              .remove([uploadedStoragePath]);
+          }
+          showToast(translateSupabaseError(error), "error");
+        } else if (data) {
+          const created = data as EcommerceCalculationRecord;
+          setRecords((prev) =>
+            prev.some((item) => item.id === created.id)
+              ? prev
+              : [created, ...prev]
+          );
+          if (created.product_image_url) {
+            setExistingImageUrl(created.product_image_url);
+            setCompressedImage((prev) => {
+              if (prev?.previewUrl) {
+                URL.revokeObjectURL(prev.previewUrl);
+              }
+              return null;
+            });
+          }
+          showToast(
+            `บันทึก "${created.product_name}" ลง Cloud เรียบร้อยแล้ว`,
+            "success"
+          );
+        }
       }
     } catch (err) {
-      setDbError(translateSupabaseError(err));
+      showToast(translateSupabaseError(err), "error");
     } finally {
       setSaving(false);
     }
   }
 
-  async function handleDeleteRecord(record: EcommerceCalculationRecord) {
+  async function handleConfirmDeleteRecord() {
+    const record = pendingDeleteRecord;
     const supabase = createClient();
-    if (!supabase || deletingId) return;
+    if (!record || !supabase || deletingId) return;
 
     setDeletingId(record.id);
-    setDbError(null);
-    setDbSuccess(null);
 
     try {
       const storagePath = extractProductImageStoragePath(
@@ -410,12 +526,17 @@ export function DashboardClient({
         .eq("user_id", userId);
 
       if (error) {
-        setDbError(translateSupabaseError(error));
+        showToast(translateSupabaseError(error), "error");
       } else {
         if (storagePath) {
           await supabase.storage.from("product-images").remove([storagePath]);
         }
         setRecords((prev) => prev.filter((item) => item.id !== record.id));
+        if (editingRecord?.id === record.id) {
+          setEditingRecord(null);
+        }
+        setPendingDeleteRecord(null);
+        showToast(`ลบรายการ "${record.product_name}" เรียบร้อยแล้ว`, "success");
       }
     } finally {
       setDeletingId(null);
@@ -424,6 +545,7 @@ export function DashboardClient({
 
   function handleLoadRecord(record: EcommerceCalculationRecord) {
     handleRemoveImage();
+    setEditingRecord(record);
     setFormValues({
       productName: record.product_name,
       platform: record.platform,
@@ -437,16 +559,7 @@ export function DashboardClient({
     setExistingImageUrl(record.product_image_url ?? null);
     setHasCalculated(true);
     handleSwitchTab("calculator");
-    setDbSuccess(`โหลดข้อมูล "${record.product_name}" กลับมาเรียบร้อยแล้ว`);
-
-    window.requestAnimationFrame(() => {
-      window.setTimeout(() => {
-        const reportEl = document.getElementById("calculation-report");
-        if (reportEl) {
-          reportEl.scrollIntoView({ behavior: "smooth", block: "start" });
-        }
-      }, 80);
-    });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function triggerCsvDownload(csvContent: string) {
@@ -502,6 +615,7 @@ export function DashboardClient({
         />
         <div className="animate-dashboard-glow-b absolute -top-24 left-[8%] h-[420px] w-[42vw] min-w-[280px] rounded-full bg-gradient-to-b from-emerald-500/20 via-emerald-500/8 to-transparent blur-3xl" />
         <div className="animate-dashboard-glow-a absolute -top-28 right-[8%] h-[440px] w-[40vw] min-w-[280px] rounded-full bg-gradient-to-b from-emerald-400/18 via-emerald-500/8 to-transparent blur-3xl" />
+        <FloatingBackgroundDocs />
       </div>
 
       <main
@@ -551,62 +665,30 @@ export function DashboardClient({
             </div>
           )}
 
-          <div className="inline-flex shrink-0 self-start lg:self-auto rounded-2xl border border-emerald-500/25 bg-[#050505] p-1 shadow-[0_0_20px_-6px_rgba(16,185,129,0.16)]">
+          {activeTab === "history" ? (
             <button
               type="button"
-              onClick={() => handleSwitchTab("calculator")}
-              className={`rounded-xl px-4 py-2 text-xs sm:text-sm font-semibold whitespace-nowrap transition-colors ${
-                activeTab === "calculator"
-                  ? "bg-emerald-500 text-slate-950"
-                  : "text-zinc-400 hover:text-zinc-200"
-              }`}
+              onClick={handleStartNewCalculation}
+              className="inline-flex shrink-0 self-start lg:self-auto items-center gap-2 rounded-2xl bg-emerald-500 px-5 py-3 text-sm font-semibold text-black shadow-[0_0_24px_rgba(16,185,129,0.3)] transition-all duration-200 hover:bg-emerald-400 hover:-translate-y-0.5 whitespace-nowrap"
             >
-              {isEn ? "New Calculation" : "คำนวณรายการใหม่"}
+              <Plus className="h-4 w-4 stroke-[2.5]" />
+              <span>{isEn ? "New Calculation" : "คำนวณรายการใหม่"}</span>
             </button>
+          ) : (
             <button
               type="button"
               onClick={() => handleSwitchTab("history")}
-              className={`rounded-xl px-4 py-2 text-xs sm:text-sm font-semibold whitespace-nowrap transition-colors ${
-                activeTab === "history"
-                  ? "bg-emerald-500 text-slate-950"
-                  : "text-zinc-400 hover:text-zinc-200"
-              }`}
+              className="inline-flex shrink-0 self-start lg:self-auto items-center gap-2 rounded-2xl border border-emerald-500/30 bg-[#050505] px-5 py-3 text-sm font-semibold text-zinc-200 shadow-[0_0_20px_-6px_rgba(16,185,129,0.18)] transition-all duration-200 hover:border-emerald-400/60 hover:text-emerald-300 whitespace-nowrap"
             >
-              {isEn
-                ? `Cloud Storage (${records.length}/${MAX_CLOUD_RECORDS})`
-                : `คลาวด์เก็บข้อมูล (${records.length}/${MAX_CLOUD_RECORDS})`}
+              <Cloud className="h-4 w-4 text-emerald-400" />
+              <span>
+                {isEn
+                  ? `Cloud Storage (${records.length}/${MAX_CLOUD_RECORDS})`
+                  : `คลาวด์เก็บข้อมูล (${records.length}/${MAX_CLOUD_RECORDS})`}
+              </span>
             </button>
-          </div>
+          )}
         </div>
-
-        {dbError && (
-          <div
-            role="alert"
-            className="flex items-center gap-2.5 rounded-2xl border border-rose-500/45 bg-[#050505] px-4 py-3 text-xs sm:text-sm text-rose-300 shadow-[0_0_20px_-6px_rgba(244,63,94,0.25)]"
-          >
-            <AlertCircle className="h-4 w-4 shrink-0 text-rose-400" />
-            <span>{dbError}</span>
-          </div>
-        )}
-
-        {dbSuccess && (
-          <div
-            role="status"
-            className="flex items-center justify-between gap-2.5 rounded-2xl border border-emerald-500/45 bg-[#050505] px-4 py-3 text-xs sm:text-sm text-emerald-300 shadow-[0_0_20px_-6px_rgba(16,185,129,0.25)]"
-          >
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400" />
-              <span>{dbSuccess}</span>
-            </div>
-            <button
-              type="button"
-              onClick={() => setDbSuccess(null)}
-              className="text-xs underline opacity-80 hover:opacity-100"
-            >
-              ปิด
-            </button>
-          </div>
-        )}
 
         {activeTab === "calculator" ? (
           <div className="space-y-14">
@@ -616,6 +698,8 @@ export function DashboardClient({
               existingImageUrl={existingImageUrl}
               compressingImage={compressingImage}
               imageError={imageError}
+              editingProductName={editingRecord?.product_name ?? null}
+              onCancelEdit={handleCancelEdit}
               onChangeField={handleChangeField}
               onSelectPreset={handleSelectPreset}
               onSelectImageFile={handleSelectImageFile}
@@ -633,6 +717,7 @@ export function DashboardClient({
                 previewImageUrl={activePreviewUrl}
                 saving={saving}
                 isCloudFull={isCloudFull}
+                isEditing={Boolean(editingRecord)}
                 onChangeDiscount={setDiscountPercent}
                 onSaveToCloud={handleSaveToCloud}
                 onExportCsv={handleExportReportCsv}
@@ -648,10 +733,77 @@ export function DashboardClient({
             onRefresh={fetchHistory}
             onExportCsv={handleExportCloudCsv}
             onLoadRecord={handleLoadRecord}
-            onDeleteRecord={handleDeleteRecord}
+            onDeleteRecord={(record) => setPendingDeleteRecord(record)}
           />
         )}
       </main>
+
+      <DashboardToast toast={toast} onDismiss={dismissToast} />
+
+      {pendingDeleteRecord && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="delete-record-confirm-title"
+          onClick={(e) => {
+            if (e.target === e.currentTarget && !deletingId) {
+              setPendingDeleteRecord(null);
+            }
+          }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4"
+        >
+          <div className="relative w-full max-w-sm overflow-hidden rounded-2xl border border-red-500/30 bg-[#050505] p-6 text-zinc-100 shadow-2xl">
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-red-500/70 to-transparent"
+            />
+
+            <div className="space-y-2.5">
+              <div className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-red-500/10 text-red-400">
+                <Trash2 className="h-5 w-5" />
+              </div>
+              <h2
+                id="delete-record-confirm-title"
+                className="pt-1 text-lg font-bold tracking-tight text-white"
+              >
+                คุณแน่ใจหรือไม่ว่าต้องการลบรายการนี้?
+              </h2>
+              <div className="rounded-xl border border-zinc-800/90 bg-black px-3.5 py-2.5 text-sm font-medium text-zinc-200 truncate">
+                {pendingDeleteRecord.product_name}
+              </div>
+              <p className="text-xs sm:text-sm leading-relaxed text-zinc-400">
+                ข้อมูลรายการนี้และรูปภาพสินค้าที่แนบไว้จะถูกลบออกจากคลาวด์อย่างถาวร และไม่สามารถกู้คืนได้
+              </p>
+            </div>
+
+            <div className="mt-6 flex items-center justify-end gap-2.5">
+              <button
+                type="button"
+                onClick={() => setPendingDeleteRecord(null)}
+                disabled={Boolean(deletingId)}
+                className="rounded-xl px-4 py-2.5 text-sm font-medium text-zinc-300 transition-colors hover:bg-white/[0.05] hover:text-white disabled:opacity-50"
+              >
+                ยกเลิก
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmDeleteRecord}
+                disabled={Boolean(deletingId)}
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-red-500 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-red-600 disabled:opacity-60"
+              >
+                {deletingId === pendingDeleteRecord.id && (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                )}
+                <span>
+                  {deletingId === pendingDeleteRecord.id
+                    ? "กำลังลบ..."
+                    : "ยืนยันการลบ"}
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
