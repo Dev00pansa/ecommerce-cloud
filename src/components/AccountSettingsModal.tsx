@@ -4,7 +4,6 @@ import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "r
 import { useRouter } from "next/navigation";
 import {
   AlertCircle,
-  Camera,
   CheckCircle2,
   Clock,
   Eye,
@@ -504,32 +503,19 @@ export function AccountSettingsModal({
           <section className="py-5 space-y-3">
             <div className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-4 min-w-0">
-                <div className="relative h-14 w-14 shrink-0">
+                <div className="h-14 w-14 shrink-0">
                   {avatarUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={avatarUrl}
                       alt={username}
-                      className="h-14 w-14 rounded-full object-cover ring-1 ring-emerald-500/50"
+                      className="h-14 w-14 rounded-full object-cover ring-1 ring-emerald-500/50 select-none"
                     />
                   ) : (
                     <div className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-400 ring-1 ring-emerald-500/30">
                       <UserIcon className="h-6 w-6" />
                     </div>
                   )}
-                  <button
-                    type="button"
-                    onClick={() => avatarFileInputRef.current?.click()}
-                    disabled={uploadingAvatar}
-                    aria-label={isEn ? "Upload avatar" : "เปลี่ยนรูปโปรไฟล์"}
-                    className="absolute -bottom-0.5 -right-0.5 flex h-6 w-6 items-center justify-center rounded-full border border-emerald-500/50 bg-black text-emerald-400 transition-colors hover:bg-emerald-500 hover:text-slate-950 disabled:opacity-50"
-                  >
-                    {uploadingAvatar ? (
-                      <Loader2 className="h-3 w-3 animate-spin" />
-                    ) : (
-                      <Camera className="h-3 w-3" />
-                    )}
-                  </button>
                 </div>
 
                 <div className="min-w-0">
@@ -556,15 +542,20 @@ export function AccountSettingsModal({
                 type="button"
                 onClick={() => avatarFileInputRef.current?.click()}
                 disabled={uploadingAvatar}
-                className="shrink-0 rounded-xl border border-emerald-500/30 bg-black px-3.5 py-2 text-xs font-medium text-emerald-300 transition-colors hover:border-emerald-400 hover:text-white disabled:opacity-50"
+                className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-emerald-500/30 bg-black px-3.5 py-2 text-xs font-medium text-emerald-300 transition-colors hover:border-emerald-400 hover:text-white disabled:opacity-50"
               >
-                {uploadingAvatar
-                  ? isEn
-                    ? "Uploading..."
-                    : "กำลังอัปโหลด..."
-                  : isEn
-                    ? "Change Photo"
-                    : "เปลี่ยนรูป"}
+                {uploadingAvatar && (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                )}
+                <span>
+                  {uploadingAvatar
+                    ? isEn
+                      ? "Uploading..."
+                      : "กำลังอัปโหลด..."
+                    : isEn
+                      ? "Change Photo"
+                      : "เปลี่ยนรูป"}
+                </span>
               </button>
             </div>
 

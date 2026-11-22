@@ -2,17 +2,12 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useRef, useState, type MouseEvent } from "react";
 import {
-  useEffect,
-  useRef,
-  useState,
-  type ChangeEvent,
-  type MouseEvent,
-} from "react";
-import {
-  AlertCircle,
-  Camera,
+  Calculator,
+  Calendar,
   ChevronDown,
+  Cloud,
   Globe,
   KeyRound,
   Loader2,
@@ -22,7 +17,6 @@ import {
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useAppLanguage } from "@/lib/language";
-import { uploadUserAvatar } from "@/lib/avatar-upload";
 import { KhumLabLogo } from "@/components/KhumLabLogo";
 import { AccountSettingsModal } from "@/components/AccountSettingsModal";
 
@@ -30,13 +24,38 @@ interface NavbarProps {
   username?: string | null;
   email?: string | null;
   avatarUrl?: string | null;
+  createdAt?: string | null;
   isAuthenticated?: boolean;
+}
+
+function formatJoinedDate(
+  isoDate: string | null | undefined,
+  isEn: boolean
+): string | null {
+  if (!isoDate) return null;
+  const parsed = new Date(isoDate);
+  if (Number.isNaN(parsed.getTime())) return null;
+
+  if (isEn) {
+    return `Joined ${parsed.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    })}`;
+  }
+
+  return `สร้างบัญชีเมื่อ ${parsed.toLocaleDateString("th-TH", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  })}`;
 }
 
 export function Navbar({
   username = null,
   email = null,
   avatarUrl = null,
+  createdAt = null,
   isAuthenticated = false,
 }: NavbarProps) {
   const pathname = usePathname();
@@ -44,36 +63,46 @@ export function Navbar({
   const [language, setLanguage] = useAppLanguage();
   const isEn = language === "en";
 
-  const dropdownRef = useRef<HTMLDivElement | null>(null);
-  const avatarInputRef = useRef<HTMLInputElement | null>(null);
+  const toolsDropdownRef = useRef<HTMLDivElement | null>(null);
+  const profileDropdownRef = useRef<HTMLDivElement | null>(null);
 
   const [overrideUsername, setOverrideUsername] = useState<string | null>(null);
   const [overrideAvatarUrl, setOverrideAvatarUrl] = useState<string | null>(null);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [toolsDropdownOpen, setToolsDropdownOpen] = useState(false);
+  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
-  const [uploadingAvatar, setUploadingAvatar] = useState(false);
-  const [avatarError, setAvatarError] = useState<string | null>(null);
 
   const displayUsername = overrideUsername ?? username ?? "";
   const displayAvatarUrl = overrideAvatarUrl ?? avatarUrl ?? null;
+  const joinedLabel = formatJoinedDate(createdAt, isEn);
 
   useEffect(() => {
-    if (!dropdownOpen) return;
+    if (!toolsDropdownOpen && !profileDropdownOpen) return;
 
     const handlePointerDown = (event: globalThis.MouseEvent) => {
+      const target = event.target as Node;
       if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
+        toolsDropdownOpen &&
+        toolsDropdownRef.current &&
+        !toolsDropdownRef.current.contains(target)
       ) {
-        setDropdownOpen(false);
+        setToolsDropdownOpen(false);
+      }
+      if (
+        profileDropdownOpen &&
+        profileDropdownRef.current &&
+        !profileDropdownRef.current.contains(target)
+      ) {
+        setProfileDropdownOpen(false);
       }
     };
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        setDropdownOpen(false);
+        setToolsDropdownOpen(false);
+        setProfileDropdownOpen(false);
       }
     };
 
@@ -83,7 +112,7 @@ export function Navbar({
       document.removeEventListener("mousedown", handlePointerDown);
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [dropdownOpen]);
+  }, [toolsDropdownOpen, profileDropdownOpen]);
 
   useEffect(() => {
     if (!logoutConfirmOpen) return;
@@ -101,36 +130,13 @@ export function Navbar({
   }, [logoutConfirmOpen, loggingOut]);
 
   function handleLogoClick(event: MouseEvent<HTMLAnchorElement>) {
+    setToolsDropdownOpen(false);
+    setProfileDropdownOpen(false);
     if (pathname === "/") {
       event.preventDefault();
       window.scrollTo({ top: 0, behavior: "smooth" });
     } else {
       window.scrollTo({ top: 0, behavior: "instant" });
-    }
-  }
-
-  async function handleAvatarFileChange(event: ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
-    event.target.value = "";
-    if (!file || uploadingAvatar) return;
-
-    setAvatarError(null);
-    setUploadingAvatar(true);
-
-    try {
-      const result = await uploadUserAvatar(file, displayAvatarUrl);
-      setOverrideAvatarUrl(result.avatarUrl);
-      router.refresh();
-    } catch (err) {
-      setAvatarError(
-        err instanceof Error
-          ? err.message
-          : isEn
-            ? "Failed to upload avatar."
-            : "อัปโหลดรูปโปรไฟล์ไม่สำเร็จ"
-      );
-    } finally {
-      setUploadingAvatar(false);
     }
   }
 
@@ -144,7 +150,8 @@ export function Navbar({
     }
 
     setLogoutConfirmOpen(false);
-    setDropdownOpen(false);
+    setToolsDropdownOpen(false);
+    setProfileDropdownOpen(false);
     setOverrideUsername(null);
     setOverrideAvatarUrl(null);
     router.push("/login");
@@ -152,7 +159,10 @@ export function Navbar({
     setLoggingOut(false);
   }
 
-  const calculatorHref = isAuthenticated ? "/dashboard" : "/login";
+  const calculatorTabHref = isAuthenticated
+    ? "/dashboard?tab=calculator"
+    : "/login";
+  const cloudTabHref = isAuthenticated ? "/dashboard?tab=history" : "/login";
 
   return (
     <>
@@ -197,16 +207,88 @@ export function Navbar({
               >
                 {isEn ? "Home" : "หน้าหลัก"}
               </Link>
-              <Link
-                href={calculatorHref}
-                className={`rounded-lg px-3.5 py-1.5 text-sm font-medium transition-colors ${
-                  pathname.startsWith("/dashboard")
-                    ? "bg-zinc-900 text-emerald-400"
-                    : "text-zinc-400 hover:bg-zinc-900 hover:text-zinc-100"
-                }`}
-              >
-                {isEn ? "Calculator" : "เครื่องมือคำนวณ"}
-              </Link>
+
+              <div ref={toolsDropdownRef} className="relative">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setProfileDropdownOpen(false);
+                    setToolsDropdownOpen((prev) => !prev);
+                  }}
+                  aria-expanded={toolsDropdownOpen}
+                  aria-haspopup="menu"
+                  className={`inline-flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-sm font-medium transition-colors focus:outline-none ${
+                    pathname.startsWith("/dashboard") || toolsDropdownOpen
+                      ? "bg-zinc-900 text-emerald-400"
+                      : "text-zinc-400 hover:bg-zinc-900 hover:text-zinc-100"
+                  }`}
+                >
+                  <span>{isEn ? "Calculator" : "เครื่องมือคำนวณ"}</span>
+                  <ChevronDown
+                    className={`h-3.5 w-3.5 transition-transform duration-200 ${
+                      toolsDropdownOpen ? "rotate-180 text-emerald-400" : ""
+                    }`}
+                  />
+                </button>
+
+                <div
+                  role="menu"
+                  className={`absolute left-0 mt-3 w-80 origin-top-left z-50 overflow-hidden rounded-2xl bg-[#050505] border border-emerald-500/30 shadow-[0_12px_40px_-8px_rgba(0,0,0,0.85),0_0_24px_-6px_rgba(16,185,129,0.2)] transition-all duration-200 ease-out ${
+                    toolsDropdownOpen
+                      ? "opacity-100 translate-y-0 scale-100 pointer-events-auto"
+                      : "opacity-0 -translate-y-2 scale-95 pointer-events-none"
+                  }`}
+                >
+                  <div
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-400/75 to-transparent"
+                  />
+
+                  <div className="p-2 space-y-1">
+                    <Link
+                      href={calculatorTabHref}
+                      scroll={false}
+                      onClick={() => setToolsDropdownOpen(false)}
+                      className="group flex items-start gap-3 rounded-xl px-3.5 py-3 transition-colors hover:bg-white/[0.05]"
+                    >
+                      <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-400 transition-colors group-hover:bg-emerald-500/25">
+                        <Calculator className="h-4 w-4" />
+                      </span>
+                      <div className="min-w-0">
+                        <span className="block text-sm font-semibold text-zinc-100 group-hover:text-emerald-300 transition-colors">
+                          {isEn ? "Calculator" : "เครื่องมือคำนวณ"}
+                        </span>
+                        <span className="mt-0.5 block text-xs text-zinc-400 leading-snug">
+                          {isEn
+                            ? "Calculate costs, selling price, and net profit"
+                            : "คำนวณต้นทุน ราคาขาย และกำไรสุทธิ"}
+                        </span>
+                      </div>
+                    </Link>
+
+                    <Link
+                      href={cloudTabHref}
+                      scroll={false}
+                      onClick={() => setToolsDropdownOpen(false)}
+                      className="group flex items-start gap-3 rounded-xl px-3.5 py-3 transition-colors hover:bg-white/[0.05]"
+                    >
+                      <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-400 transition-colors group-hover:bg-emerald-500/25">
+                        <Cloud className="h-4 w-4" />
+                      </span>
+                      <div className="min-w-0">
+                        <span className="block text-sm font-semibold text-zinc-100 group-hover:text-emerald-300 transition-colors">
+                          {isEn ? "Cloud Storage" : "คลาวด์เก็บข้อมูล"}
+                        </span>
+                        <span className="mt-0.5 block text-xs text-zinc-400 leading-snug">
+                          {isEn
+                            ? "View saved calculations and product images"
+                            : "ดูประวัติรายการและรูปสินค้าที่บันทึกไว้"}
+                        </span>
+                      </div>
+                    </Link>
+                  </div>
+                </div>
+              </div>
             </nav>
           </div>
 
@@ -214,14 +296,14 @@ export function Navbar({
             {isAuthenticated ? (
               <div className="flex items-center gap-2 sm:gap-3">
                 {displayUsername && (
-                  <div ref={dropdownRef} className="relative">
+                  <div ref={profileDropdownRef} className="relative">
                     <button
                       type="button"
                       onClick={() => {
-                        setAvatarError(null);
-                        setDropdownOpen((prev) => !prev);
+                        setToolsDropdownOpen(false);
+                        setProfileDropdownOpen((prev) => !prev);
                       }}
-                      aria-expanded={dropdownOpen}
+                      aria-expanded={profileDropdownOpen}
                       aria-haspopup="menu"
                       className="group inline-flex items-center gap-2 rounded-xl px-2.5 py-1.5 text-sm font-medium text-zinc-200 transition-colors hover:bg-white/[0.04] hover:text-white focus:outline-none"
                     >
@@ -242,25 +324,17 @@ export function Navbar({
                       </span>
                       <ChevronDown
                         className={`h-3.5 w-3.5 transition-all duration-200 ${
-                          dropdownOpen
+                          profileDropdownOpen
                             ? "rotate-180 text-emerald-400"
                             : "text-zinc-500 group-hover:text-zinc-300"
                         }`}
                       />
                     </button>
 
-                    <input
-                      ref={avatarInputRef}
-                      type="file"
-                      accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
-                      onChange={handleAvatarFileChange}
-                      className="hidden"
-                    />
-
                     <div
                       role="menu"
                       className={`absolute right-0 mt-3 w-80 origin-top-right z-50 overflow-hidden rounded-2xl bg-[#050505] border border-emerald-500/30 shadow-[0_14px_44px_-8px_rgba(0,0,0,0.95),0_0_24px_-6px_rgba(16,185,129,0.22)] transition-all duration-200 ease-out ${
-                        dropdownOpen
+                        profileDropdownOpen
                           ? "opacity-100 translate-y-0 scale-100 pointer-events-auto"
                           : "opacity-0 -translate-y-2 scale-95 pointer-events-none"
                       }`}
@@ -270,40 +344,21 @@ export function Navbar({
                         className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-400/75 to-transparent"
                       />
 
-                      <div className="p-4 border-b border-zinc-800/80 space-y-2.5">
+                      <div className="p-4 border-b border-zinc-800/80">
                         <div className="flex items-center gap-3.5">
-                          <div className="relative h-12 w-12 shrink-0">
+                          <div className="h-12 w-12 shrink-0">
                             {displayAvatarUrl ? (
                               // eslint-disable-next-line @next/next/no-img-element
                               <img
                                 src={displayAvatarUrl}
                                 alt={displayUsername}
-                                className="h-12 w-12 rounded-full object-cover ring-1 ring-emerald-500/50"
+                                className="h-12 w-12 rounded-full object-cover ring-1 ring-emerald-500/50 select-none"
                               />
                             ) : (
                               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-400 ring-1 ring-emerald-500/30">
                                 <UserIcon className="h-5 w-5" />
                               </div>
                             )}
-
-                            <button
-                              type="button"
-                              onClick={() => avatarInputRef.current?.click()}
-                              disabled={uploadingAvatar}
-                              title={
-                                isEn ? "Change profile photo" : "เปลี่ยนรูปโปรไฟล์"
-                              }
-                              aria-label={
-                                isEn ? "Change profile photo" : "เปลี่ยนรูปโปรไฟล์"
-                              }
-                              className="absolute -bottom-0.5 -right-0.5 flex h-5 w-5 items-center justify-center rounded-full border border-emerald-500/60 bg-black text-emerald-400 transition-colors hover:bg-emerald-500 hover:text-slate-950 disabled:opacity-50"
-                            >
-                              {uploadingAvatar ? (
-                                <Loader2 className="h-2.5 w-2.5 animate-spin" />
-                              ) : (
-                                <Camera className="h-2.5 w-2.5" />
-                              )}
-                            </button>
                           </div>
 
                           <div className="min-w-0 flex-1">
@@ -315,29 +370,14 @@ export function Navbar({
                                 {email}
                               </p>
                             )}
-                            <button
-                              type="button"
-                              onClick={() => avatarInputRef.current?.click()}
-                              disabled={uploadingAvatar}
-                              className="mt-1 text-[11px] font-medium text-emerald-400 transition-colors hover:text-emerald-300 disabled:opacity-50"
-                            >
-                              {uploadingAvatar
-                                ? isEn
-                                  ? "Compressing & uploading..."
-                                  : "กำลังบีบอัดและอัปโหลด..."
-                                : isEn
-                                  ? "Change profile photo"
-                                  : "เปลี่ยนรูปโปรไฟล์"}
-                            </button>
+                            {joinedLabel && (
+                              <p className="mt-1 inline-flex items-center gap-1 text-[11px] text-zinc-500">
+                                <Calendar className="h-3 w-3 shrink-0" />
+                                <span>{joinedLabel}</span>
+                              </p>
+                            )}
                           </div>
                         </div>
-
-                        {avatarError && (
-                          <p className="flex items-start gap-1.5 text-[11px] text-rose-400">
-                            <AlertCircle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
-                            <span>{avatarError}</span>
-                          </p>
-                        )}
                       </div>
 
                       <div className="p-4 border-b border-zinc-800/80 space-y-2.5">
@@ -378,7 +418,7 @@ export function Navbar({
                         <button
                           type="button"
                           onClick={() => {
-                            setDropdownOpen(false);
+                            setProfileDropdownOpen(false);
                             setSettingsOpen(true);
                           }}
                           className="w-full flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-left text-sm font-medium text-zinc-200 transition-colors hover:bg-white/[0.05] hover:text-emerald-300"
@@ -403,7 +443,8 @@ export function Navbar({
                 <button
                   type="button"
                   onClick={() => {
-                    setDropdownOpen(false);
+                    setToolsDropdownOpen(false);
+                    setProfileDropdownOpen(false);
                     setLogoutConfirmOpen(true);
                   }}
                   disabled={loggingOut}

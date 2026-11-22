@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { AlertCircle, CheckCircle2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { sanitizePlainText, translateSupabaseError } from "@/lib/auth";
@@ -51,11 +52,18 @@ export function DashboardClient({
   userId,
   initialRecords,
 }: DashboardClientProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [language] = useAppLanguage();
   const isEn = language === "en";
 
   const topFormRef = useRef<HTMLDivElement | null>(null);
-  const [activeTab, setActiveTab] = useState<DashboardTab>("calculator");
+  const activeTab: DashboardTab =
+    searchParams.get("tab") === "history" ? "history" : "calculator";
+
+  function handleSwitchTab(nextTab: DashboardTab) {
+    router.replace(`/dashboard?tab=${nextTab}`, { scroll: false });
+  }
 
   const [formValues, setFormValues] =
     useState<CalculatorFormStrings>(DEFAULT_FORM_VALUES);
@@ -417,7 +425,7 @@ export function DashboardClient({
     });
     setExistingImageUrl(record.product_image_url ?? null);
     setHasCalculated(true);
-    setActiveTab("calculator");
+    handleSwitchTab("calculator");
     setDbSuccess(`โหลดข้อมูล "${record.product_name}" กลับมาเรียบร้อยแล้ว`);
 
     window.requestAnimationFrame(() => {
@@ -491,7 +499,7 @@ export function DashboardClient({
           <div className="inline-flex shrink-0 self-start border border-emerald-500/25 bg-[#050505] p-1 shadow-[0_0_20px_-6px_rgba(16,185,129,0.16)]">
             <button
               type="button"
-              onClick={() => setActiveTab("calculator")}
+              onClick={() => handleSwitchTab("calculator")}
               className={`px-4 py-2 text-xs sm:text-sm font-semibold whitespace-nowrap transition-colors ${
                 activeTab === "calculator"
                   ? "bg-emerald-500 text-slate-950"
@@ -502,7 +510,7 @@ export function DashboardClient({
             </button>
             <button
               type="button"
-              onClick={() => setActiveTab("history")}
+              onClick={() => handleSwitchTab("history")}
               className={`px-4 py-2 text-xs sm:text-sm font-semibold whitespace-nowrap transition-colors ${
                 activeTab === "history"
                   ? "bg-emerald-500 text-slate-950"

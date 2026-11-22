@@ -20,7 +20,7 @@ async function DashboardContent() {
   const [{ data: profile }, { data: historyRows }] = await Promise.all([
     supabase
       .from("profiles")
-      .select("username, email, avatar_url")
+      .select("username, email, avatar_url, created_at")
       .eq("id", user.id)
       .maybeSingle(),
     supabase
@@ -43,6 +43,7 @@ async function DashboardContent() {
     (typeof user.user_metadata?.avatar_url === "string"
       ? user.user_metadata.avatar_url
       : null);
+  const resolvedCreatedAt = profile?.created_at ?? user.created_at ?? null;
 
   return (
     <>
@@ -50,6 +51,7 @@ async function DashboardContent() {
         username={resolvedUsername}
         email={resolvedEmail}
         avatarUrl={resolvedAvatarUrl}
+        createdAt={resolvedCreatedAt}
         isAuthenticated
       />
       <DashboardClient

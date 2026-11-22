@@ -9,6 +9,7 @@ async function HomeContent() {
   let username: string | null = null;
   let email: string | null = null;
   let avatarUrl: string | null = null;
+  let createdAt: string | null = null;
 
   try {
     const supabase = await createServerSupabaseClient();
@@ -20,7 +21,7 @@ async function HomeContent() {
       isAuthenticated = true;
       const { data: profile } = await supabase
         .from("profiles")
-        .select("username, email, avatar_url")
+        .select("username, email, avatar_url, created_at")
         .eq("id", user.id)
         .maybeSingle();
 
@@ -35,6 +36,7 @@ async function HomeContent() {
         (typeof user.user_metadata?.avatar_url === "string"
           ? user.user_metadata.avatar_url
           : null);
+      createdAt = profile?.created_at ?? user.created_at ?? null;
     }
   } catch {
     isAuthenticated = false;
@@ -46,6 +48,7 @@ async function HomeContent() {
         username={username}
         email={email}
         avatarUrl={avatarUrl}
+        createdAt={createdAt}
         isAuthenticated={isAuthenticated}
       />
       <LandingView isAuthenticated={isAuthenticated} />
