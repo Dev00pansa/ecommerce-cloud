@@ -17,11 +17,6 @@ interface NavbarProps {
   isAuthenticated?: boolean;
 }
 
-/**
- * แถบเมนูหลักด้านบน (Sticky Header) แบรนด์ KhumLab
- * - Container กว้าง max-w-[1600px] ขยับโลโก้ชิดซ้ายขึ้นและวางเมนูลิงก์ต่อท้ายโลโก้ทันที
- * - คลิกโลโก้มุมซ้ายบนจะพากลับหน้าแรก (/) และเลื่อนขึ้นบนสุด (y = 0) เสมอจากทุกหน้าและทุกสถานะ
- */
 export function Navbar({
   username = null,
   isAuthenticated = false,
@@ -58,7 +53,6 @@ export function Navbar({
   return (
     <header className="sticky top-0 z-40 h-16 border-b border-zinc-800/90 bg-[#000000]/90 backdrop-blur-md">
       <div className="w-full max-w-[1600px] mx-auto h-full flex items-center justify-between gap-4 px-4 md:px-8">
-        {/* ฝั่งซ้าย: [โลโก้และชื่อ KhumLab] + เส้นคั่นแนวตั้ง + [หน้าหลัก] [เครื่องมือคำนวณ] */}
         <div className="flex items-center">
           <Link
             href="/"
@@ -111,7 +105,6 @@ export function Navbar({
           </nav>
         </div>
 
-        {/* ฝั่งขวาสุด: สถานะผู้ใช้ / ปุ่มเข้าสู่ระบบ */}
         <div className="flex items-center gap-2.5">
           {isAuthenticated ? (
             <div className="flex items-center gap-2.5">

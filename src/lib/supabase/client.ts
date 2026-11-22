@@ -10,10 +10,6 @@ export interface SupabaseEnvStatus {
   errorMessage: string | null;
 }
 
-/**
- * ตรวจสอบค่า Environment Variables ของ Supabase ก่อนสร้าง Client
- * เพื่อป้องกันหน้าเว็บขาวหากลืมตั้งค่าใน .env หรือ Vercel
- */
 export function getSupabaseEnvStatus(): SupabaseEnvStatus {
   const missingKeys: string[] = [];
 
@@ -50,9 +46,6 @@ export function getSupabaseEnvStatus(): SupabaseEnvStatus {
 
 let browserClient: SupabaseClient | null = null;
 
-/**
- * สร้างหรือคืนค่า Singleton Supabase Browser Client สำหรับฝั่ง Frontend
- */
 export function createClient(): SupabaseClient | null {
   const status = getSupabaseEnvStatus();
   if (!status.isConfigured) {

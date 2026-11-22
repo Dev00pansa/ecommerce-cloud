@@ -17,10 +17,6 @@ const ThemeContext = createContext<ThemeContextValue>({
   toggleTheme: () => {},
 });
 
-/**
- * ตัวจัดการธีมหลัก โฟกัสโหมดสีดำสนิท-เขียวมรกต (Pure Black & Emerald)
- * ห้ามใส่ overflow-hidden บน Wrapper เพื่อให้ position: sticky ทำงานได้ 100%
- */
 export function ThemeProvider({ children }: { children: ReactNode }) {
   return (
     <ThemeContext.Provider

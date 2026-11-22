@@ -1,11 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-/**
- * ตรวจสอบ Session จากฝั่ง Server ก่อนโหลดหน้าเว็บ (Backend-First Auth Guard)
- * - รีเฟรช Auth Cookie ให้อัตโนมัติทุก Request
- * - บังคับ Redirect ผู้ที่ยังไม่ล็อกอินออกจาก /dashboard ไปที่ /login ทันที
- */
 export async function updateSession(request: NextRequest) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() ?? "";
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim() ?? "";
@@ -33,7 +28,6 @@ export async function updateSession(request: NextRequest) {
     },
   });
 
-  // ใช้ getUser() เพื่อยืนยัน JWT กับ Supabase Auth Server โดยตรง (ปลอดภัยกว่า getSession)
   const {
     data: { user },
   } = await supabase.auth.getUser();

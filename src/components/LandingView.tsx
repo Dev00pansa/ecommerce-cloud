@@ -12,13 +12,6 @@ interface LandingViewProps {
   isAuthenticated: boolean;
 }
 
-/**
- * หน้าแรก (/) แบรนด์ KhumLab:
- * - คงพื้นหลังลายจุด Dot-Grid และลำแสงสีเขียวเคลื่อนไหวด้านบนไว้ 100%
- * - จัดโครงสร้าง Hero Section เป็น min-h-[calc(100vh-4rem)] w-full flex flex-col justify-between overflow-x-clip
- * - เนื้อหา Hero ด้านบนอยู่ใน flex-1 flex items-center (ภายใน max-w-[1440px])
- * - วาง PainPointMarquee ไว้นอก max-w-[1440px] ด้านล่างสุดแบบ Full-Bleed 100% โดยไม่ทับปุ่มหรือโลโก้ KL
- */
 export function LandingView({ isAuthenticated }: LandingViewProps) {
   const startHref = isAuthenticated ? "/dashboard" : "/login";
 
@@ -32,7 +25,6 @@ export function LandingView({ isAuthenticated }: LandingViewProps) {
 
   return (
     <div className="relative overflow-x-clip flex-1 flex flex-col">
-      {/* Animated Top Emerald Beams (4 ลำแสงกระจายซ้าย-กลาง-ขวา เคลื่อนไหวสลับจังหวะตลอดเวลา) */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-x-0 top-0 h-[620px] overflow-hidden z-0"
@@ -43,11 +35,8 @@ export function LandingView({ isAuthenticated }: LandingViewProps) {
         <div className="animate-beam-a absolute -top-24 right-[2%] h-[450px] w-[35vw] min-w-[260px] rounded-full bg-gradient-to-b from-emerald-500/25 via-emerald-400/10 to-transparent blur-3xl" />
       </div>
 
-      {/* Main Wrapper */}
       <main className="relative z-10 w-full flex-1">
-        {/* ส่วนที่ 1: Hero Section + Full-Bleed Staggered Wave Marquee ด้านล่างสุด */}
         <section className="min-h-[calc(100vh-4rem)] w-full flex flex-col justify-between overflow-x-clip">
-          {/* เนื้อหา Hero ด้านบน (หัวข้อ + ปุ่ม + โลโก้ KL) กึ่งกลางพื้นที่แนวตั้ง */}
           <div className="max-w-[1440px] mx-auto w-full flex-1 flex items-center px-8 lg:px-16 py-10">
             <div className="w-full grid grid-cols-1 lg:grid-cols-12 items-center gap-10 lg:gap-12">
               <div className="animate-enter lg:col-span-7 text-left space-y-6">
@@ -67,7 +56,6 @@ export function LandingView({ isAuthenticated }: LandingViewProps) {
                   และผลกระทบจากโปรโมชันก่อนเปิดขายจริงในไม่กี่วินาที
                 </p>
 
-                {/* ปุ่มคู่ใต้คำอธิบาย: ซ้าย "ดูวิธีใช้งาน (4 ขั้นตอน)" / ขวา "เข้าสู่ระบบ / เริ่มใช้งาน" */}
                 <div className="flex flex-wrap items-center gap-3.5 pt-2">
                   <a
                     href="#workflow"
@@ -99,7 +87,6 @@ export function LandingView({ isAuthenticated }: LandingViewProps) {
             </div>
           </div>
 
-          {/* แถบรางเส้นตัดยาวสุดขอบจอ + พื้นที่สีดำสนิทด้านล่าง 36px-48px เชื่อมลงสู่โซน 4 ขั้นตอน */}
           <div className="w-full shrink-0 flex flex-col">
             <PainPointMarquee />
             <div
@@ -109,11 +96,9 @@ export function LandingView({ isAuthenticated }: LandingViewProps) {
           </div>
         </section>
 
-        {/* ส่วนที่ 2: Vertical Scroll Storytelling 4 ขั้นตอน */}
         <WorkflowShowcase isAuthenticated={isAuthenticated} />
       </main>
 
-      {/* ส่วนที่ 3: Footer พื้นหลังสีเทาเข้มทึบ */}
       <Footer isAuthenticated={isAuthenticated} />
     </div>
   );

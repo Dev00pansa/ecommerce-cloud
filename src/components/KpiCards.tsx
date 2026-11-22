@@ -19,9 +19,6 @@ interface KpiCardsProps {
   fixedCost: number;
 }
 
-/**
- * แสดงการ์ดสรุปผลตัวเลขสำคัญ (KPI 4 ใบ) พร้อมแถบแจ้งเตือนสีแดงหากขาดทุน
- */
 export function KpiCards({
   metrics,
   sellingPrice,
@@ -66,7 +63,6 @@ export function KpiCards({
       )}
 
       <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
-        {/* 1. ต้นทุนรวมต่อชิ้น */}
         <div className={`rounded-xl border p-4 ${cardClass}`}>
           <div className="flex items-center justify-between mb-1.5">
             <span className={`text-xs font-medium ${mutedText}`}>
@@ -83,7 +79,6 @@ export function KpiCards({
           </p>
         </div>
 
-        {/* 2. กำไรสุทธิต่อชิ้น */}
         <div
           className={`rounded-xl border p-4 ${
             metrics.netProfitPerUnit < 0
@@ -122,7 +117,6 @@ export function KpiCards({
           </p>
         </div>
 
-        {/* 3. Net Margin % */}
         <div className={`rounded-xl border p-4 ${cardClass}`}>
           <div className="flex items-center justify-between mb-1.5">
             <span className={`text-xs font-medium ${mutedText}`}>
@@ -150,7 +144,6 @@ export function KpiCards({
           </p>
         </div>
 
-        {/* 4. จุดคุ้มทุน (Break-Even Point) */}
         <div className={`rounded-xl border p-4 ${cardClass}`}>
           <div className="flex items-center justify-between mb-1.5">
             <span className={`text-xs font-medium ${mutedText}`}>

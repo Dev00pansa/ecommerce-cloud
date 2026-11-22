@@ -11,9 +11,6 @@ interface PromoSimulatorProps {
   simulation: PromoSimulationResult;
 }
 
-/**
- * ตัวจำลองการจัดโปรโมชันส่วนลด 0% - 50% แบบ Real-time
- */
 export function PromoSimulator({
   discountPercent,
   onChangeDiscount,

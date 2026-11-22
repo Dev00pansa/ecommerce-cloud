@@ -22,7 +22,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
    - `src/types/`: เก็บ TypeScript Interfaces และ Types ทั้งหมดของโปรเจกต์ (ห้ามใช้ `any`)
    - `src/components/`: แยกคอมโพเนนต์ย่อยตามหน้าที่ (`Navbar`, `ThemeProvider`, `AuthForm`, `PasswordStrengthMeter`, `CalculatorForm`, `KpiCards`, `PromoSimulator`, `PriceBreakdownChart`, `HistoryPanel`) ไม่เขียนยัดรวมในไฟล์เดียว
 3. **Human-Readable Code:**
-   - ตั้งชื่อตัวแปร/ฟังก์ชันสื่อความหมายชัดเจน และใส่คอมเมนต์สั้นๆ อธิบายการทำงานในจุดสำคัญทั้งฝั่ง Backend และ Frontend เพื่อให้เจ้าของโปรเจกต์เปิดอ่านศึกษาต่อได้ง่าย
+   - ตั้งชื่อตัวแปรและฟังก์ชันให้สื่อความหมายชัดเจนด้วยตัวเอง (Self-Documenting Code) **ห้ามเขียนคอมเมนต์อธิบายโค้ดภาษาไทยพร่ำเพรื่อ** หรือคอมเมนต์อธิบายสิ่งที่โค้ดบอกชัดเจนอยู่แล้ว (อนุญาตเฉพาะ Directive ที่จำเป็นของระบบ เช่น `eslint-disable`)
 
 ## กฎข้อที่ 2: Auto-Backup ขึ้น GitHub ทุกครั้งที่แก้ไข
 ทุกครั้งที่ผู้ใช้สั่งให้เพิ่มฟีเจอร์ แก้บั๊ก หรือปรับหน้าตาเว็บ หลังจากแก้ไขโค้ดและรัน `npm run lint` และ `npm run build` ผ่านเรียบร้อยแล้ว ให้ดำเนินการตามลำดับนี้ทันทีโดยไม่ต้องรอให้ผู้ใช้สั่งซ้ำ:

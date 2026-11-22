@@ -21,18 +21,12 @@ interface CalculatorFormProps {
   saving: boolean;
 }
 
-/**
- * ปรับข้อความตัวเลขจาก input ให้ไม่ติดลบและอนุญาตให้ลบจนช่องว่างได้ขณะพิมพ์
- */
 function sanitizeNumericInput(raw: string): string {
   if (raw === "") return "";
   const cleaned = raw.replace(/-/g, "");
   return cleaned;
 }
 
-/**
- * ฟอร์มกรอกข้อมูลต้นทุนและราคาขาย E-Commerce (Sidebar ด้านซ้าย)
- */
 export function CalculatorForm({
   values,
   onChangeField,
@@ -80,7 +74,6 @@ export function CalculatorForm({
         </button>
       </div>
 
-      {/* ปุ่ม Preset แพลตฟอร์ม */}
       <div>
         <span className="block text-xs font-semibold uppercase tracking-wider text-emerald-500 mb-2">
           Preset แพลตฟอร์ม
@@ -118,7 +111,6 @@ export function CalculatorForm({
         </div>
       </div>
 
-      {/* ช่องกรอกข้อมูลสินค้าและต้นทุน */}
       <div className="space-y-3.5">
         <div>
           <label
@@ -287,7 +279,6 @@ export function CalculatorForm({
         </div>
       </div>
 
-      {/* ปุ่มดำเนินการ Cloud และ Export */}
       <div className="pt-1 flex flex-col gap-2">
         <button
           type="button"

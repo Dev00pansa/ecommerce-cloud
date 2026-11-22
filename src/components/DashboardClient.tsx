@@ -43,9 +43,6 @@ const DEFAULT_FORM_VALUES: CalculatorFormStrings = {
   fixedCost: "15000",
 };
 
-/**
- * หน้า Dashboard หลัก (/dashboard) รวมเครื่องมือคำนวณราคาและประวัติการบันทึกบน Cloud
- */
 export function DashboardClient({
   userId,
   username,
@@ -68,7 +65,6 @@ export function DashboardClient({
   const [dbError, setDbError] = useState<string | null>(null);
   const [dbSuccess, setDbSuccess] = useState<string | null>(null);
 
-  // แปลงค่าข้อความในฟอร์มเป็นตัวเลขปลอดภัยก่อนเข้าสูตร Pure Functions
   const numericInputs: CalculatorInputValues = useMemo(
     () => ({
       productName: formValues.productName,
@@ -287,7 +283,6 @@ export function DashboardClient({
 
   return (
     <main className="w-full max-w-[1440px] mx-auto flex-1 px-6 py-6 md:px-12 lg:px-16 sm:py-8 space-y-6">
-      {/* หัวข้อ Dashboard + แท็บสลับ คำนวณราคา / ประวัติที่บันทึกไว้ */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold tracking-tight">
@@ -370,7 +365,6 @@ export function DashboardClient({
       )}
 
       {activeTab === "calculator" ? (
-        /* items-start ช่วยให้ฟอร์มฝั่งซ้ายกระชับตามความสูงจริง ไม่มีช่องว่างโล่งด้านล่าง */
         <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-12">
           <div className="lg:col-span-5">
             <CalculatorForm

@@ -12,7 +12,6 @@ async function DashboardContent() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Defense-in-depth คู่กับ src/middleware.ts หากไม่มี Session ให้ Redirect ไป /login จากฝั่ง Server
   if (!user) {
     redirect("/login");
   }

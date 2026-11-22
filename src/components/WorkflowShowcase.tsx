@@ -18,13 +18,6 @@ interface WorkflowStepItem {
   highlight: string;
 }
 
-/**
- * ลำดับการวางฝั่งของทั้ง 4 ขั้นตอน (สลับฝั่งรับกับหัวข้อเปิดเรื่องที่ชิดซ้าย):
- * - Step 01: ข้อความอยู่ฝั่งขวา / ภาพอยู่ฝั่งซ้าย
- * - Step 02: ข้อความอยู่ฝั่งซ้าย / ภาพอยู่ฝั่งขวา
- * - Step 03: ข้อความอยู่ฝั่งขวา / ภาพอยู่ฝั่งซ้าย
- * - Step 04: ข้อความอยู่ฝั่งซ้าย / ภาพอยู่ฝั่งขวา
- */
 const WORKFLOW_STEPS: WorkflowStepItem[] = [
   {
     step: "01",
@@ -64,9 +57,6 @@ const WORKFLOW_STEPS: WorkflowStepItem[] = [
   },
 ];
 
-/**
- * CSS Mask แนวตั้งสำหรับละลายขอบบน-ล่างของกรอบภาพให้จางเป็นโปร่งใส 100%
- */
 const VERTICAL_FEATHER_MASK: CSSProperties = {
   maskImage:
     "linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.92) 20%, rgba(0,0,0,0.92) 80%, transparent 100%)",
@@ -74,9 +64,6 @@ const VERTICAL_FEATHER_MASK: CSSProperties = {
     "linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.92) 20%, rgba(0,0,0,0.92) 80%, transparent 100%)",
 };
 
-/**
- * CSS Mask รัศมีวงรีสำหรับละลายขอบซ้าย-ขวาและมุมทั้ง 4 ด้านให้กลืนลงพื้นหลังสีดำสนิท
- */
 function getRadialFeatherMask(imageOnLeft: boolean): CSSProperties {
   const gradient = imageOnLeft
     ? "radial-gradient(ellipse 82% 78% at 44% 50%, rgba(0,0,0,1) 18%, rgba(0,0,0,0.72) 48%, rgba(0,0,0,0.22) 74%, transparent 95%)"
@@ -88,12 +75,6 @@ function getRadialFeatherMask(imageOnLeft: boolean): CSSProperties {
   };
 }
 
-/**
- * ส่วนแสดงขั้นตอนการใช้งาน 4 ขั้นตอนแบบ Frameless Editorial:
- * - ใช้พื้นหลังสีดำสนิทแยกโซนชัดเจนจากหน้า Hero (bg-[#000000])
- * - คงระบบวางภาพแยกตาม Section อิสระและ CSS mask-image เบลอขอบทั้ง 4 ด้าน 100%
- * - เพิ่มแอนิเมชัน Directional Slide-In เลื่อนเข้าจากด้านข้างตามฝั่งของข้อความด้วย IntersectionObserver
- */
 export function WorkflowShowcase({
   isAuthenticated = false,
 }: WorkflowShowcaseProps) {
@@ -158,13 +139,11 @@ export function WorkflowShowcase({
       id="workflow"
       className="relative w-full overflow-x-clip bg-[#000000] scroll-mt-16 pt-20 pb-20 border-b border-zinc-900/80"
     >
-      {/* เงาไล่ระดับด้านบนสุดเชื่อมรอยต่อจากแถบ Marquee ของหน้า Hero สู่พื้นหลังสีดำสนิท */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-emerald-950/10 to-transparent"
       />
 
-      {/* หัวข้อเปิดเรื่อง ชิดฝั่งซ้าย */}
       <div className="relative z-10 w-full max-w-[1440px] mx-auto px-8 lg:px-16 pb-10">
         <div className="max-w-3xl space-y-3 text-left">
           <span className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-emerald-400">
@@ -180,14 +159,12 @@ export function WorkflowShowcase({
         </div>
       </div>
 
-      {/* รายการ 4 ขั้นตอน: แยกแต่ละขั้นตอนเป็น Section อิสระ (overflow-hidden) บนพื้นหลังสีดำสนิท */}
       <div className="w-full bg-[#000000]">
         {WORKFLOW_STEPS.map((item, idx) => {
           const isTextRight = item.textSide === "right";
           const isImageLeft = isTextRight;
           const isVisible = visibleSteps[idx];
 
-          // ทิศทางเลื่อนเข้าตามฝั่งของข้อความ: ขวาเลื่อนจากขวา (translate-x-12), ซ้ายเลื่อนจากซ้าย (-translate-x-12)
           const hiddenSlideClass = isTextRight
             ? "translate-x-12 opacity-0"
             : "-translate-x-12 opacity-0";
@@ -201,7 +178,6 @@ export function WorkflowShowcase({
               }}
               className="relative min-h-[85vh] w-full flex items-center overflow-hidden py-20 bg-[#000000]"
             >
-              {/* ภาพประกอบประจำขั้นตอน: อยู่เฉพาะใน Section ของตัวเองฝั่งตรงข้ามกับข้อความ และละลายขอบทั้ง 4 ด้านด้วย CSS Mask */}
               <div
                 aria-hidden="true"
                 style={VERTICAL_FEATHER_MASK}
@@ -227,7 +203,6 @@ export function WorkflowShowcase({
                 </div>
               </div>
 
-              {/* เนื้อหาตัวหนังสือแบบไร้กรอบ (Frameless Editorial Typography) + Directional Slide-In */}
               <div
                 className={`relative z-10 w-full max-w-[1440px] mx-auto px-8 lg:px-16 flex ${
                   isTextRight ? "lg:justify-end" : "lg:justify-start"
@@ -240,7 +215,6 @@ export function WorkflowShowcase({
                       : hiddenSlideClass
                   }`}
                 >
-                  {/* 1. เลขขั้นตอนสไตล์ Editorial */}
                   <div className="flex items-center gap-3">
                     <span className="font-mono text-sm font-semibold tracking-[0.2em] text-emerald-400">
                       {item.step}
@@ -253,22 +227,18 @@ export function WorkflowShowcase({
                     </span>
                   </div>
 
-                  {/* 2. หัวข้อหลัก */}
                   <h3 className="py-1 text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-white leading-[1.2] mt-4">
                     {item.title}
                   </h3>
 
-                  {/* 3. เนื้อหาคำอธิบาย */}
                   <p className="text-base sm:text-lg text-zinc-300 leading-relaxed mt-5 max-w-xl">
                     {item.desc}
                   </p>
 
-                  {/* 4. จุดเน้นสำคัญด้านล่างด้วยเส้นขอบตั้งสีเขียว */}
                   <p className="border-l-2 border-emerald-500/80 pl-4 mt-6 text-sm sm:text-base text-zinc-400">
                     {item.highlight}
                   </p>
 
-                  {/* 5. ปุ่ม CTA ปิดท้ายใน Step 04 */}
                   {idx === WORKFLOW_STEPS.length - 1 && (
                     <div className="mt-8 pt-2">
                       <Link

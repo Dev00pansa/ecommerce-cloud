@@ -1,8 +1,5 @@
 "use client";
 
-/**
- * รายการปัญหาจริงของผู้ขาย E-Commerce ครบทั้ง 24 ประโยคที่ KhumLab ช่วยแก้ได้
- */
 const PAIN_POINTS: readonly string[] = [
   "ขายดีแต่เงินหายไม่รู้ตัว",
   "ลืมหักค่า GP แพลตฟอร์ม 12%–15%",
@@ -30,27 +27,16 @@ const PAIN_POINTS: readonly string[] = [
   "วางแผนราคาหลายแพลตฟอร์มไม่เคยตรงกัน",
 ];
 
-/**
- * แพทเทิร์นความสูงเยื้องแนวตั้ง (Staggered Wave Elevation, หน่วย px ช่วง -11px ถึง +10px)
- * สมดุลกับรางความสูงเพรียว h-[86px] md:h-[98px] ไม่ชนขอบบน-ล่าง
- */
 const WAVE_OFFSETS_PX: readonly number[] = [
   0, 10, -10, 6, -11, 8, -5, 10, -8, 4, -10, 7,
 ];
 
-/**
- * แถบรางเส้นตัดแบบยาวสุดขอบจอ (Full-Bleed Staggered Wave Marquee)
- * - ความสูงเพรียวกระชับ h-[86px] md:h-[98px]
- * - เลื่อนไปทางขวาอย่างต่อเนื่องไร้รอยต่อ (90s linear infinite) โดยไม่หยุดเมื่อชี้เมาส์
- * - เมื่อชี้เมาส์ที่ป้ายข้อความ ป้ายจะเรืองแสงสีเขียวมรกตอย่างนุ่มนวล
- */
 export function PainPointMarquee() {
   return (
     <div
       aria-label="ปัญหาที่ผู้ขายออนไลน์พบบ่อยซึ่ง KhumLab ช่วยแก้ไขได้"
       className="relative w-full shrink-0 h-[86px] md:h-[98px] flex items-center overflow-hidden bg-black/65 backdrop-blur-sm border-y border-zinc-800/90"
     >
-      {/* เส้นแสงสีเขียวมรกตบางเฉียบซ้อนทับที่ขอบบนสุดและขอบล่างสุด */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-x-0 top-0 z-20 h-px bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent"
@@ -60,13 +46,11 @@ export function PainPointMarquee() {
         className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-px bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent"
       />
 
-      {/* เส้นประแนวนอนจางๆ พาดกลางราง */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-x-0 top-1/2 -translate-y-1/2 z-0 border-t border-dashed border-zinc-800/40"
       />
 
-      {/* Gradient Fade ขอบซ้ายสุดและขวาสุดของหน้าจอ */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 md:w-32 bg-gradient-to-r from-black via-black/70 to-transparent"
@@ -76,7 +60,6 @@ export function PainPointMarquee() {
         className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 md:w-32 bg-gradient-to-l from-black via-black/70 to-transparent"
       />
 
-      {/* รางข้อความเลื่อนไปทางขวาไร้รอยต่อ (Duplicate 2 ชุดต่อกันใน flex w-max) */}
       <div className="relative z-[5] flex w-max items-center animate-pain-marquee">
         {[0, 1].map((copyIndex) => (
           <div

@@ -7,10 +7,6 @@ interface FooterProps {
   isAuthenticated?: boolean;
 }
 
-/**
- * ส่วนท้ายเว็บ (Footer) พื้นหลังสีเทาเข้มทึบ (bg-zinc-900 / #18181B)
- * แยกโซนสีจากพื้นหลังสีดำสนิทด้านบนอย่างชัดเจน
- */
 export function Footer({ isAuthenticated = false }: FooterProps) {
   const handleScrollTop = () => {
     if (typeof window !== "undefined") {
@@ -22,7 +18,6 @@ export function Footer({ isAuthenticated = false }: FooterProps) {
     <footer className="relative z-20 w-full border-t border-zinc-800 bg-zinc-900 text-zinc-300">
       <div className="w-full max-w-[1440px] mx-auto px-8 lg:px-16 py-12 sm:py-14">
         <div className="grid grid-cols-1 gap-10 md:grid-cols-12 pb-10 border-b border-zinc-800">
-          {/* ฝั่งซ้าย: โลโก้และคำอธิบายแบรนด์ KhumLab */}
           <div className="md:col-span-6 space-y-4">
             <Link
               href="/"
@@ -46,7 +41,6 @@ export function Footer({ isAuthenticated = false }: FooterProps) {
             </p>
           </div>
 
-          {/* ฝั่งขวา: คอลัมน์เมนูและฟีเจอร์หลัก */}
           <div className="md:col-span-3 space-y-3">
             <h3 className="text-xs font-semibold uppercase tracking-wider text-zinc-100">
               เมนูการใช้งาน
@@ -93,7 +87,6 @@ export function Footer({ isAuthenticated = false }: FooterProps) {
           </div>
         </div>
 
-        {/* แถบข้อความด้านล่างสุดของ Footer */}
         <div className="pt-8 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs sm:text-sm text-zinc-400">
           <p>
             เว็บไซต์นี้จัดทำขึ้นเป็นโปรเจกต์ในวิชาดิจิทัลฟอร์อีคอมเมิร์ซ

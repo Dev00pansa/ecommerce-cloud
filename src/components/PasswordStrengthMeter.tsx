@@ -7,9 +7,6 @@ interface PasswordStrengthMeterProps {
   password: string;
 }
 
-/**
- * ตัววัดระดับความปลอดภัยรหัสผ่านแบบเรียลไทม์ (3 ระดับ: แดง / เหลือง / เขียว)
- */
 export function PasswordStrengthMeter({ password }: PasswordStrengthMeterProps) {
   const { isDark } = useTheme();
 

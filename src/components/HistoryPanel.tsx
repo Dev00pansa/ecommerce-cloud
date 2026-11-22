@@ -23,9 +23,6 @@ interface HistoryPanelProps {
   onDeleteRecord: (id: string) => void;
 }
 
-/**
- * แผงแสดงประวัติการคำนวณบน Supabase Cloud พร้อมปุ่มโหลดกลับมาแก้ไข, ลบ และ Export CSV
- */
 export function HistoryPanel({
   records,
   loading,

@@ -6,12 +6,6 @@ interface KhumLabLogoProps {
   variant?: "mark" | "hero";
 }
 
-/**
- * โลโก้เวกเตอร์โมโนแกรม KL แบรนด์ KhumLab พื้นหลังโปร่งใส 100%
- * สไตล์ Geometric Tech / Modern Fintech โทนสีขาว-เงินตัดเขียวมรกต (#10B981 / #34D399)
- * - variant="mark": ใช้ใน Navbar และ Footer
- * - variant="hero": ใช้ในฝั่งขวาของส่วน Hero หน้าแรก พร้อมแสงเรืองและแอนิเมชันลอยตัว 3 มิติ
- */
 export function KhumLabLogo({
   size = 36,
   className = "",
@@ -20,19 +14,16 @@ export function KhumLabLogo({
   if (variant === "hero") {
     return (
       <div className="relative flex items-center justify-center select-none py-4">
-        {/* แสงเรืองสีเขียวมรกตฟุ้งด้านหลังโลโก้ */}
         <div
           aria-hidden="true"
           className="pointer-events-none absolute h-[280px] w-[280px] sm:h-[340px] sm:w-[340px] rounded-full bg-emerald-500/20 blur-3xl animate-pulse"
         />
 
-        {/* วงแหวนแสงโคจรด้านนอกหมุนช้าๆ */}
         <div
           aria-hidden="true"
           className="pointer-events-none absolute h-[270px] w-[270px] sm:h-[330px] sm:w-[330px] rounded-full border border-emerald-500/20 border-dashed animate-orbit-slow"
         />
 
-        {/* วงแหวนโคจรวงในหมุนสวนทาง */}
         <div
           aria-hidden="true"
           className="pointer-events-none absolute h-[225px] w-[225px] sm:h-[275px] sm:w-[275px] rounded-full border border-emerald-400/15 animate-orbit-reverse"
@@ -41,7 +32,6 @@ export function KhumLabLogo({
           <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 h-2 w-2 rounded-full bg-emerald-300/70" />
         </div>
 
-        {/* ตัวโลโก้โมโนแกรม KL ลอยตัว 3 มิติ + เรืองแสงชัดขึ้นเมื่อชี้เมาส์ */}
         <div className="group relative z-10 animate-khum-logo-3d transition-transform duration-500 hover:scale-105">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -88,7 +78,6 @@ export function KhumLabLogo({
               </linearGradient>
             </defs>
 
-            {/* กรอบ Geometric Tech Chamfered Corners ทั้ง 4 มุม (พื้นหลังโปร่งใส 100%) */}
             <path
               d="M24 78V42L42 24H78"
               stroke="url(#heroKlEmerald)"
@@ -118,7 +107,6 @@ export function KhumLabLogo({
               strokeLinejoin="round"
             />
 
-            {/* เส้นไกด์เรขาคณิตด้านใน */}
             <rect
               x="36"
               y="36"
@@ -131,8 +119,6 @@ export function KhumLabLogo({
               opacity="0.35"
             />
 
-            {/* ==================== ตัวอักษร K (ฝั่งซ้าย) ==================== */}
-            {/* เสาตั้งตัว K สีขาว-เงิน */}
             <rect
               x="44"
               y="56"
@@ -141,29 +127,23 @@ export function KhumLabLogo({
               rx="6"
               fill="url(#heroKlSilver)"
             />
-            {/* แขนบนตัว K เฉียงขึ้นสีขาว-เงิน */}
             <path
               d="M72 124L114 59C116.2 55.6 120 53.5 124.1 53.5H139L92 132L72 124Z"
               fill="url(#heroKlSilver)"
             />
-            {/* ขาล่างตัว K เฉียงลงสีเขียวมรกต */}
             <path
               d="M84 118L140 200H114.5C110.2 200 106.2 197.8 103.9 194.2L72 144L84 118Z"
               fill="url(#heroKlEmerald)"
             />
-            {/* จุดตัดเพชรกลางตัว K */}
             <polygon
               points="74,116 86,128 74,140 62,128"
               fill="#FFFFFF"
             />
 
-            {/* ==================== ตัวอักษร L (ฝั่งขวา) ==================== */}
-            {/* โครงตัว L เฉียบคมพร้อมหัวตัดเฉียงสไตล์ Fintech */}
             <path
               d="M152 68L166 54H178V176H220V200H158C154.7 200 152 197.3 152 194V68Z"
               fill="url(#heroKlBright)"
             />
-            {/* ขีดกราฟแท่งสะท้อนการเติบโตเหนือฐานตัว L */}
             <rect
               x="188"
               y="138"
@@ -224,7 +204,6 @@ export function KhumLabLogo({
         </linearGradient>
       </defs>
 
-      {/* กรอบมุมเรขาคณิต 4 มุม */}
       <path
         d="M22 78V40L40 22H78"
         stroke="url(#markKlEmerald)"
@@ -254,7 +233,6 @@ export function KhumLabLogo({
         strokeLinejoin="round"
       />
 
-      {/* ตัว K */}
       <rect
         x="44"
         y="56"
@@ -273,7 +251,6 @@ export function KhumLabLogo({
       />
       <polygon points="74,116 86,128 74,140 62,128" fill="#FFFFFF" />
 
-      {/* ตัว L */}
       <path
         d="M152 68L166 54H180V174H220V200H158C154.7 200 152 197.3 152 194V68Z"
         fill="url(#markKlEmerald)"

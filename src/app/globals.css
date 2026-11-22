@@ -15,7 +15,6 @@ body {
   color: #f4f4f5;
 }
 
-/* ลายจุด Dot-Grid สำหรับโหมดสว่างและโหมดมืด */
 .bg-dot-light {
   background-color: #f8fafc;
   background-image:
@@ -31,7 +30,6 @@ body {
   background-size: 24px 24px;
 }
 
-/* Staggered Entrance Animation */
 @keyframes fadeSlideUp {
   from {
     opacity: 0;
@@ -59,7 +57,6 @@ body {
   animation: fadeSlideUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.24s both;
 }
 
-/* Animated Top Emerald Beams (เคลื่อนไหวสลับจังหวะตลอดเวลาด้วย GPU Acceleration) */
 @keyframes emeraldBeamDriftA {
   0% {
     transform: translate3d(-6%, -4%, 0) scale(0.95) rotate(-6deg);
@@ -120,7 +117,6 @@ body {
   animation: emeraldBeamDriftC 11s ease-in-out infinite alternate;
 }
 
-/* KhumLab Hero Logo 3D Float & Orbital Rings */
 @keyframes khumLogoFloat3D {
   0% {
     transform: perspective(900px) translate3d(0, 0px, 0) rotateX(4deg) rotateY(-8deg) rotateZ(-1deg);
@@ -166,7 +162,6 @@ body {
   animation: khumOrbitSpinReverse 20s linear infinite;
 }
 
-/* Full-Bleed Staggered Wave Marquee (เลื่อนไปทางขวาไร้รอยต่อ 90 วินาที ไม่หยุดเมื่อชี้เมาส์) */
 @keyframes painPointMarqueeScroll {
   0% {
     transform: translate3d(-50%, 0, 0);

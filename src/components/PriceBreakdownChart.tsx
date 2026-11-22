@@ -12,9 +12,6 @@ interface PriceBreakdownChartProps {
   metrics: CalculationMetrics;
 }
 
-/**
- * กราฟสัดส่วนโครงสร้างราคา (100% Horizontal Stacked Bar + SVG Donut Chart)
- */
 export function PriceBreakdownChart({
   costPrice,
   sellingPrice,
@@ -82,7 +79,6 @@ export function PriceBreakdownChart({
         </span>
       </div>
 
-      {/* แถบกราฟแนวนอน 100% */}
       <div
         className={`flex h-3.5 w-full overflow-hidden rounded-full p-0.5 ${
           isDark ? "bg-zinc-900" : "bg-slate-200"

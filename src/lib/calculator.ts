@@ -13,9 +13,6 @@ export const PLATFORM_PRESETS: PlatformPreset[] = [
   { id: "ขายตรง", label: "ขายตรง 0%", badge: "Direct / Chat", feePercent: 0 },
 ];
 
-/**
- * แปลงข้อความจากช่อง input เป็นตัวเลขที่ไม่ติดลบและไม่ใช่ NaN / Infinity
- */
 export function parseSafeNonNegativeNumber(raw: string, max?: number): number {
   const trimmed = raw.trim();
   if (!trimmed) return 0;
@@ -30,9 +27,6 @@ export function parseSafeNonNegativeNumber(raw: string, max?: number): number {
   return parsed;
 }
 
-/**
- * จัดรูปแบบตัวเลขสำหรับแสดงผลทางการเงินอย่างปลอดภัย
- */
 export function formatCurrency(value: number, decimals = 2): string {
   const safe = Number.isFinite(value) ? value : 0;
   return safe.toLocaleString("th-TH", {
@@ -41,10 +35,6 @@ export function formatCurrency(value: number, decimals = 2): string {
   });
 }
 
-/**
- * คำนวณต้นทุนรวม กำไรสุทธิ Net Margin จุดคุ้มทุน และสัดส่วนโครงสร้างราคา (Pure Function)
- * ป้องกันการหารด้วย 0, NaN และ Infinity ทุกกรณี
- */
 export function calculateEcommerceMetrics(
   input: CalculatorInputValues
 ): CalculationMetrics {
@@ -65,11 +55,9 @@ export function calculateEcommerceMetrics(
   const totalCostPerUnit = costPrice + packAndAdsCost + platformFeeBaht;
   const netProfitPerUnit = sellingPrice - totalCostPerUnit;
 
-  // ป้องกันหารด้วย 0 เมื่อราคาขายเป็น 0
   const netMarginPercent =
     sellingPrice > 0 ? (netProfitPerUnit / sellingPrice) * 100 : 0;
 
-  // ป้องกันหารด้วย 0 หรือกำไรติดลบในการคำนวณจุดคุ้มทุน
   const canBreakEven = netProfitPerUnit > 0;
   const breakEvenUnits = canBreakEven
     ? Math.ceil(fixedCost / netProfitPerUnit)
@@ -77,7 +65,6 @@ export function calculateEcommerceMetrics(
   const breakEvenRevenue =
     breakEvenUnits !== null ? breakEvenUnits * sellingPrice : null;
 
-  // คำนวณสัดส่วน 100% สำหรับกราฟโครงสร้างราคา (ป้องกันฐานเป็น 0)
   const chartBase = Math.max(sellingPrice, totalCostPerUnit, 1);
   const productCostShare = (costPrice / chartBase) * 100;
   const packAdsShare = (packAndAdsCost / chartBase) * 100;
@@ -101,9 +88,6 @@ export function calculateEcommerceMetrics(
   };
 }
 
-/**
- * จำลองผลกระทบของการจัดโปรโมชันลดราคา 0% - 50% (Pure Function)
- */
 export function simulatePromoDiscount(
   input: CalculatorInputValues,
   baseMetrics: CalculationMetrics,
@@ -135,7 +119,6 @@ export function simulatePromoDiscount(
   const discountedBreakEvenUnits =
     discountedProfitPerUnit > 0 ? Math.ceil(fixedCost / discountedProfitPerUnit) : null;
 
-  // เทียบเป้าหมายกำไรรวมกับการขายราคาปกติ 100 ชิ้น
   const baselineUnits = 100;
   const baselineTotalProfit =
     baseMetrics.netProfitPerUnit > 0
@@ -168,9 +151,6 @@ export function simulatePromoDiscount(
   };
 }
 
-/**
- * สร้างเนื้อหาไฟล์ CSV พร้อม UTF-8 BOM เพื่อเปิดอ่านภาษาไทยใน Excel ได้สมบูรณ์
- */
 export function buildCsvExportContent(
   records: EcommerceCalculationRecord[],
   fallbackInput: CalculatorInputValues
