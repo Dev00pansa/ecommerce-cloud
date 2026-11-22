@@ -74,7 +74,7 @@ export function KpiCards({
             </span>
             <Package className="h-4 w-4 text-blue-500" />
           </div>
-          <p className="text-2xl font-bold font-mono tabular-nums">
+          <p className="text-3xl lg:text-4xl font-bold font-mono tabular-nums leading-tight">
             ฿{formatCurrency(metrics.totalCostPerUnit)}
           </p>
           <p className={`mt-1 text-xs ${subtleText}`}>
@@ -104,7 +104,7 @@ export function KpiCards({
             )}
           </div>
           <p
-            className={`text-2xl font-bold font-mono tabular-nums ${
+            className={`text-3xl lg:text-4xl font-bold font-mono tabular-nums leading-tight ${
               metrics.netProfitPerUnit > 0
                 ? "text-emerald-500"
                 : metrics.netProfitPerUnit < 0
@@ -131,7 +131,7 @@ export function KpiCards({
             <Coins className="h-4 w-4 text-amber-500" />
           </div>
           <p
-            className={`text-2xl font-bold font-mono tabular-nums ${
+            className={`text-3xl lg:text-4xl font-bold font-mono tabular-nums leading-tight ${
               metrics.netMarginPercent >= 20
                 ? "text-emerald-500"
                 : metrics.netMarginPercent > 0
@@ -160,9 +160,9 @@ export function KpiCards({
           </div>
           {metrics.canBreakEven && metrics.breakEvenUnits !== null ? (
             <>
-              <p className="text-2xl font-bold font-mono tabular-nums">
+              <p className="text-3xl lg:text-4xl font-bold font-mono tabular-nums leading-tight">
                 {metrics.breakEvenUnits.toLocaleString("th-TH")}{" "}
-                <span className="text-sm font-sans font-medium">ชิ้น</span>
+                <span className="text-base font-sans font-medium">ชิ้น</span>
               </p>
               <p className={`mt-1 text-xs ${subtleText}`}>
                 ยอดขายคืนทุน ฿{formatCurrency(metrics.breakEvenRevenue ?? 0, 0)}{" "}
