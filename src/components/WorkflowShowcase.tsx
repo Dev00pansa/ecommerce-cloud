@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type CSSProperties } from "react";
 import { ArrowDown, ArrowRight, Calculator } from "lucide-react";
 
 interface WorkflowShowcaseProps {
@@ -10,7 +10,7 @@ interface WorkflowShowcaseProps {
 
 interface WorkflowStepItem {
   step: string;
-  align: "left" | "right";
+  textSide: "left" | "right";
   image: string;
   tag: string;
   title: string;
@@ -18,10 +18,17 @@ interface WorkflowStepItem {
   highlight: string;
 }
 
+/**
+ * ลำดับการวางฝั่งของทั้ง 4 ขั้นตอน (สลับฝั่งรับกับหัวข้อเปิดเรื่องที่ชิดซ้าย):
+ * - Step 01: ข้อความอยู่ฝั่งขวา / ภาพอยู่ฝั่งซ้าย
+ * - Step 02: ข้อความอยู่ฝั่งซ้าย / ภาพอยู่ฝั่งขวา
+ * - Step 03: ข้อความอยู่ฝั่งขวา / ภาพอยู่ฝั่งซ้าย
+ * - Step 04: ข้อความอยู่ฝั่งซ้าย / ภาพอยู่ฝั่งขวา
+ */
 const WORKFLOW_STEPS: WorkflowStepItem[] = [
   {
     step: "01",
-    align: "left",
+    textSide: "right",
     image: "/images/workflow/step-1.jpg",
     tag: "Platform & Cost Structure",
     title: "เลือกแพลตฟอร์ม & กรอกต้นทุน",
@@ -30,7 +37,7 @@ const WORKFLOW_STEPS: WorkflowStepItem[] = [
   },
   {
     step: "02",
-    align: "right",
+    textSide: "left",
     image: "/images/workflow/step-2.jpg",
     tag: "Net Margin & Break-Even Analysis",
     title: "ตรวจกำไรสุทธิ & จุดคุ้มทุน",
@@ -39,7 +46,7 @@ const WORKFLOW_STEPS: WorkflowStepItem[] = [
   },
   {
     step: "03",
-    align: "left",
+    textSide: "right",
     image: "/images/workflow/step-3.jpg",
     tag: "Flash Sale & Promo Simulation",
     title: "จำลองส่วนลดโปรโมชัน",
@@ -48,7 +55,7 @@ const WORKFLOW_STEPS: WorkflowStepItem[] = [
   },
   {
     step: "04",
-    align: "right",
+    textSide: "left",
     image: "/images/workflow/step-4.jpg",
     tag: "Cloud Storage & CSV Report",
     title: "บันทึก Cloud & Export CSV",
@@ -58,7 +65,7 @@ const WORKFLOW_STEPS: WorkflowStepItem[] = [
 ];
 
 /**
- * คำนวณค่า Smoothstep (0 ถึง 1) อย่างปลอดภัย ไม่เกิด NaN หรือค่าติดลบ
+ * คำนวณค่า Smoothstep (0 ถึง 1) อย่างปลอดภัย ป้องกัน NaN และค่าติดลบ
  */
 function clampSmoothProgress(raw: number): number {
   if (!Number.isFinite(raw)) return 0;
@@ -67,15 +74,40 @@ function clampSmoothProgress(raw: number): number {
 }
 
 /**
- * ส่วนแสดงขั้นตอนการใช้งาน 4 ขั้นตอนแบบ Frameless Editorial Vertical Storytelling
- * - ใช้ Passive Scroll Listener + requestAnimationFrame คำนวณ Continuous Scroll Progress
- *   เพื่อให้ภาพพื้นหลังและข้อความค่อยๆ สว่างขึ้นและจางลงสู่สีดำอย่างต่อเนื่องไร้รอยต่อแข็งๆ
+ * CSS Mask แนวตั้งสำหรับละลายขอบบน-ล่างของกรอบภาพให้จางเป็นโปร่งใส 100%
+ */
+const VERTICAL_FEATHER_MASK: CSSProperties = {
+  maskImage:
+    "linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.92) 20%, rgba(0,0,0,0.92) 80%, transparent 100%)",
+  WebkitMaskImage:
+    "linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.92) 20%, rgba(0,0,0,0.92) 80%, transparent 100%)",
+};
+
+/**
+ * CSS Mask รัศมีวงรีสำหรับละลายขอบซ้าย-ขวาและมุมทั้ง 4 ด้านให้กลืนลงพื้นหลังลายจุด Dot-Grid
+ */
+function getRadialFeatherMask(imageOnLeft: boolean): CSSProperties {
+  const gradient = imageOnLeft
+    ? "radial-gradient(ellipse 82% 78% at 44% 50%, rgba(0,0,0,1) 18%, rgba(0,0,0,0.72) 48%, rgba(0,0,0,0.22) 74%, transparent 95%)"
+    : "radial-gradient(ellipse 82% 78% at 56% 50%, rgba(0,0,0,1) 18%, rgba(0,0,0,0.72) 48%, rgba(0,0,0,0.22) 74%, transparent 95%)";
+
+  return {
+    maskImage: gradient,
+    WebkitMaskImage: gradient,
+  };
+}
+
+/**
+ * ส่วนแสดงขั้นตอนการใช้งาน 4 ขั้นตอนแบบ Frameless Editorial:
+ * - ใช้พื้นหลังโปร่งใส (bg-transparent) เพื่อคงพื้นหลังสีดำลายจุด Dot-Grid ของเว็บให้ต่อเนื่องเป็นผืนเดียว
+ * - แยกแต่ละ Step เป็น Section อิสระ (overflow-hidden) ป้องกันภาพทะลุข้ามขั้น 100%
+ * - ใช้ CSS mask-image ละลายขอบภาพทั้ง 4 ด้านให้กลืนเข้ากับพื้นหลังลายจุดโดยไม่ใช้แผ่นดำทึบแปะทับ
  */
 export function WorkflowShowcase({
   isAuthenticated = false,
 }: WorkflowShowcaseProps) {
   const stepRefs = useRef<Array<HTMLElement | null>>([]);
-  const bgRefs = useRef<Array<HTMLDivElement | null>>([]);
+  const imageWrapRefs = useRef<Array<HTMLDivElement | null>>([]);
   const contentRefs = useRef<Array<HTMLDivElement | null>>([]);
 
   useEffect(() => {
@@ -83,15 +115,15 @@ export function WorkflowShowcase({
 
     let rafId: number | null = null;
 
-    const updateScrollScene = () => {
+    const updateSectionsProgress = () => {
       rafId = null;
       const viewportHeight = Math.max(window.innerHeight, 1);
       const viewportCenter = viewportHeight / 2;
-      const fadeDistance = Math.max(viewportHeight * 0.62, 1);
+      const activeRange = Math.max(viewportHeight * 0.72, 1);
 
       for (let i = 0; i < WORKFLOW_STEPS.length; i += 1) {
         const stepEl = stepRefs.current[i];
-        const bgEl = bgRefs.current[i];
+        const imageEl = imageWrapRefs.current[i];
         const contentEl = contentRefs.current[i];
 
         if (!stepEl) continue;
@@ -99,22 +131,26 @@ export function WorkflowShowcase({
         const rect = stepEl.getBoundingClientRect();
         const stepCenter = rect.top + rect.height / 2;
         const offsetFromCenter = stepCenter - viewportCenter;
-        const distanceRatio = Math.abs(offsetFromCenter) / fadeDistance;
+        const distanceRatio = Math.abs(offsetFromCenter) / activeRange;
 
-        const rawProgress = 1 - distanceRatio;
-        const progress = clampSmoothProgress(rawProgress);
+        const progress = clampSmoothProgress(1 - distanceRatio);
 
-        if (bgEl) {
-          const scale = 1.04 - 0.04 * progress;
-          bgEl.style.opacity = progress.toFixed(3);
-          bgEl.style.transform = `scale(${scale.toFixed(4)})`;
+        if (imageEl) {
+          // จำกัดความสว่างภาพไว้ที่ระดับ ~0.55 เพื่อไม่ให้แย่งสายตาตัวหนังสือ
+          const targetOpacity = 0.08 + progress * 0.47;
+          const scale = 1.04 - progress * 0.04;
+          imageEl.style.opacity = targetOpacity.toFixed(3);
+          imageEl.style.transform = `scale(${scale.toFixed(4)})`;
         }
 
         if (contentEl) {
-          const textProgress = clampSmoothProgress(1 - Math.abs(offsetFromCenter) / (fadeDistance * 0.92));
+          const textProgress = clampSmoothProgress(
+            1 - Math.abs(offsetFromCenter) / (activeRange * 0.95)
+          );
           const direction = offsetFromCenter > 0 ? 1 : -1;
-          const translateY = (1 - textProgress) * 26 * direction;
-          contentEl.style.opacity = textProgress.toFixed(3);
+          const translateY = (1 - textProgress) * 24 * direction;
+          const textOpacity = 0.12 + textProgress * 0.88;
+          contentEl.style.opacity = textOpacity.toFixed(3);
           contentEl.style.transform = `translate3d(0, ${translateY.toFixed(1)}px, 0)`;
         }
       }
@@ -122,7 +158,7 @@ export function WorkflowShowcase({
 
     const scheduleUpdate = () => {
       if (rafId === null) {
-        rafId = window.requestAnimationFrame(updateScrollScene);
+        rafId = window.requestAnimationFrame(updateSectionsProgress);
       }
     };
 
@@ -142,10 +178,13 @@ export function WorkflowShowcase({
   const startHref = isAuthenticated ? "/dashboard" : "/login";
 
   return (
-    <section id="workflow" className="w-full scroll-mt-16 pt-16">
-      {/* ส่วนเปิดหัวข้อก่อนเข้าสู่ Vertical Storytelling */}
-      <div className="w-full max-w-[1440px] mx-auto px-8 lg:px-16 pb-14">
-        <div className="max-w-3xl space-y-3">
+    <section
+      id="workflow"
+      className="relative w-full bg-transparent scroll-mt-16 pt-12 pb-16"
+    >
+      {/* หัวข้อเปิดเรื่อง ชิดฝั่งซ้ายเหมือนเดิม */}
+      <div className="w-full max-w-[1440px] mx-auto px-8 lg:px-16 pb-10">
+        <div className="max-w-3xl space-y-3 text-left">
           <span className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-emerald-400">
             Step-by-Step Vertical Walkthrough
           </span>
@@ -159,131 +198,115 @@ export function WorkflowShowcase({
         </div>
       </div>
 
-      {/* โครงสร้าง Sticky Full-Bleed Background + 4 Frameless Editorial Steps */}
-      <div className="relative w-full bg-black">
-        {/* ชั้นพื้นหลัง Sticky เต็มจอ สว่างขึ้นและจางมืดลงตาม Continuous Scroll Progress */}
-        <div className="sticky top-0 h-screen w-full overflow-hidden z-0 bg-black">
-          {WORKFLOW_STEPS.map((item, idx) => (
-            <div
+      {/* รายการ 4 ขั้นตอน: แยกแต่ละขั้นตอนเป็น Section อิสระ (overflow-hidden) บนพื้นหลังโปร่งใสเห็นลายจุด Dot-Grid */}
+      <div className="w-full bg-transparent">
+        {WORKFLOW_STEPS.map((item, idx) => {
+          const isTextRight = item.textSide === "right";
+          const isImageLeft = isTextRight;
+
+          return (
+            <article
               key={item.step}
               ref={(el) => {
-                bgRefs.current[idx] = el;
+                stepRefs.current[idx] = el;
               }}
-              style={{
-                opacity: idx === 0 ? 1 : 0,
-                transform: idx === 0 ? "scale(1)" : "scale(1.04)",
-              }}
-              className="pointer-events-none absolute inset-0 will-change-[opacity,transform]"
+              className="relative min-h-[85vh] w-full flex items-center overflow-hidden py-20 bg-transparent"
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={item.image}
-                alt={item.title}
-                className="h-full w-full object-cover object-center"
-              />
-            </div>
-          ))}
-
-          {/* ชั้นคลุมความมืดและ Gradient กลืนขอบบน-ล่างอย่างนุ่มนวล */}
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0 bg-black/55"
-          />
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black via-transparent to-black"
-          />
-        </div>
-
-        {/* รายการ 4 ขั้นตอนแบบไร้กรอบ (Frameless Editorial) สลับซ้าย-ขวา */}
-        <div className="relative z-10 -mt-[100vh]">
-          {WORKFLOW_STEPS.map((item, idx) => {
-            const isLeft = item.align === "left";
-
-            return (
-              <article
-                key={item.step}
-                ref={(el) => {
-                  stepRefs.current[idx] = el;
-                }}
-                className="relative min-h-screen w-full flex items-center"
+              {/* ภาพประกอบประจำขั้นตอน: อยู่เฉพาะใน Section ของตัวเองฝั่งตรงข้ามกับข้อความ และละลายขอบทั้ง 4 ด้านด้วย CSS Mask */}
+              <div
+                aria-hidden="true"
+                style={VERTICAL_FEATHER_MASK}
+                className={`pointer-events-none absolute inset-y-4 z-0 w-full lg:w-[62%] ${
+                  isImageLeft ? "left-0" : "right-0"
+                }`}
               >
-                {/* แผ่นไล่เฉดสีดำทึบด้านหลังตัวหนังสือ: มือถือคลุมเต็มจอ, Desktop ไล่เฉดตามฝั่งซ้าย/ขวา */}
                 <div
-                  aria-hidden="true"
-                  className={`pointer-events-none absolute inset-0 bg-black/80 lg:bg-transparent ${
-                    isLeft
-                      ? "lg:bg-gradient-to-r lg:from-black lg:via-black/92 lg:to-transparent"
-                      : "lg:bg-gradient-to-l lg:from-black lg:via-black/92 lg:to-transparent"
-                  }`}
-                />
-
-                <div
-                  className={`relative z-10 w-full max-w-[1440px] mx-auto px-6 md:px-12 lg:px-16 py-24 flex justify-start ${
-                    isLeft ? "lg:justify-start" : "lg:justify-end"
-                  }`}
+                  ref={(el) => {
+                    imageWrapRefs.current[idx] = el;
+                  }}
+                  style={{
+                    ...getRadialFeatherMask(isImageLeft),
+                    opacity: 0.55,
+                    transform: "scale(1)",
+                  }}
+                  className="h-full w-full will-change-[opacity,transform]"
                 >
-                  <div
-                    ref={(el) => {
-                      contentRefs.current[idx] = el;
-                    }}
-                    style={{
-                      opacity: idx === 0 ? 1 : 0,
-                      transform: "translate3d(0, 0px, 0)",
-                    }}
-                    className="w-full max-w-xl text-left will-change-[opacity,transform]"
-                  >
-                    {/* 1. เลขขั้นตอนสไตล์ Editorial */}
-                    <div className="flex items-center gap-3">
-                      <span className="font-mono text-sm font-semibold tracking-[0.2em] text-emerald-400">
-                        {item.step}
-                      </span>
-                      <span aria-hidden="true" className="text-zinc-600">
-                        —
-                      </span>
-                      <span className="font-mono text-xs sm:text-sm uppercase tracking-wider text-zinc-400">
-                        {item.tag}
-                      </span>
-                    </div>
-
-                    {/* 2. หัวข้อหลัก */}
-                    <h3 className="py-1 text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-white leading-[1.2] mt-4">
-                      {item.title}
-                    </h3>
-
-                    {/* 3. เนื้อหาคำอธิบาย */}
-                    <p className="text-base sm:text-lg text-zinc-300 leading-relaxed mt-5 max-w-xl">
-                      {item.desc}
-                    </p>
-
-                    {/* 4. จุดเน้นสำคัญด้านล่างด้วยเส้นขอบตั้งสีเขียว */}
-                    <p className="border-l-2 border-emerald-500/80 pl-4 mt-6 text-sm sm:text-base text-zinc-400">
-                      {item.highlight}
-                    </p>
-
-                    {/* 5. ปุ่ม CTA ปิดท้ายใน Step 04 */}
-                    {idx === WORKFLOW_STEPS.length - 1 && (
-                      <div className="mt-8 pt-2">
-                        <Link
-                          href={startHref}
-                          className="inline-flex items-center gap-2.5 rounded-lg bg-emerald-500 px-6 py-3.5 text-sm sm:text-base font-semibold text-slate-950 transition-all hover:bg-emerald-400"
-                        >
-                          <Calculator className="h-4 w-4" />
-                          <span>
-                            {isAuthenticated
-                              ? "เปิดเครื่องมือคำนวณทันที"
-                              : "เข้าสู่ระบบเพื่อเริ่มใช้งานจริง"}
-                          </span>
-                          <ArrowRight className="h-4 w-4" />
-                        </Link>
-                      </div>
-                    )}
-                  </div>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={item.image}
+                    alt={item.title}
+                    loading={idx === 0 ? "eager" : "lazy"}
+                    className="h-full w-full object-cover object-center saturate-[0.95] contrast-[1.05]"
+                  />
                 </div>
-              </article>
-            );
-          })}
-        </div>
+              </div>
+
+              {/* เนื้อหาตัวหนังสือแบบไร้กรอบ (Frameless Editorial Typography) */}
+              <div
+                className={`relative z-10 w-full max-w-[1440px] mx-auto px-8 lg:px-16 flex ${
+                  isTextRight ? "lg:justify-end" : "lg:justify-start"
+                }`}
+              >
+                <div
+                  ref={(el) => {
+                    contentRefs.current[idx] = el;
+                  }}
+                  style={{
+                    opacity: 1,
+                    transform: "translate3d(0, 0px, 0)",
+                  }}
+                  className="w-full max-w-xl text-left will-change-[opacity,transform]"
+                >
+                  {/* 1. เลขขั้นตอนสไตล์ Editorial */}
+                  <div className="flex items-center gap-3">
+                    <span className="font-mono text-sm font-semibold tracking-[0.2em] text-emerald-400">
+                      {item.step}
+                    </span>
+                    <span aria-hidden="true" className="text-zinc-600">
+                      —
+                    </span>
+                    <span className="font-mono text-xs sm:text-sm uppercase tracking-wider text-zinc-400">
+                      {item.tag}
+                    </span>
+                  </div>
+
+                  {/* 2. หัวข้อหลัก */}
+                  <h3 className="py-1 text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-white leading-[1.2] mt-4">
+                    {item.title}
+                  </h3>
+
+                  {/* 3. เนื้อหาคำอธิบาย */}
+                  <p className="text-base sm:text-lg text-zinc-300 leading-relaxed mt-5 max-w-xl">
+                    {item.desc}
+                  </p>
+
+                  {/* 4. จุดเน้นสำคัญด้านล่างด้วยเส้นขอบตั้งสีเขียว */}
+                  <p className="border-l-2 border-emerald-500/80 pl-4 mt-6 text-sm sm:text-base text-zinc-400">
+                    {item.highlight}
+                  </p>
+
+                  {/* 5. ปุ่ม CTA ปิดท้ายใน Step 04 */}
+                  {idx === WORKFLOW_STEPS.length - 1 && (
+                    <div className="mt-8 pt-2">
+                      <Link
+                        href={startHref}
+                        className="inline-flex items-center gap-2.5 rounded-lg bg-emerald-500 px-6 py-3.5 text-sm sm:text-base font-semibold text-slate-950 transition-all hover:bg-emerald-400"
+                      >
+                        <Calculator className="h-4 w-4" />
+                        <span>
+                          {isAuthenticated
+                            ? "เปิดเครื่องมือคำนวณทันที"
+                            : "เข้าสู่ระบบเพื่อเริ่มใช้งานจริง"}
+                        </span>
+                        <ArrowRight className="h-4 w-4" />
+                      </Link>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </article>
+          );
+        })}
       </div>
     </section>
   );
