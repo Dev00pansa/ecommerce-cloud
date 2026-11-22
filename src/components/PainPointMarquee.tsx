@@ -31,23 +31,24 @@ const PAIN_POINTS: readonly string[] = [
 ];
 
 /**
- * แพทเทิร์นความสูงเยื้องแนวตั้ง (Staggered Wave Elevation, หน่วย px)
- * สลับระดับขึ้น-ลงอย่างเป็นธรรมชาติ ไม่เรียงเป็นเส้นตรงทื่อๆ และไม่ชนขอบราง
+ * แพทเทิร์นความสูงเยื้องแนวตั้ง (Staggered Wave Elevation, หน่วย px ช่วง -11px ถึง +10px)
+ * สมดุลกับรางความสูงเพรียว h-[86px] md:h-[98px] ไม่ชนขอบบน-ล่าง
  */
 const WAVE_OFFSETS_PX: readonly number[] = [
-  0, 18, -16, 10, -18, 14, -8, 18, -14, 6, -16, 12,
+  0, 10, -10, 6, -11, 8, -5, 10, -8, 4, -10, 7,
 ];
 
 /**
  * แถบรางเส้นตัดแบบยาวสุดขอบจอ (Full-Bleed Staggered Wave Marquee)
- * - วางเป็นลูกโดยตรงด้านล่างสุดของ Hero Section (w-full shrink-0) ไม่ใช้ position: absolute
- *   จึงไม่ทับบังปุ่มหรือโลโก้ KL ในทุกขนาดหน้าจอ
+ * - ความสูงเพรียวกระชับ h-[86px] md:h-[98px]
+ * - เลื่อนไปทางขวาอย่างต่อเนื่องไร้รอยต่อ (90s linear infinite) โดยไม่หยุดเมื่อชี้เมาส์
+ * - เมื่อชี้เมาส์ที่ป้ายข้อความ ป้ายจะเรืองแสงสีเขียวมรกตอย่างนุ่มนวล
  */
 export function PainPointMarquee() {
   return (
     <div
       aria-label="ปัญหาที่ผู้ขายออนไลน์พบบ่อยซึ่ง KhumLab ช่วยแก้ไขได้"
-      className="relative w-full shrink-0 h-28 md:h-32 flex items-center overflow-hidden bg-black/55 backdrop-blur-sm border-y border-zinc-800/90"
+      className="relative w-full shrink-0 h-[86px] md:h-[98px] flex items-center overflow-hidden bg-black/65 backdrop-blur-sm border-y border-zinc-800/90"
     >
       {/* เส้นแสงสีเขียวมรกตบางเฉียบซ้อนทับที่ขอบบนสุดและขอบล่างสุด */}
       <div
@@ -75,7 +76,7 @@ export function PainPointMarquee() {
         className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 md:w-32 bg-gradient-to-l from-black via-black/70 to-transparent"
       />
 
-      {/* รางข้อความวิ่งวนไร้รอยต่อ (Duplicate 2 ชุดต่อกันใน flex w-max) */}
+      {/* รางข้อความเลื่อนไปทางขวาไร้รอยต่อ (Duplicate 2 ชุดต่อกันใน flex w-max) */}
       <div className="relative z-[5] flex w-max items-center animate-pain-marquee">
         {[0, 1].map((copyIndex) => (
           <div
@@ -91,11 +92,11 @@ export function PainPointMarquee() {
                 <div
                   key={`${copyIndex}-${itemIndex}`}
                   style={{ transform: `translateY(${offsetY}px)` }}
-                  className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-zinc-950/80 border border-zinc-800/80 text-sm md:text-base text-zinc-200 whitespace-nowrap select-none transition-colors hover:border-emerald-500/50 hover:text-white"
+                  className="group inline-flex items-center gap-2.5 px-3.5 py-1 rounded-full bg-zinc-950/80 border border-zinc-800/80 text-xs md:text-sm text-zinc-200 whitespace-nowrap select-none transition-all duration-300 hover:border-emerald-400/80 hover:text-white hover:bg-emerald-950/40 hover:shadow-[0_0_18px_rgba(16,185,129,0.4)]"
                 >
                   <span
                     aria-hidden="true"
-                    className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.85)]"
+                    className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.85)] transition-all duration-300 group-hover:bg-emerald-300 group-hover:scale-125 group-hover:shadow-[0_0_12px_rgba(110,231,183,1)]"
                   />
                   <span>{text}</span>
                 </div>

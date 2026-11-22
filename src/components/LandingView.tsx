@@ -99,8 +99,14 @@ export function LandingView({ isAuthenticated }: LandingViewProps) {
             </div>
           </div>
 
-          {/* แถบรางเส้นตัดยาวสุดขอบจอ (วางนอก max-w-[1440px] เป็นลูกโดยตรงของ section) */}
-          <PainPointMarquee />
+          {/* แถบรางเส้นตัดยาวสุดขอบจอ + พื้นที่สีดำสนิทด้านล่าง 36px-48px เชื่อมลงสู่โซน 4 ขั้นตอน */}
+          <div className="w-full shrink-0 flex flex-col">
+            <PainPointMarquee />
+            <div
+              aria-hidden="true"
+              className="w-full h-9 md:h-12 bg-black shrink-0"
+            />
+          </div>
         </section>
 
         {/* ส่วนที่ 2: Vertical Scroll Storytelling 4 ขั้นตอน */}

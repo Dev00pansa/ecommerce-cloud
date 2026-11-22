@@ -166,21 +166,17 @@ body {
   animation: khumOrbitSpinReverse 20s linear infinite;
 }
 
-/* Full-Bleed Staggered Wave Marquee (วิ่งวนไร้รอยต่อ 60 วินาที หยุดเมื่อชี้เมาส์) */
+/* Full-Bleed Staggered Wave Marquee (เลื่อนไปทางขวาไร้รอยต่อ 90 วินาที ไม่หยุดเมื่อชี้เมาส์) */
 @keyframes painPointMarqueeScroll {
   0% {
-    transform: translate3d(0, 0, 0);
+    transform: translate3d(-50%, 0, 0);
   }
   100% {
-    transform: translate3d(-50%, 0, 0);
+    transform: translate3d(0, 0, 0);
   }
 }
 
 .animate-pain-marquee {
   will-change: transform;
-  animation: painPointMarqueeScroll 60s linear infinite;
-}
-
-.animate-pain-marquee:hover {
-  animation-play-state: paused;
+  animation: painPointMarqueeScroll 90s linear infinite;
 }
