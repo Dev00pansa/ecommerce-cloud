@@ -2,14 +2,16 @@
 
 import { useState } from "react";
 import {
+  AlertCircle,
   ArrowUp,
   ChevronDown,
   ChevronUp,
   CloudUpload,
   Download,
+  Image as ImageIcon,
   Loader2,
 } from "lucide-react";
-import { formatCurrency } from "@/lib/calculator";
+import { MAX_CLOUD_RECORDS, formatCurrency } from "@/lib/calculator";
 import type {
   CalculationMetrics,
   CalculatorInputValues,
@@ -23,6 +25,7 @@ interface CalculationReportProps {
   discountPercent: number;
   previewImageUrl: string | null;
   saving: boolean;
+  isCloudFull: boolean;
   onChangeDiscount: (next: number) => void;
   onSaveToCloud: () => void;
   onExportCsv: () => void;
@@ -36,6 +39,7 @@ export function CalculationReport({
   discountPercent,
   previewImageUrl,
   saving,
+  isCloudFull,
   onChangeDiscount,
   onSaveToCloud,
   onExportCsv,
@@ -68,7 +72,7 @@ export function CalculationReport({
   return (
     <section
       id="calculation-report"
-      className="relative scroll-mt-20 bg-[#050505] border border-emerald-500/30 p-6 sm:p-8 shadow-[0_0_32px_-8px_rgba(16,185,129,0.22)] space-y-10"
+      className="relative scroll-mt-20 overflow-hidden rounded-2xl bg-[#050505] border border-emerald-500/30 p-6 sm:p-8 shadow-[0_0_32px_-8px_rgba(16,185,129,0.22)] space-y-10"
     >
       <div
         aria-hidden="true"
@@ -77,8 +81,8 @@ export function CalculationReport({
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5">
         <div className="flex items-center gap-4">
-          {previewImageUrl && (
-            <div className="h-20 w-20 shrink-0 overflow-hidden border border-emerald-500/30 bg-black">
+          {previewImageUrl ? (
+            <div className="h-20 w-20 shrink-0 overflow-hidden rounded-xl border border-emerald-500/30 bg-black">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={previewImageUrl}
@@ -86,7 +90,15 @@ export function CalculationReport({
                 className="h-full w-full object-cover object-center"
               />
             </div>
+          ) : (
+            <div className="h-20 w-20 shrink-0 rounded-xl bg-zinc-900 border border-zinc-800 flex flex-col items-center justify-center gap-1 select-none">
+              <ImageIcon className="h-5 w-5 text-zinc-500" />
+              <span className="text-[10px] font-medium tracking-tight text-zinc-500 leading-none">
+                ไม่มีรูปภาพ
+              </span>
+            </div>
           )}
+
           <div className="space-y-1.5">
             <div className="flex flex-wrap items-center gap-2">
               <span className="font-mono text-xs font-semibold uppercase tracking-[0.18em] text-emerald-400">
@@ -104,7 +116,7 @@ export function CalculationReport({
         </div>
 
         <div
-          className={`self-start sm:self-center border px-3.5 py-2 text-xs sm:text-sm font-semibold ${statusColorClass}`}
+          className={`self-start sm:self-center rounded-xl border px-3.5 py-2 text-xs sm:text-sm font-semibold ${statusColorClass}`}
         >
           {statusText}
         </div>
@@ -263,7 +275,7 @@ export function CalculationReport({
         </div>
 
         <div className="space-y-2 pt-1">
-          <div className="flex h-1.5 w-full overflow-hidden bg-zinc-900">
+          <div className="flex h-1.5 w-full overflow-hidden rounded-full bg-zinc-900">
             <div
               style={{ width: `${Math.max(0, metrics.productCostShare)}%` }}
               className="h-full bg-zinc-500"
@@ -283,19 +295,19 @@ export function CalculationReport({
           </div>
           <div className="flex flex-wrap items-center gap-x-5 gap-y-1 text-xs text-zinc-400">
             <span className="inline-flex items-center gap-1.5">
-              <span className="h-2 w-2 bg-zinc-500" />
+              <span className="h-2 w-2 rounded-full bg-zinc-500" />
               <span>ทุนสินค้า</span>
             </span>
             <span className="inline-flex items-center gap-1.5">
-              <span className="h-2 w-2 bg-amber-500/80" />
+              <span className="h-2 w-2 rounded-full bg-amber-500/80" />
               <span>ค่าแพ็ก + ค่าแอด</span>
             </span>
             <span className="inline-flex items-center gap-1.5">
-              <span className="h-2 w-2 bg-zinc-700" />
+              <span className="h-2 w-2 rounded-full bg-zinc-700" />
               <span>ค่า GP แพลตฟอร์ม</span>
             </span>
             <span className="inline-flex items-center gap-1.5">
-              <span className="h-2 w-2 bg-emerald-500" />
+              <span className="h-2 w-2 rounded-full bg-emerald-500" />
               <span>กำไรสุทธิ</span>
             </span>
           </div>
@@ -316,7 +328,7 @@ export function CalculationReport({
               กดเพื่อทดลองเลื่อนดูว่าถ้าจัด Flash Sale ลดราคาลง จะยังเหลือกำไรชิ้นละเท่าไหร่
             </p>
           </div>
-          <span className="inline-flex items-center gap-1.5 border border-emerald-500/30 bg-black px-3 py-1.5 text-xs font-mono text-emerald-400">
+          <span className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-500/30 bg-black px-3 py-1.5 text-xs font-mono text-emerald-400">
             <span>ลด {discountPercent}%</span>
             {showPromoSimulator ? (
               <ChevronUp className="h-3.5 w-3.5" />
@@ -414,13 +426,25 @@ export function CalculationReport({
         )}
       </div>
 
+      {isCloudFull && (
+        <div
+          role="alert"
+          className="flex items-center gap-2.5 rounded-xl border border-amber-500/45 bg-amber-950/20 px-4 py-3 text-xs sm:text-sm text-amber-300"
+        >
+          <AlertCircle className="h-4 w-4 shrink-0 text-amber-400" />
+          <span>
+            พื้นที่คลาวด์เต็ม ({MAX_CLOUD_RECORDS}/{MAX_CLOUD_RECORDS} รายการ) กรุณาลบรายการเก่าออกก่อนบันทึกเพิ่ม
+          </span>
+        </div>
+      )}
+
       <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
         <div className="flex flex-wrap items-center gap-3">
           <button
             type="button"
             onClick={onSaveToCloud}
-            disabled={saving}
-            className="inline-flex items-center justify-center gap-2 bg-emerald-500 px-6 py-3.5 text-sm sm:text-base font-semibold text-slate-950 shadow-[0_0_24px_-4px_rgba(16,185,129,0.45)] transition-all duration-200 hover:bg-emerald-400 disabled:opacity-60"
+            disabled={saving || isCloudFull}
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-500 px-6 py-3.5 text-sm sm:text-base font-semibold text-slate-950 shadow-[0_0_24px_-4px_rgba(16,185,129,0.45)] transition-all duration-200 hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {saving ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -428,14 +452,18 @@ export function CalculationReport({
               <CloudUpload className="h-4 w-4" />
             )}
             <span>
-              {saving ? "กำลังบันทึกลง Cloud..." : "บันทึกข้อมูลนี้ลง Cloud"}
+              {isCloudFull
+                ? `พื้นที่คลาวด์เต็ม (${MAX_CLOUD_RECORDS}/${MAX_CLOUD_RECORDS})`
+                : saving
+                  ? "กำลังบันทึกลง Cloud..."
+                  : "บันทึกข้อมูลนี้ลง Cloud"}
             </span>
           </button>
 
           <button
             type="button"
             onClick={onExportCsv}
-            className="inline-flex items-center justify-center gap-2 border border-emerald-500/25 bg-black px-5 py-3.5 text-sm font-medium text-zinc-200 shadow-[0_0_20px_-6px_rgba(16,185,129,0.16)] transition-all duration-200 hover:border-emerald-400/50 hover:text-white"
+            className="inline-flex items-center justify-center gap-2 rounded-xl border border-emerald-500/25 bg-black px-5 py-3.5 text-sm font-medium text-zinc-200 shadow-[0_0_20px_-6px_rgba(16,185,129,0.16)] transition-all duration-200 hover:border-emerald-400/50 hover:text-white"
           >
             <Download className="h-4 w-4" />
             <span>ส่งออกไฟล์ CSV</span>
@@ -445,7 +473,7 @@ export function CalculationReport({
         <button
           type="button"
           onClick={onEditTop}
-          className="inline-flex items-center gap-1.5 py-2 text-xs sm:text-sm font-medium text-zinc-400 transition-colors hover:text-emerald-400"
+          className="inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs sm:text-sm font-medium text-zinc-400 transition-colors hover:bg-white/[0.04] hover:text-emerald-400"
         >
           <ArrowUp className="h-4 w-4" />
           <span>แก้ไขตัวเลขด้านบน</span>

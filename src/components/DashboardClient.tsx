@@ -7,8 +7,9 @@ import { createClient } from "@/lib/supabase/client";
 import { sanitizePlainText, translateSupabaseError } from "@/lib/auth";
 import { useAppLanguage } from "@/lib/language";
 import {
-  buildCsvExportContent,
+  MAX_CLOUD_RECORDS,
   calculateEcommerceMetrics,
+  exportCalculationsToCsv,
   parseSafeNonNegativeNumber,
   simulatePromoDiscount,
 } from "@/lib/calculator";
@@ -20,6 +21,7 @@ import type {
   CalculatorFormStrings,
   CalculatorInputValues,
   CompressedProductImage,
+  CsvExportColumnKey,
   EcommerceCalculationRecord,
   PlatformPreset,
 } from "@/types";
@@ -84,6 +86,8 @@ export function DashboardClient({
   const [realtimeConnected, setRealtimeConnected] = useState(false);
   const [dbError, setDbError] = useState<string | null>(null);
   const [dbSuccess, setDbSuccess] = useState<string | null>(null);
+
+  const isCloudFull = records.length >= MAX_CLOUD_RECORDS;
 
   useEffect(() => {
     return () => {
@@ -288,6 +292,13 @@ export function DashboardClient({
     const supabase = createClient();
     if (!supabase || saving) return;
 
+    if (records.length >= MAX_CLOUD_RECORDS) {
+      setDbError(
+        `พื้นที่คลาวด์เต็ม (${MAX_CLOUD_RECORDS}/${MAX_CLOUD_RECORDS} รายการ) กรุณาลบรายการเก่าออกก่อนบันทึกเพิ่ม`
+      );
+      return;
+    }
+
     setDbError(null);
     setDbSuccess(null);
     setSaving(true);
@@ -438,8 +449,7 @@ export function DashboardClient({
     });
   }
 
-  function handleExportCsv() {
-    const csvContent = buildCsvExportContent(records, numericInputs);
+  function triggerCsvDownload(csvContent: string) {
     const blob = new Blob([csvContent], {
       type: "text/csv;charset=utf-8;",
     });
@@ -451,6 +461,20 @@ export function DashboardClient({
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
+  }
+
+  function handleExportReportCsv() {
+    const csvContent = exportCalculationsToCsv([], undefined, numericInputs);
+    triggerCsvDownload(csvContent);
+  }
+
+  function handleExportCloudCsv(
+    orderedRecords: EcommerceCalculationRecord[],
+    selectedKeys: CsvExportColumnKey[]
+  ) {
+    if (selectedKeys.length === 0 || orderedRecords.length === 0) return;
+    const csvContent = exportCalculationsToCsv(orderedRecords, selectedKeys);
+    triggerCsvDownload(csvContent);
   }
 
   const activePreviewUrl = compressedImage?.previewUrl ?? existingImageUrl;
@@ -496,11 +520,11 @@ export function DashboardClient({
             </h1>
           </div>
 
-          <div className="inline-flex shrink-0 self-start border border-emerald-500/25 bg-[#050505] p-1 shadow-[0_0_20px_-6px_rgba(16,185,129,0.16)]">
+          <div className="inline-flex shrink-0 self-start rounded-2xl border border-emerald-500/25 bg-[#050505] p-1 shadow-[0_0_20px_-6px_rgba(16,185,129,0.16)]">
             <button
               type="button"
               onClick={() => handleSwitchTab("calculator")}
-              className={`px-4 py-2 text-xs sm:text-sm font-semibold whitespace-nowrap transition-colors ${
+              className={`rounded-xl px-4 py-2 text-xs sm:text-sm font-semibold whitespace-nowrap transition-colors ${
                 activeTab === "calculator"
                   ? "bg-emerald-500 text-slate-950"
                   : "text-zinc-400 hover:text-zinc-200"
@@ -511,15 +535,15 @@ export function DashboardClient({
             <button
               type="button"
               onClick={() => handleSwitchTab("history")}
-              className={`px-4 py-2 text-xs sm:text-sm font-semibold whitespace-nowrap transition-colors ${
+              className={`rounded-xl px-4 py-2 text-xs sm:text-sm font-semibold whitespace-nowrap transition-colors ${
                 activeTab === "history"
                   ? "bg-emerald-500 text-slate-950"
                   : "text-zinc-400 hover:text-zinc-200"
               }`}
             >
               {isEn
-                ? `Saved History (${records.length})`
-                : `ประวัติที่บันทึกไว้ (${records.length})`}
+                ? `Cloud Storage (${records.length}/${MAX_CLOUD_RECORDS})`
+                : `คลาวด์เก็บข้อมูล (${records.length}/${MAX_CLOUD_RECORDS})`}
             </button>
           </div>
         </div>
@@ -527,7 +551,7 @@ export function DashboardClient({
         {dbError && (
           <div
             role="alert"
-            className="flex items-center gap-2.5 border border-rose-500/45 bg-[#050505] px-4 py-3 text-xs sm:text-sm text-rose-300 shadow-[0_0_20px_-6px_rgba(244,63,94,0.25)]"
+            className="flex items-center gap-2.5 rounded-2xl border border-rose-500/45 bg-[#050505] px-4 py-3 text-xs sm:text-sm text-rose-300 shadow-[0_0_20px_-6px_rgba(244,63,94,0.25)]"
           >
             <AlertCircle className="h-4 w-4 shrink-0 text-rose-400" />
             <span>{dbError}</span>
@@ -537,7 +561,7 @@ export function DashboardClient({
         {dbSuccess && (
           <div
             role="status"
-            className="flex items-center justify-between gap-2.5 border border-emerald-500/45 bg-[#050505] px-4 py-3 text-xs sm:text-sm text-emerald-300 shadow-[0_0_20px_-6px_rgba(16,185,129,0.25)]"
+            className="flex items-center justify-between gap-2.5 rounded-2xl border border-emerald-500/45 bg-[#050505] px-4 py-3 text-xs sm:text-sm text-emerald-300 shadow-[0_0_20px_-6px_rgba(16,185,129,0.25)]"
           >
             <div className="flex items-center gap-2">
               <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400" />
@@ -577,9 +601,10 @@ export function DashboardClient({
                 discountPercent={discountPercent}
                 previewImageUrl={activePreviewUrl}
                 saving={saving}
+                isCloudFull={isCloudFull}
                 onChangeDiscount={setDiscountPercent}
                 onSaveToCloud={handleSaveToCloud}
-                onExportCsv={handleExportCsv}
+                onExportCsv={handleExportReportCsv}
                 onEditTop={handleEditTop}
               />
             )}
@@ -591,7 +616,7 @@ export function DashboardClient({
             deletingId={deletingId}
             realtimeConnected={realtimeConnected}
             onRefresh={fetchHistory}
-            onExportCsv={handleExportCsv}
+            onExportCsv={handleExportCloudCsv}
             onLoadRecord={handleLoadRecord}
             onDeleteRecord={handleDeleteRecord}
           />

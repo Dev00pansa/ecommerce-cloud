@@ -1,10 +1,14 @@
 import type {
   CalculationMetrics,
   CalculatorInputValues,
+  CsvExportColumnKey,
+  CsvExportColumnOption,
   EcommerceCalculationRecord,
   PlatformPreset,
   PromoSimulationResult,
 } from "@/types";
+
+export const MAX_CLOUD_RECORDS = 50;
 
 export const PLATFORM_PRESETS: PlatformPreset[] = [
   { id: "Shopee", label: "Shopee 13%", badge: "Marketplace", feePercent: 13 },
@@ -12,6 +16,31 @@ export const PLATFORM_PRESETS: PlatformPreset[] = [
   { id: "Lazada", label: "Lazada 12%", badge: "Marketplace", feePercent: 12 },
   { id: "ขายตรง", label: "ขายตรง 0%", badge: "Direct / Chat", feePercent: 0 },
 ];
+
+export const CSV_EXPORT_COLUMNS: readonly CsvExportColumnOption[] = [
+  { key: "product_name", label: "ชื่อสินค้า", defaultSelected: true },
+  { key: "platform", label: "แพลตฟอร์ม", defaultSelected: true },
+  { key: "cost_price", label: "ต้นทุนสินค้า (บาท)", defaultSelected: false },
+  { key: "packaging_cost", label: "ค่าแพ็ก (บาท)", defaultSelected: false },
+  { key: "ads_cost", label: "ค่าแอด (บาท)", defaultSelected: false },
+  { key: "platform_fee_percent", label: "ค่าธรรมเนียม (%)", defaultSelected: false },
+  { key: "platform_fee_baht", label: "ค่าธรรมเนียม (บาท)", defaultSelected: false },
+  { key: "total_cost_per_unit", label: "ต้นทุนรวมต่อชิ้น (บาท)", defaultSelected: true },
+  { key: "selling_price", label: "ราคาขาย (บาท)", defaultSelected: true },
+  { key: "net_profit_per_unit", label: "กำไรสุทธิต่อชิ้น (บาท)", defaultSelected: true },
+  { key: "net_margin_percent", label: "Net Margin (%)", defaultSelected: true },
+  { key: "fixed_cost", label: "ต้นทุนคงที่รวม (บาท)", defaultSelected: false },
+  { key: "break_even_units", label: "จุดคุ้มทุน (ชิ้น)", defaultSelected: false },
+  { key: "created_at", label: "วันที่บันทึก", defaultSelected: true },
+];
+
+export const DEFAULT_CSV_EXPORT_KEYS: CsvExportColumnKey[] = CSV_EXPORT_COLUMNS
+  .filter((col) => col.defaultSelected)
+  .map((col) => col.key);
+
+export const ALL_CSV_EXPORT_KEYS: CsvExportColumnKey[] = CSV_EXPORT_COLUMNS.map(
+  (col) => col.key
+);
 
 export function parseSafeNonNegativeNumber(raw: string, max?: number): number {
   const trimmed = raw.trim();
@@ -151,13 +180,24 @@ export function simulatePromoDiscount(
   };
 }
 
-export function buildCsvExportContent(
-  records: EcommerceCalculationRecord[],
-  fallbackInput: CalculatorInputValues
+export function exportCalculationsToCsv(
+  items: EcommerceCalculationRecord[],
+  selectedKeys?: readonly CsvExportColumnKey[],
+  fallbackInput?: CalculatorInputValues
 ): string {
+  const keySet =
+    selectedKeys !== undefined
+      ? new Set(selectedKeys)
+      : new Set(ALL_CSV_EXPORT_KEYS);
+
+  const activeColumns = CSV_EXPORT_COLUMNS.filter((col) => keySet.has(col.key));
+  if (activeColumns.length === 0) {
+    return "\uFEFF";
+  }
+
   const rows =
-    records.length > 0
-      ? records.map((r) => ({
+    items.length > 0
+      ? items.map((r) => ({
           productName: r.product_name,
           platform: r.platform,
           costPrice: Number(r.cost_price) || 0,
@@ -168,39 +208,26 @@ export function buildCsvExportContent(
           fixedCost: Number(r.fixed_cost) || 0,
           createdAt: new Date(r.created_at).toLocaleString("th-TH"),
         }))
-      : [
-          {
-            productName: fallbackInput.productName.trim() || "สินค้าปัจจุบัน",
-            platform: fallbackInput.platform,
-            costPrice: fallbackInput.costPrice,
-            packagingCost: fallbackInput.packagingCost,
-            adsCost: fallbackInput.adsCost,
-            platformFeePercent: fallbackInput.platformFeePercent,
-            sellingPrice: fallbackInput.sellingPrice,
-            fixedCost: fallbackInput.fixedCost,
-            createdAt: new Date().toLocaleString("th-TH"),
-          },
-        ];
-
-  const headers = [
-    "ชื่อสินค้า",
-    "แพลตฟอร์ม",
-    "ต้นทุนสินค้า (บาท)",
-    "ค่าแพ็ก (บาท)",
-    "ค่าแอด (บาท)",
-    "ค่าธรรมเนียม (%)",
-    "ค่าธรรมเนียม (บาท)",
-    "ต้นทุนรวมต่อชิ้น (บาท)",
-    "ราคาขาย (บาท)",
-    "กำไรสุทธิต่อชิ้น (บาท)",
-    "Net Margin (%)",
-    "ต้นทุนคงที่รวม (บาท)",
-    "จุดคุ้มทุน (ชิ้น)",
-    "วันที่บันทึก",
-  ];
+      : fallbackInput
+        ? [
+            {
+              productName: fallbackInput.productName.trim() || "สินค้าปัจจุบัน",
+              platform: fallbackInput.platform,
+              costPrice: fallbackInput.costPrice,
+              packagingCost: fallbackInput.packagingCost,
+              adsCost: fallbackInput.adsCost,
+              platformFeePercent: fallbackInput.platformFeePercent,
+              sellingPrice: fallbackInput.sellingPrice,
+              fixedCost: fallbackInput.fixedCost,
+              createdAt: new Date().toLocaleString("th-TH"),
+            },
+          ]
+        : [];
 
   const escapeCell = (val: string | number) =>
     `"${String(val).replace(/"/g, '""')}"`;
+
+  const headers = activeColumns.map((col) => escapeCell(col.label));
 
   const lines = [
     headers.join(","),
@@ -216,24 +243,36 @@ export function buildCsvExportContent(
         fixedCost: row.fixedCost,
       });
 
-      return [
-        escapeCell(row.productName),
-        escapeCell(row.platform),
-        row.costPrice.toFixed(2),
-        row.packagingCost.toFixed(2),
-        row.adsCost.toFixed(2),
-        row.platformFeePercent.toFixed(2),
-        m.platformFeeBaht.toFixed(2),
-        m.totalCostPerUnit.toFixed(2),
-        row.sellingPrice.toFixed(2),
-        m.netProfitPerUnit.toFixed(2),
-        m.netMarginPercent.toFixed(2),
-        row.fixedCost.toFixed(2),
-        escapeCell(m.breakEvenUnits !== null ? m.breakEvenUnits : "ไม่สามารถคืนทุนได้"),
-        escapeCell(row.createdAt),
-      ].join(",");
+      const cellMap: Record<CsvExportColumnKey, string> = {
+        product_name: escapeCell(row.productName),
+        platform: escapeCell(row.platform),
+        cost_price: row.costPrice.toFixed(2),
+        packaging_cost: row.packagingCost.toFixed(2),
+        ads_cost: row.adsCost.toFixed(2),
+        platform_fee_percent: row.platformFeePercent.toFixed(2),
+        platform_fee_baht: m.platformFeeBaht.toFixed(2),
+        total_cost_per_unit: m.totalCostPerUnit.toFixed(2),
+        selling_price: row.sellingPrice.toFixed(2),
+        net_profit_per_unit: m.netProfitPerUnit.toFixed(2),
+        net_margin_percent: m.netMarginPercent.toFixed(2),
+        fixed_cost: row.fixedCost.toFixed(2),
+        break_even_units: escapeCell(
+          m.breakEvenUnits !== null ? m.breakEvenUnits : "ไม่สามารถคืนทุนได้"
+        ),
+        created_at: escapeCell(row.createdAt),
+      };
+
+      return activeColumns.map((col) => cellMap[col.key]).join(",");
     }),
   ];
 
   return "\uFEFF" + lines.join("\r\n");
+}
+
+export function buildCsvExportContent(
+  records: EcommerceCalculationRecord[],
+  fallbackInput: CalculatorInputValues,
+  selectedKeys?: readonly CsvExportColumnKey[]
+): string {
+  return exportCalculationsToCsv(records, selectedKeys, fallbackInput);
 }

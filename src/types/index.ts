@@ -104,3 +104,31 @@ export interface CompressedProductImage {
   mimeType: "image/webp" | "image/jpeg";
   extension: "webp" | "jpg";
 }
+
+export type CsvExportColumnKey =
+  | "product_name"
+  | "platform"
+  | "cost_price"
+  | "packaging_cost"
+  | "ads_cost"
+  | "platform_fee_percent"
+  | "platform_fee_baht"
+  | "total_cost_per_unit"
+  | "selling_price"
+  | "net_profit_per_unit"
+  | "net_margin_percent"
+  | "fixed_cost"
+  | "break_even_units"
+  | "created_at";
+
+export interface CsvExportColumnOption {
+  key: CsvExportColumnKey;
+  label: string;
+  defaultSelected: boolean;
+}
+
+export type HistorySortOrder =
+  | "date_desc"
+  | "date_asc"
+  | "profit_desc"
+  | "profit_asc";

@@ -36,10 +36,10 @@ function sanitizeNumericInput(raw: string): string {
 }
 
 const INPUT_SURFACE_CLASS =
-  "w-full bg-[#050505] border border-emerald-500/25 shadow-[0_0_20px_-6px_rgba(16,185,129,0.16)] transition-all duration-200 hover:border-emerald-400/50 focus:border-emerald-400 focus:shadow-[0_0_25px_-4px_rgba(16,185,129,0.3)] focus:outline-none";
+  "w-full rounded-xl bg-[#050505] border border-emerald-500/25 shadow-[0_0_20px_-6px_rgba(16,185,129,0.16)] transition-all duration-200 hover:border-emerald-400/50 focus:border-emerald-400 focus:shadow-[0_0_25px_-4px_rgba(16,185,129,0.3)] focus:outline-none";
 
 const BOX_SURFACE_CLASS =
-  "bg-[#050505] border border-emerald-500/25 shadow-[0_0_20px_-6px_rgba(16,185,129,0.16)] transition-all duration-200 hover:border-emerald-400/50 hover:shadow-[0_0_25px_-4px_rgba(16,185,129,0.3)]";
+  "rounded-2xl bg-[#050505] border border-emerald-500/25 shadow-[0_0_20px_-6px_rgba(16,185,129,0.16)] transition-all duration-200 hover:border-emerald-400/50 hover:shadow-[0_0_25px_-4px_rgba(16,185,129,0.3)]";
 
 export function CalculatorForm({
   values,
@@ -105,7 +105,7 @@ export function CalculatorForm({
                 key={preset.id}
                 type="button"
                 onClick={() => onSelectPreset(preset)}
-                className={`flex items-center justify-between px-4 py-4 text-left transition-all duration-200 ${
+                className={`flex items-center justify-between rounded-2xl px-4 py-4 text-left transition-all duration-200 ${
                   active
                     ? "bg-[#050505] border border-emerald-400/80 text-white shadow-[0_0_26px_-4px_rgba(16,185,129,0.34),inset_0_0_24px_-12px_rgba(16,185,129,0.3)]"
                     : `${BOX_SURFACE_CLASS} text-zinc-300 hover:text-white`
@@ -120,7 +120,7 @@ export function CalculatorForm({
                   </span>
                 </div>
                 <span
-                  className={`font-mono text-sm font-semibold px-2.5 py-1 border ${
+                  className={`rounded-xl font-mono text-sm font-semibold px-2.5 py-1 border ${
                     active
                       ? "border-emerald-400/60 bg-emerald-500/15 text-emerald-300"
                       : "border-emerald-500/20 bg-black text-zinc-400"
@@ -223,7 +223,7 @@ export function CalculatorForm({
               className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 ${BOX_SURFACE_CLASS}`}
             >
               <div className="flex items-center gap-4">
-                <div className="h-20 w-20 shrink-0 overflow-hidden border border-emerald-500/30 bg-black">
+                <div className="h-20 w-20 shrink-0 overflow-hidden rounded-xl border border-emerald-500/30 bg-black">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={activePreviewUrl}
@@ -248,7 +248,7 @@ export function CalculatorForm({
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={compressingImage}
-                  className="border border-emerald-500/30 bg-black px-3.5 py-2 text-xs font-medium text-zinc-200 transition-all duration-200 hover:border-emerald-400 hover:text-emerald-400 disabled:opacity-50"
+                  className="rounded-xl border border-emerald-500/30 bg-black px-3.5 py-2 text-xs font-medium text-zinc-200 transition-all duration-200 hover:border-emerald-400 hover:text-emerald-400 disabled:opacity-50"
                 >
                   เปลี่ยนรูป
                 </button>
@@ -256,7 +256,7 @@ export function CalculatorForm({
                   type="button"
                   onClick={onRemoveImage}
                   disabled={compressingImage}
-                  className="inline-flex items-center gap-1 border border-zinc-800 bg-black px-3 py-2 text-xs font-medium text-rose-400 transition-colors hover:border-rose-500/60 disabled:opacity-50"
+                  className="inline-flex items-center gap-1 rounded-xl border border-zinc-800 bg-black px-3 py-2 text-xs font-medium text-rose-400 transition-colors hover:border-rose-500/60 disabled:opacity-50"
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                   <span>ลบรูป</span>
@@ -291,7 +291,7 @@ export function CalculatorForm({
                   </p>
                 </div>
               </div>
-              <span className="shrink-0 border border-emerald-500/30 bg-black px-3 py-1.5 text-xs font-medium text-emerald-300">
+              <span className="shrink-0 rounded-xl border border-emerald-500/30 bg-black px-3 py-1.5 text-xs font-medium text-emerald-300">
                 เลือกรูป
               </span>
             </div>
@@ -434,7 +434,7 @@ export function CalculatorForm({
                   )
                 }
                 placeholder="0"
-                className="w-full bg-[#050505] border-2 border-emerald-500/65 px-4 py-3 text-lg font-mono font-bold tabular-nums text-emerald-400 shadow-[0_0_24px_-6px_rgba(16,185,129,0.28)] transition-all duration-200 hover:border-emerald-400 focus:border-emerald-400 focus:shadow-[0_0_28px_-4px_rgba(16,185,129,0.42)] focus:outline-none"
+                className="w-full rounded-xl bg-[#050505] border-2 border-emerald-500/65 px-4 py-3 text-lg font-mono font-bold tabular-nums text-emerald-400 shadow-[0_0_24px_-6px_rgba(16,185,129,0.28)] transition-all duration-200 hover:border-emerald-400 focus:border-emerald-400 focus:shadow-[0_0_28px_-4px_rgba(16,185,129,0.42)] focus:outline-none"
               />
             </div>
           </div>
@@ -472,7 +472,7 @@ export function CalculatorForm({
         <div className="pt-4 flex flex-wrap items-center gap-3">
           <button
             type="submit"
-            className="inline-flex items-center justify-center gap-2.5 bg-emerald-500 px-7 py-3.5 text-base font-semibold text-slate-950 shadow-[0_0_24px_-4px_rgba(16,185,129,0.45)] transition-all duration-200 hover:bg-emerald-400"
+            className="inline-flex items-center justify-center gap-2.5 rounded-xl bg-emerald-500 px-7 py-3.5 text-base font-semibold text-slate-950 shadow-[0_0_24px_-4px_rgba(16,185,129,0.45)] transition-all duration-200 hover:bg-emerald-400"
           >
             <span>ประมวลผลและสรุปกำไร</span>
             <ArrowDown className="h-4 w-4" />
@@ -481,7 +481,7 @@ export function CalculatorForm({
           <button
             type="button"
             onClick={onReset}
-            className={`inline-flex items-center justify-center gap-1.5 px-4 py-3.5 text-sm font-medium text-zinc-400 hover:text-zinc-100 ${BOX_SURFACE_CLASS}`}
+            className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#050505] border border-emerald-500/25 px-4 py-3.5 text-sm font-medium text-zinc-400 shadow-[0_0_20px_-6px_rgba(16,185,129,0.16)] transition-all duration-200 hover:border-emerald-400/50 hover:text-zinc-100"
           >
             <RotateCcw className="h-3.5 w-3.5" />
             <span>ล้างค่า</span>
