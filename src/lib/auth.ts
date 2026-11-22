@@ -172,10 +172,10 @@ export function translateSupabaseError(error: unknown): string {
     return "ส่งคำขอบ่อยเกินไป กรุณารอสักครู่แล้วลองใหม่อีกครั้ง";
   }
   if (msg.includes("failed to fetch") || msg.includes("network")) {
-    return "ไม่สามารถเชื่อมต่อ Supabase Cloud ได้ กรุณาตรวจสอบอินเทอร์เน็ต";
+    return "ไม่สามารถเชื่อมต่อระบบ Cloud ได้ กรุณาตรวจสอบอินเทอร์เน็ต";
   }
   if (msg.includes("row-level security")) {
-    return "ไม่มีสิทธิ์เข้าถึงข้อมูลนี้ (RLS Policy)";
+    return "ไม่มีสิทธิ์เข้าถึงข้อมูลส่วนตัวนี้";
   }
 
   return `เกิดข้อผิดพลาด: ${rawMessage}`;

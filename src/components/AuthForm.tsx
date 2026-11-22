@@ -114,7 +114,7 @@ export function AuthForm() {
 
     const supabase = createClient();
     if (!supabase) {
-      setErrorMessage(envStatus.errorMessage ?? "ยังไม่ได้ตั้งค่า Supabase");
+      setErrorMessage(envStatus.errorMessage ?? "ยังไม่ได้ตั้งค่าระบบ Cloud");
       return;
     }
 
@@ -186,7 +186,7 @@ export function AuthForm() {
 
     const supabase = createClient();
     if (!supabase) {
-      setErrorMessage(envStatus.errorMessage ?? "ยังไม่ได้ตั้งค่า Supabase");
+      setErrorMessage(envStatus.errorMessage ?? "ยังไม่ได้ตั้งค่าระบบ Cloud");
       return;
     }
 
@@ -250,11 +250,11 @@ export function AuthForm() {
       <div className="mb-6">
         <span className="inline-flex items-center gap-1.5 rounded-md border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-semibold text-emerald-500 mb-3">
           <Lock className="h-3 w-3" />
-          <span>Supabase Cloud Authentication</span>
+          <span>KhumLab Cloud Account</span>
         </span>
         <h1 className="text-xl sm:text-2xl font-bold tracking-tight">
           {activeTab === "login"
-            ? "เข้าสู่ระบบ E-Com MarginLab"
+            ? "เข้าสู่ระบบ KhumLab"
             : "สร้างบัญชีผู้ใช้งานใหม่"}
         </h1>
         <p className={`mt-1 text-xs sm:text-sm ${mutedText}`}>

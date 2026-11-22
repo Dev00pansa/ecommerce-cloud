@@ -276,7 +276,7 @@ export function DashboardClient({
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `ecom-marginlab-${new Date().toISOString().slice(0, 10)}.csv`;
+    link.download = `khumlab-${new Date().toISOString().slice(0, 10)}.csv`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -291,7 +291,7 @@ export function DashboardClient({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold tracking-tight">
-            E-Commerce Profit & Break-Even Workspace
+            KhumLab Profit & Break-Even Workspace
           </h1>
           <p className={`text-xs sm:text-sm ${mutedText}`}>
             ผู้ใช้งาน: <span className="font-mono text-emerald-500">@{username}</span> ({email})

@@ -17,9 +17,12 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "E-Com MarginLab | ระบบคำนวณต้นทุน ตั้งราคาขาย และจุดคุ้มทุน E-Commerce",
+  title: "KhumLab | ระบบคำนวณต้นทุน ตั้งราคาขาย และจุดคุ้มทุน E-Commerce",
   description:
-    "เว็บแอปพลิเคชันคำนวณต้นทุน ตั้งราคาขาย จำลองโปรโมชัน และวิเคราะห์จุดคุ้มทุนสำหรับผู้ประกอบการ E-Commerce พร้อมบันทึกข้อมูลบน Supabase Cloud",
+    "KhumLab เว็บแอปพลิเคชันคำนวณต้นทุน ตั้งราคาขาย จำลองโปรโมชัน และวิเคราะห์จุดคุ้มทุนสำหรับผู้ประกอบการ E-Commerce พร้อมบันทึกข้อมูลส่วนตัวบน Cloud",
+  icons: {
+    icon: "/images/khumlab-logo.svg",
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

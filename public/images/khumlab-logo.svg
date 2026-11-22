@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="none">
+  <defs>
+    <linearGradient id="khumEmerald" x1="24" y1="24" x2="232" y2="232" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#34D399" />
+      <stop offset="55%" stop-color="#10B981" />
+      <stop offset="100%" stop-color="#059669" />
+    </linearGradient>
+    <linearGradient id="khumSilver" x1="48" y1="36" x2="200" y2="220" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="65%" stop-color="#E2E8F0" />
+      <stop offset="100%" stop-color="#94A3B8" />
+    </linearGradient>
+    <linearGradient id="khumAccent" x1="120" y1="40" x2="224" y2="140" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#6EE7B7" />
+      <stop offset="100%" stop-color="#10B981" />
+    </linearGradient>
+  </defs>
+
+  <!-- Outer Geometric Hexagonal Frame (Transparent interior) -->
+  <path
+    d="M128 16L226 72V184L128 240L30 184V72L128 16Z"
+    stroke="url(#khumEmerald)"
+    stroke-width="10"
+    stroke-linejoin="round"
+    opacity="0.88"
+  />
+
+  <!-- Inner Precision Corner Ticks -->
+  <path
+    d="M128 34L210 81V175L128 222L46 175V81L128 34Z"
+    stroke="#34D399"
+    stroke-width="2.5"
+    stroke-dasharray="14 10"
+    opacity="0.45"
+  />
+
+  <!-- Left Vertical Pillar of K (Silver-White) -->
+  <rect
+    x="68"
+    y="62"
+    width="28"
+    height="132"
+    rx="8"
+    fill="url(#khumSilver)"
+  />
+
+  <!-- Upper Diagonal Ascending Profit Wing of K (Emerald) -->
+  <path
+    d="M106 124L164 64C167.5 60.4 172.3 58.4 177.3 58.4H194C198.4 58.4 200.7 63.7 197.6 66.9L136 130L106 124Z"
+    fill="url(#khumAccent)"
+  />
+
+  <!-- Ascending Arrow Tip on Upper Wing -->
+  <path
+    d="M168 58H198V88"
+    stroke="#6EE7B7"
+    stroke-width="7"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+
+  <!-- Lower Diagonal Precision Leg of K (Emerald + Silver Geometric Cut) -->
+  <path
+    d="M114 118L196 187C200 190.4 197.6 197 192.3 197H165.5C161 197 156.7 195.2 153.5 192.1L102 142L114 118Z"
+    fill="url(#khumEmerald)"
+  />
+
+  <!-- Core Diamond Node (Precision Balance Point) -->
+  <polygon
+    points="110,114 126,128 110,142 94,128"
+    fill="#FFFFFF"
+  />
+</svg>

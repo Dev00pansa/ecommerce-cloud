@@ -119,3 +119,49 @@ body {
   will-change: transform, opacity;
   animation: emeraldBeamDriftC 11s ease-in-out infinite alternate;
 }
+
+/* KhumLab Hero Logo 3D Float & Orbital Rings */
+@keyframes khumLogoFloat3D {
+  0% {
+    transform: perspective(900px) translate3d(0, 0px, 0) rotateX(4deg) rotateY(-8deg) rotateZ(-1deg);
+  }
+  50% {
+    transform: perspective(900px) translate3d(0, -12px, 12px) rotateX(-5deg) rotateY(9deg) rotateZ(1.5deg);
+  }
+  100% {
+    transform: perspective(900px) translate3d(0, 4px, 0) rotateX(3deg) rotateY(-6deg) rotateZ(-0.5deg);
+  }
+}
+
+@keyframes khumOrbitSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes khumOrbitSpinReverse {
+  from {
+    transform: rotate(360deg);
+  }
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+.animate-khum-logo-3d {
+  will-change: transform;
+  animation: khumLogoFloat3D 7.5s ease-in-out infinite alternate;
+}
+
+.animate-orbit-slow {
+  will-change: transform;
+  animation: khumOrbitSpin 28s linear infinite;
+}
+
+.animate-orbit-reverse {
+  will-change: transform;
+  animation: khumOrbitSpinReverse 20s linear infinite;
+}

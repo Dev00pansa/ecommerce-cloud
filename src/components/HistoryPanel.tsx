@@ -108,7 +108,7 @@ export function HistoryPanel({
         <div className={`rounded-xl border p-10 text-center ${cardClass}`}>
           <Loader2 className="mx-auto h-6 w-6 animate-spin text-emerald-500 mb-2" />
           <p className={`text-sm ${mutedText}`}>
-            กำลังดึงประวัติจาก Supabase Cloud...
+            กำลังดึงประวัติที่บันทึกไว้บน Cloud...
           </p>
         </div>
       ) : records.length === 0 ? (

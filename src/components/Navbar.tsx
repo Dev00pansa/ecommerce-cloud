@@ -2,15 +2,15 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, type MouseEvent } from "react";
 import {
-  Calculator,
   LayoutDashboard,
   Loader2,
   LogIn,
   LogOut,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { KhumLabLogo } from "@/components/KhumLabLogo";
 
 interface NavbarProps {
   username?: string | null;
@@ -18,8 +18,8 @@ interface NavbarProps {
 }
 
 /**
- * แถบเมนูหลักด้านบน (Sticky Header)
- * ใช้ Container กว้าง max-w-[1440px] และตัดปุ่มสลับโหมดสีออกเพื่อโฟกัสโหมดดำ-เขียว
+ * แถบเมนูหลักด้านบน (Sticky Header) แบรนด์ KhumLab
+ * - คลิกโลโก้มุมซ้ายบนจะพากลับหน้าแรก (/) และเลื่อนขึ้นบนสุด (y = 0) เสมอจากทุกหน้าและทุกสถานะล็อกอิน
  */
 export function Navbar({
   username = null,
@@ -28,6 +28,15 @@ export function Navbar({
   const pathname = usePathname();
   const router = useRouter();
   const [loggingOut, setLoggingOut] = useState(false);
+
+  function handleLogoClick(event: MouseEvent<HTMLAnchorElement>) {
+    if (pathname === "/") {
+      event.preventDefault();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } else {
+      window.scrollTo({ top: 0, behavior: "instant" });
+    }
+  }
 
   async function handleLogout() {
     if (loggingOut) return;
@@ -48,17 +57,20 @@ export function Navbar({
   return (
     <header className="sticky top-0 z-40 border-b border-zinc-800/90 bg-[#000000]/90 backdrop-blur-md">
       <div className="w-full max-w-[1440px] mx-auto flex items-center justify-between gap-4 px-6 py-3.5 md:px-12 lg:px-16">
-        {/* ด้านซ้าย: โลโก้และชื่อโปรเจกต์ */}
+        {/* ด้านซ้าย: โลโก้พื้นหลังโปร่งใสและชื่อแบรนด์ KhumLab */}
         <Link
           href="/"
+          scroll={true}
+          onClick={handleLogoClick}
           className="flex items-center gap-2.5 group focus:outline-none"
         >
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-500 text-slate-950 transition-transform group-hover:scale-105">
-            <Calculator className="h-5 w-5" />
-          </div>
+          <KhumLabLogo
+            size={38}
+            className="transition-transform duration-300 group-hover:scale-105"
+          />
           <div>
-            <span className="text-sm sm:text-base font-bold tracking-tight text-zinc-100 block leading-none">
-              E-Com MarginLab
+            <span className="text-base sm:text-lg font-bold tracking-tight text-zinc-100 block leading-none">
+              KhumLab
             </span>
             <span className="text-[11px] font-medium text-zinc-500">
               Digital for E-Commerce
@@ -70,6 +82,8 @@ export function Navbar({
         <nav className="hidden sm:flex items-center gap-1.5">
           <Link
             href="/"
+            scroll={true}
+            onClick={handleLogoClick}
             className={`rounded-lg px-3.5 py-1.5 text-sm font-medium transition-colors ${
               pathname === "/"
                 ? "bg-zinc-900 text-emerald-400"
