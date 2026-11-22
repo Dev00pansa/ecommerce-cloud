@@ -5,7 +5,7 @@ export default function LoginPage() {
   return (
     <>
       <Navbar isAuthenticated={false} />
-      <main className="mx-auto flex w-full max-w-6xl flex-1 items-center justify-center px-4 py-12 sm:px-6">
+      <main className="w-full max-w-[1440px] mx-auto flex flex-1 items-center justify-center px-6 py-12 md:px-12 lg:px-16">
         <AuthForm />
       </main>
     </>

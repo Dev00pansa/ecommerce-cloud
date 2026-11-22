@@ -286,7 +286,7 @@ export function DashboardClient({
   const mutedText = isDark ? "text-zinc-400" : "text-slate-600";
 
   return (
-    <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-6 sm:py-8 space-y-6">
+    <main className="w-full max-w-[1440px] mx-auto flex-1 px-6 py-6 md:px-12 lg:px-16 sm:py-8 space-y-6">
       {/* หัวข้อ Dashboard + แท็บสลับ คำนวณราคา / ประวัติที่บันทึกไว้ */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>

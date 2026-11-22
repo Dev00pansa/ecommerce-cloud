@@ -9,11 +9,8 @@ import {
   Loader2,
   LogIn,
   LogOut,
-  Moon,
-  Sun,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-import { useTheme } from "@/components/ThemeProvider";
 
 interface NavbarProps {
   username?: string | null;
@@ -22,13 +19,12 @@ interface NavbarProps {
 
 /**
  * แถบเมนูหลักด้านบน (Sticky Header)
- * แสดงโลโก้ ลิงก์นำทาง ปุ่มสลับ 2 โหมดสี (ปกติ / ดำ) และสถานะผู้ใช้งาน
+ * ใช้ Container กว้าง max-w-[1440px] และตัดปุ่มสลับโหมดสีออกเพื่อโฟกัสโหมดดำ-เขียว
  */
 export function Navbar({
   username = null,
   isAuthenticated = false,
 }: NavbarProps) {
-  const { isDark, toggleTheme } = useTheme();
   const pathname = usePathname();
   const router = useRouter();
   const [loggingOut, setLoggingOut] = useState(false);
@@ -50,14 +46,8 @@ export function Navbar({
   const calculatorHref = isAuthenticated ? "/dashboard" : "/login";
 
   return (
-    <header
-      className={`sticky top-0 z-40 border-b backdrop-blur-md transition-colors ${
-        isDark
-          ? "border-zinc-800 bg-[#000000]/90"
-          : "border-slate-200/90 bg-white/85"
-      }`}
-    >
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
+    <header className="sticky top-0 z-40 border-b border-zinc-800/90 bg-[#000000]/90 backdrop-blur-md">
+      <div className="w-full max-w-[1440px] mx-auto flex items-center justify-between gap-4 px-6 py-3.5 md:px-12 lg:px-16">
         {/* ด้านซ้าย: โลโก้และชื่อโปรเจกต์ */}
         <Link
           href="/"
@@ -67,86 +57,47 @@ export function Navbar({
             <Calculator className="h-5 w-5" />
           </div>
           <div>
-            <span className="text-sm sm:text-base font-bold tracking-tight block leading-none">
+            <span className="text-sm sm:text-base font-bold tracking-tight text-zinc-100 block leading-none">
               E-Com MarginLab
             </span>
-            <span
-              className={`text-[11px] font-medium ${
-                isDark ? "text-zinc-500" : "text-slate-500"
-              }`}
-            >
+            <span className="text-[11px] font-medium text-zinc-500">
               Digital for E-Commerce
             </span>
           </div>
         </Link>
 
-        {/* ตรงกลาง: เมนูลิงก์เรียบง่ายไม่ซ้ำซ้อน */}
-        <nav className="hidden sm:flex items-center gap-1">
+        {/* ตรงกลาง: เมนูลิงก์นำทาง */}
+        <nav className="hidden sm:flex items-center gap-1.5">
           <Link
             href="/"
-            className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
+            className={`rounded-lg px-3.5 py-1.5 text-sm font-medium transition-colors ${
               pathname === "/"
-                ? isDark
-                  ? "bg-zinc-900 text-emerald-400"
-                  : "bg-emerald-50 text-emerald-700"
-                : isDark
-                  ? "text-zinc-400 hover:bg-zinc-900 hover:text-zinc-100"
-                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                ? "bg-zinc-900 text-emerald-400"
+                : "text-zinc-400 hover:bg-zinc-900 hover:text-zinc-100"
             }`}
           >
             หน้าหลัก
           </Link>
           <Link
             href={calculatorHref}
-            className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
+            className={`rounded-lg px-3.5 py-1.5 text-sm font-medium transition-colors ${
               pathname.startsWith("/dashboard")
-                ? isDark
-                  ? "bg-zinc-900 text-emerald-400"
-                  : "bg-emerald-50 text-emerald-700"
-                : isDark
-                  ? "text-zinc-400 hover:bg-zinc-900 hover:text-zinc-100"
-                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                ? "bg-zinc-900 text-emerald-400"
+                : "text-zinc-400 hover:bg-zinc-900 hover:text-zinc-100"
             }`}
           >
             เครื่องมือคำนวณ
           </Link>
         </nav>
 
-        {/* มุมขวาบน: ปุ่มสลับโหมดสี 2 โหมด + ปุ่มเข้าสู่ระบบ / สถานะผู้ใช้ */}
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={toggleTheme}
-            aria-label="สลับโหมดสี"
-            className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors ${
-              isDark
-                ? "border-zinc-800 bg-zinc-950 text-zinc-200 hover:border-zinc-700 hover:bg-zinc-900"
-                : "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50"
-            }`}
-          >
-            {isDark ? (
-              <>
-                <Sun className="h-3.5 w-3.5 text-emerald-400" />
-                <span>ปกติ</span>
-              </>
-            ) : (
-              <>
-                <Moon className="h-3.5 w-3.5 text-slate-700" />
-                <span>ดำ</span>
-              </>
-            )}
-          </button>
-
+        {/* มุมขวาบน: สถานะผู้ใช้ / ปุ่มเข้าสู่ระบบ */}
+        <div className="flex items-center gap-2.5">
           {isAuthenticated ? (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2.5">
               {username && (
                 <Link
                   href="/dashboard"
-                  className={`hidden md:inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-mono font-medium transition-colors ${
-                    isDark
-                      ? "border-zinc-800 bg-zinc-950 text-emerald-400 hover:border-emerald-500/50"
-                      : "border-slate-200 bg-slate-50 text-emerald-700 hover:border-emerald-500/50"
-                  }`}
+                  className="hidden md:inline-flex items-center gap-1.5 rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-1.5 text-xs font-mono font-medium text-emerald-400 transition-colors hover:border-emerald-500/50"
                 >
                   <LayoutDashboard className="h-3.5 w-3.5" />
                   <span>@{username}</span>
@@ -156,11 +107,7 @@ export function Navbar({
                 type="button"
                 onClick={handleLogout}
                 disabled={loggingOut}
-                className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition-colors disabled:opacity-60 ${
-                  isDark
-                    ? "border-zinc-800 bg-zinc-950 text-zinc-200 hover:border-rose-500/50 hover:text-rose-400"
-                    : "border-slate-200 bg-white text-slate-700 hover:border-rose-300 hover:text-rose-600"
-                }`}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-800 bg-zinc-950 px-3.5 py-1.5 text-xs font-semibold text-zinc-200 transition-colors hover:border-rose-500/50 hover:text-rose-400 disabled:opacity-60"
               >
                 {loggingOut ? (
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -173,7 +120,7 @@ export function Navbar({
           ) : (
             <Link
               href="/login"
-              className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-500 px-3.5 py-1.5 text-xs sm:text-sm font-semibold text-slate-950 transition-colors hover:bg-emerald-400"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-500 px-4 py-2 text-xs sm:text-sm font-semibold text-slate-950 transition-colors hover:bg-emerald-400"
             >
               <LogIn className="h-3.5 w-3.5" />
               <span>เข้าสู่ระบบ</span>

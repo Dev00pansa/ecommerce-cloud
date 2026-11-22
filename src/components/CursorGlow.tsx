@@ -3,10 +3,10 @@
 import { useEffect, useRef } from "react";
 
 /**
- * เอฟเฟกต์แสงสีเขียวมรกตติดตามตำแหน่งเมาส์ (Cursor Emerald Spotlight)
- * - ทำงานเฉพาะอุปกรณ์ที่มีเมาส์ละเอียด (pointer: fine) เพื่อไม่รบกวนหน้าจอมือถือ
+ * เอฟเฟกต์แสงสีเขียวมรกตขนาดกระชับติดตามตำแหน่งเมาส์ (Cursor Emerald Spotlight)
+ * - รัศมีกระชับ 180px ไม่บดบังสายตา
+ * - ทำงานเฉพาะอุปกรณ์ที่มีเมาส์ละเอียด (pointer: fine)
  * - อัปเดตตำแหน่งผ่าน DOM CSS Variables ภายใน requestAnimationFrame โดยไม่ใช้ useState
- *   จึงไม่เกิด React Re-render และไม่กระตุกขณะขยับเมาส์
  */
 export function CursorGlow() {
   const overlayRef = useRef<HTMLDivElement | null>(null);
@@ -66,7 +66,7 @@ export function CursorGlow() {
       style={{
         opacity: 0,
         background:
-          "radial-gradient(400px circle at var(--mouse-x, -999px) var(--mouse-y, -999px), rgba(16, 185, 129, 0.14), transparent 72%)",
+          "radial-gradient(180px circle at var(--mouse-x, -999px) var(--mouse-y, -999px), rgba(16, 185, 129, 0.16), transparent 70%)",
       }}
     />
   );

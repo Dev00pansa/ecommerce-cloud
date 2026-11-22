@@ -11,6 +11,8 @@ html {
 
 body {
   font-family: var(--font-sans);
+  background-color: #000000;
+  color: #f4f4f5;
 }
 
 /* ลายจุด Dot-Grid สำหรับโหมดสว่างและโหมดมืด */
@@ -25,9 +27,8 @@ body {
 .bg-dot-dark {
   background-color: #000000;
   background-image:
-    radial-gradient(ellipse 75% 40% at 50% -10%, rgba(16, 185, 129, 0.1), transparent),
-    radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
-  background-size: 100% 100%, 22px 22px;
+    radial-gradient(rgba(255, 255, 255, 0.075) 1px, transparent 1px);
+  background-size: 24px 24px;
 }
 
 /* Staggered Entrance Animation */
@@ -56,4 +57,65 @@ body {
 
 .animate-enter-delay-3 {
   animation: fadeSlideUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.24s both;
+}
+
+/* Animated Top Emerald Beams (เคลื่อนไหวสลับจังหวะตลอดเวลาด้วย GPU Acceleration) */
+@keyframes emeraldBeamDriftA {
+  0% {
+    transform: translate3d(-6%, -4%, 0) scale(0.95) rotate(-6deg);
+    opacity: 0.45;
+  }
+  50% {
+    transform: translate3d(4%, 6%, 0) scale(1.08) rotate(3deg);
+    opacity: 0.85;
+  }
+  100% {
+    transform: translate3d(10%, -2%, 0) scale(0.98) rotate(8deg);
+    opacity: 0.55;
+  }
+}
+
+@keyframes emeraldBeamDriftB {
+  0% {
+    transform: translate3d(8%, 2%, 0) scale(1.05) rotate(5deg);
+    opacity: 0.75;
+  }
+  50% {
+    transform: translate3d(-5%, 8%, 0) scale(0.92) rotate(-4deg);
+    opacity: 0.4;
+  }
+  100% {
+    transform: translate3d(-10%, -3%, 0) scale(1.1) rotate(-8deg);
+    opacity: 0.85;
+  }
+}
+
+@keyframes emeraldBeamDriftC {
+  0% {
+    transform: translate3d(-4%, 6%, 0) scale(0.9) rotate(4deg);
+    opacity: 0.5;
+  }
+  50% {
+    transform: translate3d(7%, -4%, 0) scale(1.12) rotate(-5deg);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate3d(-8%, 3%, 0) scale(0.96) rotate(6deg);
+    opacity: 0.45;
+  }
+}
+
+.animate-beam-a {
+  will-change: transform, opacity;
+  animation: emeraldBeamDriftA 10s ease-in-out infinite alternate;
+}
+
+.animate-beam-b {
+  will-change: transform, opacity;
+  animation: emeraldBeamDriftB 13s ease-in-out infinite alternate;
+}
+
+.animate-beam-c {
+  will-change: transform, opacity;
+  animation: emeraldBeamDriftC 11s ease-in-out infinite alternate;
 }
