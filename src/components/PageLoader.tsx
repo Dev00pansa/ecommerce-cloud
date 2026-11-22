@@ -7,7 +7,7 @@ export function PageLoader({ label = "กำลังโหลดข้อมู
     <div
       role="status"
       aria-live="polite"
-      className="w-full min-h-[calc(100vh-4rem)] bg-black flex flex-col items-center justify-center gap-4 px-6"
+      className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center gap-4 px-6"
     >
       <div className="relative flex items-center justify-center">
         <div

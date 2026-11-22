@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Sans_Thai, JetBrains_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { ClickRipple } from "@/components/ClickRipple";
 import "./globals.css";
 
 const ibmPlexThai = IBM_Plex_Sans_Thai({
@@ -33,6 +34,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col">
         <ThemeProvider>{children}</ThemeProvider>
+        <ClickRipple />
       </body>
     </html>
   );

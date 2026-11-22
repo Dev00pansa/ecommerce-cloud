@@ -223,7 +223,7 @@ export function Navbar({
                       }}
                       aria-expanded={dropdownOpen}
                       aria-haspopup="menu"
-                      className="group inline-flex items-center gap-2 rounded-md px-2.5 py-1.5 text-sm font-medium text-zinc-200 transition-colors hover:bg-white/[0.04] hover:text-white focus:outline-none"
+                      className="group inline-flex items-center gap-2 rounded-xl px-2.5 py-1.5 text-sm font-medium text-zinc-200 transition-colors hover:bg-white/[0.04] hover:text-white focus:outline-none"
                     >
                       {displayAvatarUrl ? (
                         // eslint-disable-next-line @next/next/no-img-element
@@ -259,7 +259,7 @@ export function Navbar({
 
                     <div
                       role="menu"
-                      className={`absolute right-0 mt-3 w-80 origin-top-right z-50 bg-[#070707]/95 backdrop-blur-xl border border-emerald-500/30 shadow-[0_12px_40px_-8px_rgba(0,0,0,0.85),0_0_24px_-6px_rgba(16,185,129,0.2)] transition-all duration-200 ease-out ${
+                      className={`absolute right-0 mt-3 w-80 origin-top-right z-50 overflow-hidden rounded-2xl bg-[#050505] border border-emerald-500/30 shadow-[0_14px_44px_-8px_rgba(0,0,0,0.95),0_0_24px_-6px_rgba(16,185,129,0.22)] transition-all duration-200 ease-out ${
                         dropdownOpen
                           ? "opacity-100 translate-y-0 scale-100 pointer-events-auto"
                           : "opacity-0 -translate-y-2 scale-95 pointer-events-none"
@@ -348,11 +348,11 @@ export function Navbar({
                           </span>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-1.5 border border-zinc-800/90 bg-black p-1">
+                        <div className="grid grid-cols-2 gap-1.5 rounded-xl border border-zinc-800/90 bg-black p-1">
                           <button
                             type="button"
                             onClick={() => setLanguage("th")}
-                            className={`py-1.5 text-xs font-semibold transition-colors ${
+                            className={`rounded-lg py-1.5 text-xs font-semibold transition-colors ${
                               language === "th"
                                 ? "bg-emerald-500 text-slate-950"
                                 : "text-zinc-400 hover:text-zinc-200"
@@ -363,7 +363,7 @@ export function Navbar({
                           <button
                             type="button"
                             onClick={() => setLanguage("en")}
-                            className={`py-1.5 text-xs font-semibold transition-colors ${
+                            className={`rounded-lg py-1.5 text-xs font-semibold transition-colors ${
                               language === "en"
                                 ? "bg-emerald-500 text-slate-950"
                                 : "text-zinc-400 hover:text-zinc-200"
@@ -381,7 +381,7 @@ export function Navbar({
                             setDropdownOpen(false);
                             setSettingsOpen(true);
                           }}
-                          className="w-full flex items-center gap-2.5 px-3 py-2.5 text-left text-sm font-medium text-zinc-200 transition-colors hover:bg-white/[0.04] hover:text-emerald-300"
+                          className="w-full flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-left text-sm font-medium text-zinc-200 transition-colors hover:bg-white/[0.05] hover:text-emerald-300"
                         >
                           <KeyRound className="h-4 w-4 text-emerald-400 shrink-0" />
                           <span>
@@ -407,7 +407,7 @@ export function Navbar({
                     setLogoutConfirmOpen(true);
                   }}
                   disabled={loggingOut}
-                  className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs sm:text-sm font-medium text-red-400 transition-colors hover:bg-white/[0.04] hover:text-red-300 disabled:opacity-60 focus:outline-none"
+                  className="inline-flex items-center gap-1.5 rounded-xl px-2.5 py-1.5 text-xs sm:text-sm font-medium text-red-400 transition-colors hover:bg-white/[0.04] hover:text-red-300 disabled:opacity-60 focus:outline-none"
                 >
                   <LogOut className="h-4 w-4" />
                   <span>{isEn ? "Sign Out" : "ออกจากระบบ"}</span>
@@ -434,7 +434,6 @@ export function Navbar({
           initialEmail={email}
           avatarUrl={displayAvatarUrl}
           language={language}
-          onChangeLanguage={setLanguage}
           onUsernameUpdated={(next) => setOverrideUsername(next)}
           onAvatarUpdated={(next) => setOverrideAvatarUrl(next)}
         />
@@ -452,7 +451,7 @@ export function Navbar({
           }}
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4"
         >
-          <div className="relative w-full max-w-sm border border-zinc-800 bg-[#070707] p-6 text-zinc-100 shadow-2xl">
+          <div className="relative w-full max-w-sm overflow-hidden rounded-2xl border border-zinc-800 bg-[#050505] p-6 text-zinc-100 shadow-2xl">
             <div
               aria-hidden="true"
               className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-red-500/60 to-transparent"
@@ -482,7 +481,7 @@ export function Navbar({
                 type="button"
                 onClick={() => setLogoutConfirmOpen(false)}
                 disabled={loggingOut}
-                className="px-4 py-2.5 text-sm font-medium text-zinc-300 transition-colors hover:bg-white/[0.04] hover:text-white disabled:opacity-50"
+                className="rounded-xl px-4 py-2.5 text-sm font-medium text-zinc-300 transition-colors hover:bg-white/[0.05] hover:text-white disabled:opacity-50"
               >
                 {isEn ? "Cancel" : "ยกเลิก"}
               </button>
@@ -490,7 +489,7 @@ export function Navbar({
                 type="button"
                 onClick={handleConfirmLogout}
                 disabled={loggingOut}
-                className="inline-flex items-center justify-center gap-2 bg-red-500 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-red-600 disabled:opacity-60"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-red-500 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-red-600 disabled:opacity-60"
               >
                 {loggingOut && <Loader2 className="h-4 w-4 animate-spin" />}
                 <span>

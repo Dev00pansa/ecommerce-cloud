@@ -215,3 +215,19 @@ body {
   will-change: transform, opacity;
   animation: dashboardGlowB 12s ease-in-out infinite alternate;
 }
+
+@keyframes clickRippleExpand {
+  0% {
+    transform: translate3d(-50%, -50%, 0) scale(0.65);
+    opacity: 0.95;
+  }
+  100% {
+    transform: translate3d(-50%, -50%, 0) scale(1.75);
+    opacity: 0;
+  }
+}
+
+.animate-click-ripple {
+  will-change: transform, opacity;
+  animation: clickRippleExpand 350ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}

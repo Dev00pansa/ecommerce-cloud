@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { Navbar } from "@/components/Navbar";
 import { LandingView } from "@/components/LandingView";
+import { PageLoader } from "@/components/PageLoader";
 
 async function HomeContent() {
   let isAuthenticated = false;
@@ -54,13 +55,7 @@ async function HomeContent() {
 
 export default function HomePage() {
   return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen flex items-center justify-center text-sm text-slate-500">
-          กำลังโหลดหน้าแรก...
-        </div>
-      }
-    >
+    <Suspense fallback={<PageLoader label="กำลังโหลดหน้าแรก..." />}>
       <HomeContent />
     </Suspense>
   );

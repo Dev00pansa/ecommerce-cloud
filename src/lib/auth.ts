@@ -172,6 +172,12 @@ export function translateSupabaseError(error: unknown): string {
   if (msg.includes("failed to fetch") || msg.includes("network")) {
     return "ไม่สามารถเชื่อมต่อระบบ Cloud ได้ กรุณาตรวจสอบอินเทอร์เน็ต";
   }
+  if (msg.includes("username_cooldown_active")) {
+    return "สามารถเปลี่ยนชื่อผู้ใช้ได้เดือนละ 1 ครั้ง (ทุก 30 วัน) เท่านั้น";
+  }
+  if (msg.includes("password_cooldown_active")) {
+    return "สามารถเปลี่ยนรหัสผ่านได้เดือนละ 1 ครั้ง (ทุก 30 วัน) เท่านั้น";
+  }
   if (msg.includes("row-level security")) {
     return "ไม่มีสิทธิ์เข้าถึงข้อมูลส่วนตัวนี้";
   }

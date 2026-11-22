@@ -5,11 +5,10 @@ import { useRouter } from "next/navigation";
 import {
   AlertCircle,
   Camera,
-  Check,
   CheckCircle2,
+  Clock,
   Eye,
   EyeOff,
-  Globe,
   KeyRound,
   Loader2,
   Lock,
@@ -36,9 +35,46 @@ interface AccountSettingsModalProps {
   initialEmail?: string | null;
   avatarUrl?: string | null;
   language: AppLanguage;
-  onChangeLanguage: (next: AppLanguage) => void;
   onUsernameUpdated: (nextUsername: string) => void;
   onAvatarUpdated: (nextAvatarUrl: string) => void;
+}
+
+const COOLDOWN_DAYS = 30;
+const COOLDOWN_MS = COOLDOWN_DAYS * 24 * 60 * 60 * 1000;
+
+function computeCooldownInfo(
+  updatedAtIso: string | null,
+  isEn: boolean
+): { remainingDays: number; nextAvailableDate: string | null } {
+  if (!updatedAtIso) {
+    return { remainingDays: 0, nextAvailableDate: null };
+  }
+
+  const parsedMs = new Date(updatedAtIso).getTime();
+  if (!Number.isFinite(parsedMs)) {
+    return { remainingDays: 0, nextAvailableDate: null };
+  }
+
+  const nextAllowedMs = parsedMs + COOLDOWN_MS;
+  const remainingMs = nextAllowedMs - Date.now();
+  if (remainingMs <= 0) {
+    return { remainingDays: 0, nextAvailableDate: null };
+  }
+
+  const remainingDays = Math.max(
+    1,
+    Math.ceil(remainingMs / (24 * 60 * 60 * 1000))
+  );
+  const nextAvailableDate = new Date(nextAllowedMs).toLocaleDateString(
+    isEn ? "en-US" : "th-TH",
+    {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    }
+  );
+
+  return { remainingDays, nextAvailableDate };
 }
 
 export function AccountSettingsModal({
@@ -48,7 +84,6 @@ export function AccountSettingsModal({
   initialEmail = null,
   avatarUrl = null,
   language,
-  onChangeLanguage,
   onUsernameUpdated,
   onAvatarUpdated,
 }: AccountSettingsModalProps) {
@@ -57,6 +92,10 @@ export function AccountSettingsModal({
   const avatarFileInputRef = useRef<HTMLInputElement | null>(null);
 
   const [resolvedEmail, setResolvedEmail] = useState<string>(initialEmail ?? "");
+  const [usernameUpdatedAt, setUsernameUpdatedAt] = useState<string | null>(null);
+  const [passwordUpdatedAt, setPasswordUpdatedAt] = useState<string | null>(null);
+  const [loadingCooldown, setLoadingCooldown] = useState(false);
+
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [avatarError, setAvatarError] = useState<string | null>(null);
   const [avatarSuccess, setAvatarSuccess] = useState<string | null>(null);
@@ -77,6 +116,9 @@ export function AccountSettingsModal({
 
   const isBusy = savingUsername || savingPassword || uploadingAvatar;
 
+  const usernameCooldown = computeCooldownInfo(usernameUpdatedAt, isEn);
+  const passwordCooldown = computeCooldownInfo(passwordUpdatedAt, isEn);
+
   useEffect(() => {
     if (!isOpen) return;
 
@@ -93,22 +135,52 @@ export function AccountSettingsModal({
   }, [isOpen, isBusy, onClose]);
 
   useEffect(() => {
-    if (!isOpen || resolvedEmail) return;
+    if (!isOpen) return;
 
     let cancelled = false;
     const supabase = createClient();
     if (!supabase) return;
 
-    void supabase.auth.getUser().then(({ data }) => {
-      if (!cancelled && data.user?.email) {
-        setResolvedEmail(data.user.email);
+    async function loadAccountCooldowns() {
+      if (!supabase) return;
+      setLoadingCooldown(true);
+      try {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+
+        if (!user || cancelled) return;
+
+        if (user.email) {
+          setResolvedEmail(user.email);
+        }
+
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("email, username_updated_at, password_updated_at")
+          .eq("id", user.id)
+          .maybeSingle();
+
+        if (!cancelled && profile) {
+          if (profile.email) {
+            setResolvedEmail(profile.email);
+          }
+          setUsernameUpdatedAt(profile.username_updated_at ?? null);
+          setPasswordUpdatedAt(profile.password_updated_at ?? null);
+        }
+      } finally {
+        if (!cancelled) {
+          setLoadingCooldown(false);
+        }
       }
-    });
+    }
+
+    void loadAccountCooldowns();
 
     return () => {
       cancelled = true;
     };
-  }, [isOpen, resolvedEmail]);
+  }, [isOpen]);
 
   if (!isOpen) {
     return null;
@@ -146,6 +218,7 @@ export function AccountSettingsModal({
   }
 
   function startEditUsername() {
+    if (usernameCooldown.remainingDays > 0 || loadingCooldown) return;
     setNextUsername(username);
     setUsernameError(null);
     setUsernameSuccess(null);
@@ -160,7 +233,7 @@ export function AccountSettingsModal({
 
   async function handleSaveUsername(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (savingUsername) return;
+    if (savingUsername || usernameCooldown.remainingDays > 0) return;
 
     setUsernameError(null);
     setUsernameSuccess(null);
@@ -223,10 +296,12 @@ export function AccountSettingsModal({
         return;
       }
 
-      const { error: profileError } = await supabase
+      const { data: updatedProfile, error: profileError } = await supabase
         .from("profiles")
         .update({ username: check.normalized })
-        .eq("id", user.id);
+        .eq("id", user.id)
+        .select("username, username_updated_at")
+        .single();
 
       if (profileError) {
         setUsernameError(translateSupabaseError(profileError));
@@ -243,6 +318,9 @@ export function AccountSettingsModal({
       }
 
       onUsernameUpdated(check.normalized);
+      setUsernameUpdatedAt(
+        updatedProfile?.username_updated_at ?? new Date().toISOString()
+      );
       setEditingUsername(false);
       setUsernameSuccess(
         isEn
@@ -258,6 +336,7 @@ export function AccountSettingsModal({
   }
 
   function toggleEditPassword() {
+    if (passwordCooldown.remainingDays > 0 || loadingCooldown) return;
     setEditingPassword((prev) => !prev);
     setNewPassword("");
     setConfirmPassword("");
@@ -268,7 +347,7 @@ export function AccountSettingsModal({
 
   async function handleSavePassword(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (savingPassword) return;
+    if (savingPassword || passwordCooldown.remainingDays > 0) return;
 
     setPasswordError(null);
     setPasswordSuccess(null);
@@ -312,6 +391,39 @@ export function AccountSettingsModal({
     setSavingPassword(true);
 
     try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        setPasswordError(
+          isEn
+            ? "Session expired. Please sign in again."
+            : "เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่"
+        );
+        return;
+      }
+
+      const { data: latestProfile } = await supabase
+        .from("profiles")
+        .select("password_updated_at")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      const serverCooldown = computeCooldownInfo(
+        latestProfile?.password_updated_at ?? null,
+        isEn
+      );
+      if (serverCooldown.remainingDays > 0) {
+        setPasswordUpdatedAt(latestProfile?.password_updated_at ?? null);
+        setPasswordError(
+          isEn
+            ? `Password can be changed once every 30 days (${serverCooldown.remainingDays} days left).`
+            : `เปลี่ยนได้เดือนละ 1 ครั้ง (เปลี่ยนได้อีกครั้งในอีก ${serverCooldown.remainingDays} วัน)`
+        );
+        return;
+      }
+
       const { error } = await supabase.auth.updateUser({
         password: newPassword,
       });
@@ -321,6 +433,15 @@ export function AccountSettingsModal({
         return;
       }
 
+      const nowIso = new Date().toISOString();
+      const { data: updatedProfile } = await supabase
+        .from("profiles")
+        .update({ password_updated_at: nowIso })
+        .eq("id", user.id)
+        .select("password_updated_at")
+        .single();
+
+      setPasswordUpdatedAt(updatedProfile?.password_updated_at ?? nowIso);
       setNewPassword("");
       setConfirmPassword("");
       setShowNewPassword(false);
@@ -349,7 +470,7 @@ export function AccountSettingsModal({
       }}
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4"
     >
-      <div className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto border border-emerald-500/30 bg-[#070707] text-zinc-100 shadow-[0_0_50px_-10px_rgba(16,185,129,0.28)]">
+      <div className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl border border-emerald-500/30 bg-[#050505] text-zinc-100 shadow-[0_24px_60px_-12px_rgba(0,0,0,0.95),0_0_40px_-10px_rgba(16,185,129,0.28)]">
         <div
           aria-hidden="true"
           className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-400/75 to-transparent"
@@ -373,7 +494,7 @@ export function AccountSettingsModal({
             onClick={onClose}
             disabled={isBusy}
             aria-label={isEn ? "Close settings" : "ปิดหน้าต่างตั้งค่า"}
-            className="p-2 text-zinc-400 transition-colors hover:bg-white/[0.05] hover:text-zinc-100 disabled:opacity-50"
+            className="rounded-xl p-2 text-zinc-400 transition-colors hover:bg-white/[0.06] hover:text-zinc-100 disabled:opacity-50"
           >
             <X className="h-5 w-5" />
           </button>
@@ -435,7 +556,7 @@ export function AccountSettingsModal({
                 type="button"
                 onClick={() => avatarFileInputRef.current?.click()}
                 disabled={uploadingAvatar}
-                className="shrink-0 border border-emerald-500/30 bg-black px-3.5 py-2 text-xs font-medium text-emerald-300 transition-colors hover:border-emerald-400 hover:text-white disabled:opacity-50"
+                className="shrink-0 rounded-xl border border-emerald-500/30 bg-black px-3.5 py-2 text-xs font-medium text-emerald-300 transition-colors hover:border-emerald-400 hover:text-white disabled:opacity-50"
               >
                 {uploadingAvatar
                   ? isEn
@@ -462,45 +583,6 @@ export function AccountSettingsModal({
             )}
           </section>
 
-          <section className="py-5 space-y-3.5">
-            <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-[0.16em] text-zinc-400">
-              <Globe className="h-3.5 w-3.5 text-emerald-400" />
-              <span>{isEn ? "Language" : "การตั้งค่าภาษา"}</span>
-            </div>
-
-            <div className="grid grid-cols-2 gap-2.5">
-              <button
-                type="button"
-                onClick={() => onChangeLanguage("th")}
-                className={`flex items-center justify-between border px-4 py-2.5 text-sm font-medium transition-colors ${
-                  language === "th"
-                    ? "border-emerald-500/70 bg-emerald-950/30 text-emerald-300"
-                    : "border-zinc-800 bg-black text-zinc-400 hover:border-zinc-700 hover:text-zinc-200"
-                }`}
-              >
-                <span>ภาษาไทย (TH)</span>
-                {language === "th" && (
-                  <Check className="h-4 w-4 text-emerald-400" />
-                )}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => onChangeLanguage("en")}
-                className={`flex items-center justify-between border px-4 py-2.5 text-sm font-medium transition-colors ${
-                  language === "en"
-                    ? "border-emerald-500/70 bg-emerald-950/30 text-emerald-300"
-                    : "border-zinc-800 bg-black text-zinc-400 hover:border-zinc-700 hover:text-zinc-200"
-                }`}
-              >
-                <span>English (EN)</span>
-                {language === "en" && (
-                  <Check className="h-4 w-4 text-emerald-400" />
-                )}
-              </button>
-            </div>
-          </section>
-
           <section className="py-5 space-y-5">
             <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-[0.16em] text-zinc-400">
               <KeyRound className="h-3.5 w-3.5 text-emerald-400" />
@@ -512,15 +594,25 @@ export function AccountSettingsModal({
             </div>
 
             <div className="space-y-3">
-              <div className="flex items-center justify-between gap-3">
-                <div className="min-w-0">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0 space-y-1">
                   <span className="flex items-center gap-1.5 text-xs text-zinc-500">
                     <UserIcon className="h-3.5 w-3.5" />
                     <span>{isEn ? "Username" : "ชื่อผู้ใช้ (Username)"}</span>
                   </span>
                   {!editingUsername && (
-                    <p className="mt-1 text-base font-semibold text-zinc-100 truncate">
+                    <p className="text-base font-semibold text-zinc-100 truncate">
                       {username}
+                    </p>
+                  )}
+                  {usernameCooldown.remainingDays > 0 && (
+                    <p className="flex items-center gap-1.5 text-[11px] text-amber-400/90">
+                      <Clock className="h-3.5 w-3.5 shrink-0" />
+                      <span>
+                        {isEn
+                          ? `Can be changed once a month (available in ${usernameCooldown.remainingDays} days — ${usernameCooldown.nextAvailableDate})`
+                          : `เปลี่ยนได้เดือนละ 1 ครั้ง (เปลี่ยนได้อีกครั้งในอีก ${usernameCooldown.remainingDays} วัน — ${usernameCooldown.nextAvailableDate})`}
+                      </span>
                     </p>
                   )}
                 </div>
@@ -529,7 +621,8 @@ export function AccountSettingsModal({
                   <button
                     type="button"
                     onClick={startEditUsername}
-                    className="inline-flex shrink-0 items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-emerald-400 transition-colors hover:bg-white/[0.04] hover:text-emerald-300"
+                    disabled={usernameCooldown.remainingDays > 0 || loadingCooldown}
+                    className="inline-flex shrink-0 items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-medium text-emerald-400 transition-colors hover:bg-white/[0.05] hover:text-emerald-300 disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     <Pencil className="h-3.5 w-3.5" />
                     <span>{isEn ? "Edit Username" : "แก้ไขชื่อผู้ใช้"}</span>
@@ -540,7 +633,7 @@ export function AccountSettingsModal({
               {editingUsername && (
                 <form
                   onSubmit={handleSaveUsername}
-                  className="space-y-3 border border-emerald-500/25 bg-black p-4"
+                  className="space-y-3 rounded-xl border border-emerald-500/25 bg-black p-4"
                 >
                   <div className="space-y-1.5">
                     <label
@@ -559,8 +652,13 @@ export function AccountSettingsModal({
                       value={nextUsername}
                       onChange={(e) => setNextUsername(e.target.value)}
                       disabled={savingUsername}
-                      className="w-full border border-emerald-500/25 bg-[#050505] px-3.5 py-2.5 text-sm font-mono text-zinc-100 focus:border-emerald-400 focus:outline-none disabled:opacity-60"
+                      className="w-full rounded-xl border border-emerald-500/25 bg-[#050505] px-3.5 py-2.5 text-sm font-mono text-zinc-100 focus:border-emerald-400 focus:outline-none disabled:opacity-60"
                     />
+                    <p className="text-[11px] text-zinc-500">
+                      {isEn
+                        ? "Note: Username can only be changed once every 30 days."
+                        : "หมายเหตุ: สามารถเปลี่ยนชื่อผู้ใช้ได้เดือนละ 1 ครั้ง (ทุก 30 วัน)"}
+                    </p>
                   </div>
 
                   {usernameError && (
@@ -575,14 +673,14 @@ export function AccountSettingsModal({
                       type="button"
                       onClick={cancelEditUsername}
                       disabled={savingUsername}
-                      className="px-3.5 py-2 text-xs font-medium text-zinc-400 transition-colors hover:text-zinc-200 disabled:opacity-50"
+                      className="rounded-xl px-3.5 py-2 text-xs font-medium text-zinc-400 transition-colors hover:bg-white/[0.05] hover:text-zinc-200 disabled:opacity-50"
                     >
                       {isEn ? "Cancel" : "ยกเลิก"}
                     </button>
                     <button
                       type="submit"
                       disabled={savingUsername}
-                      className="inline-flex items-center gap-1.5 bg-emerald-500 px-4 py-2 text-xs font-semibold text-slate-950 transition-colors hover:bg-emerald-400 disabled:opacity-60"
+                      className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-500 px-4 py-2 text-xs font-semibold text-slate-950 transition-colors hover:bg-emerald-400 disabled:opacity-60"
                     >
                       {savingUsername && (
                         <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -634,12 +732,23 @@ export function AccountSettingsModal({
                       ? "Passwords are encrypted one-way in our database for security and cannot be retrieved as plain text."
                       : "ระบบเข้ารหัสรหัสผ่านแบบทางเดียวเพื่อความปลอดภัยสูงสุด จึงไม่สามารถดึงรหัสผ่านเดิมมาแสดงเป็นตัวอักษรได้"}
                   </p>
+                  {passwordCooldown.remainingDays > 0 && (
+                    <p className="flex items-center gap-1.5 pt-0.5 text-[11px] text-amber-400/90">
+                      <Clock className="h-3.5 w-3.5 shrink-0" />
+                      <span>
+                        {isEn
+                          ? `Can be changed once a month (available in ${passwordCooldown.remainingDays} days — ${passwordCooldown.nextAvailableDate})`
+                          : `เปลี่ยนได้เดือนละ 1 ครั้ง (เปลี่ยนได้อีกครั้งในอีก ${passwordCooldown.remainingDays} วัน — ${passwordCooldown.nextAvailableDate})`}
+                      </span>
+                    </p>
+                  )}
                 </div>
 
                 <button
                   type="button"
                   onClick={toggleEditPassword}
-                  className="shrink-0 px-2.5 py-1.5 text-xs font-medium text-emerald-400 transition-colors hover:bg-white/[0.04] hover:text-emerald-300"
+                  disabled={passwordCooldown.remainingDays > 0 || loadingCooldown}
+                  className="shrink-0 rounded-xl px-3 py-1.5 text-xs font-medium text-emerald-400 transition-colors hover:bg-white/[0.05] hover:text-emerald-300 disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   {editingPassword
                     ? isEn
@@ -654,7 +763,7 @@ export function AccountSettingsModal({
               {editingPassword && (
                 <form
                   onSubmit={handleSavePassword}
-                  className="space-y-3.5 border border-emerald-500/25 bg-black p-4"
+                  className="space-y-3.5 rounded-xl border border-emerald-500/25 bg-black p-4"
                 >
                   <div>
                     <label
@@ -679,7 +788,7 @@ export function AccountSettingsModal({
                             : "กรอกรหัสผ่านใหม่ (อย่างน้อย 6 ตัวอักษร)"
                         }
                         disabled={savingPassword}
-                        className="w-full border border-emerald-500/25 bg-[#050505] pl-3.5 pr-10 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 focus:border-emerald-400 focus:outline-none disabled:opacity-60"
+                        className="w-full rounded-xl border border-emerald-500/25 bg-[#050505] pl-3.5 pr-10 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 focus:border-emerald-400 focus:outline-none disabled:opacity-60"
                       />
                       <button
                         type="button"
@@ -693,7 +802,7 @@ export function AccountSettingsModal({
                               ? "Show password"
                               : "แสดงรหัสผ่าน"
                         }
-                        className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-zinc-400 hover:text-zinc-200"
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-lg p-1 text-zinc-400 hover:text-zinc-200"
                       >
                         {showNewPassword ? (
                           <EyeOff className="h-4 w-4" />
@@ -728,7 +837,7 @@ export function AccountSettingsModal({
                           : "พิมพ์รหัสผ่านใหม่อีกครั้งให้ตรงกัน"
                       }
                       disabled={savingPassword}
-                      className="w-full border border-emerald-500/25 bg-[#050505] px-3.5 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 focus:border-emerald-400 focus:outline-none disabled:opacity-60"
+                      className="w-full rounded-xl border border-emerald-500/25 bg-[#050505] px-3.5 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 focus:border-emerald-400 focus:outline-none disabled:opacity-60"
                     />
                     {confirmPassword && confirmPassword !== newPassword && (
                       <p className="mt-1.5 text-[11px] font-medium text-rose-400">
@@ -737,6 +846,11 @@ export function AccountSettingsModal({
                           : "รหัสผ่านใหม่ยังไม่ตรงกัน"}
                       </p>
                     )}
+                    <p className="mt-1.5 text-[11px] text-zinc-500">
+                      {isEn
+                        ? "Note: Password can only be changed once every 30 days."
+                        : "หมายเหตุ: สามารถเปลี่ยนรหัสผ่านได้เดือนละ 1 ครั้ง (ทุก 30 วัน)"}
+                    </p>
                   </div>
 
                   {passwordError && (
@@ -751,14 +865,14 @@ export function AccountSettingsModal({
                       type="button"
                       onClick={toggleEditPassword}
                       disabled={savingPassword}
-                      className="px-3.5 py-2 text-xs font-medium text-zinc-400 transition-colors hover:text-zinc-200 disabled:opacity-50"
+                      className="rounded-xl px-3.5 py-2 text-xs font-medium text-zinc-400 transition-colors hover:bg-white/[0.05] hover:text-zinc-200 disabled:opacity-50"
                     >
                       {isEn ? "Cancel" : "ยกเลิก"}
                     </button>
                     <button
                       type="submit"
                       disabled={savingPassword}
-                      className="inline-flex items-center gap-1.5 bg-emerald-500 px-4 py-2 text-xs font-semibold text-slate-950 transition-colors hover:bg-emerald-400 disabled:opacity-60"
+                      className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-500 px-4 py-2 text-xs font-semibold text-slate-950 transition-colors hover:bg-emerald-400 disabled:opacity-60"
                     >
                       {savingPassword && (
                         <Loader2 className="h-3.5 w-3.5 animate-spin" />

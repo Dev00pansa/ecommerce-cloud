@@ -19,6 +19,8 @@ export interface UserProfile {
   username: string;
   email: string;
   avatar_url?: string | null;
+  username_updated_at?: string | null;
+  password_updated_at?: string | null;
   created_at: string;
 }
 
