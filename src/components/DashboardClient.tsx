@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AlertCircle, CheckCircle2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { sanitizePlainText, translateSupabaseError } from "@/lib/auth";
+import { useAppLanguage } from "@/lib/language";
 import {
   buildCsvExportContent,
   calculateEcommerceMetrics,
@@ -50,6 +51,9 @@ export function DashboardClient({
   userId,
   initialRecords,
 }: DashboardClientProps) {
+  const [language] = useAppLanguage();
+  const isEn = language === "en";
+
   const topFormRef = useRef<HTMLDivElement | null>(null);
   const [activeTab, setActiveTab] = useState<DashboardTab>("calculator");
 
@@ -302,7 +306,9 @@ export function DashboardClient({
           });
 
         if (uploadError) {
-          setDbError(`อัปโหลดรูปสินค้าไม่สำเร็จ: ${translateSupabaseError(uploadError)}`);
+          setDbError(
+            `อัปโหลดรูปสินค้าไม่สำเร็จ: ${translateSupabaseError(uploadError)}`
+          );
           setSaving(false);
           return;
         }
@@ -442,118 +448,147 @@ export function DashboardClient({
   const activePreviewUrl = compressedImage?.previewUrl ?? existingImageUrl;
 
   return (
-    <main className="w-full max-w-3xl mx-auto flex-1 px-6 py-10 sm:py-12 space-y-8">
+    <div className="relative z-0 flex-1 flex flex-col">
       <div
-        ref={topFormRef}
-        className="scroll-mt-20 flex flex-col sm:flex-row sm:items-end justify-between gap-4"
+        aria-hidden="true"
+        className="pointer-events-none fixed inset-0 -z-10 overflow-hidden bg-black"
       >
-        <div className="space-y-1">
-          <span className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-emerald-400">
-            KhumLab Profit Planner
-          </span>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
-            คำนวณต้นทุนและกำไรสุทธิทีละขั้น
-          </h1>
-        </div>
-
-        <div className="inline-flex self-start border border-zinc-800 bg-black p-1">
-          <button
-            type="button"
-            onClick={() => setActiveTab("calculator")}
-            className={`px-4 py-2 text-xs sm:text-sm font-semibold transition-colors ${
-              activeTab === "calculator"
-                ? "bg-emerald-500 text-slate-950"
-                : "text-zinc-400 hover:text-zinc-200"
-            }`}
-          >
-            คำนวณรายการใหม่
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab("history")}
-            className={`px-4 py-2 text-xs sm:text-sm font-semibold transition-colors ${
-              activeTab === "history"
-                ? "bg-emerald-500 text-slate-950"
-                : "text-zinc-400 hover:text-zinc-200"
-            }`}
-          >
-            ประวัติที่บันทึกไว้ ({records.length})
-          </button>
-        </div>
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage:
+              "radial-gradient(rgba(255, 255, 255, 0.075) 1px, transparent 1px)",
+            backgroundSize: "24px 24px",
+          }}
+        />
+        <div
+          className="animate-dashboard-glow-a absolute inset-x-0 top-0 h-[560px]"
+          style={{
+            background:
+              "radial-gradient(ellipse 80% 55% at 50% -8%, rgba(16, 185, 129, 0.22), rgba(16, 185, 129, 0.08) 45%, transparent 78%)",
+          }}
+        />
+        <div className="animate-dashboard-glow-b absolute -top-24 left-[8%] h-[420px] w-[42vw] min-w-[280px] rounded-full bg-gradient-to-b from-emerald-500/20 via-emerald-500/8 to-transparent blur-3xl" />
+        <div className="animate-dashboard-glow-a absolute -top-28 right-[8%] h-[440px] w-[40vw] min-w-[280px] rounded-full bg-gradient-to-b from-emerald-400/18 via-emerald-500/8 to-transparent blur-3xl" />
       </div>
 
-      {dbError && (
+      <main className="relative z-10 w-full max-w-3xl mx-auto flex-1 px-6 py-10 sm:py-12 space-y-8">
         <div
-          role="alert"
-          className="flex items-center gap-2.5 border border-rose-500/40 bg-rose-950/30 px-4 py-3 text-xs sm:text-sm text-rose-300"
+          ref={topFormRef}
+          className="scroll-mt-20 flex flex-col sm:flex-row sm:items-end justify-between gap-4"
         >
-          <AlertCircle className="h-4 w-4 shrink-0 text-rose-400" />
-          <span>{dbError}</span>
-        </div>
-      )}
-
-      {dbSuccess && (
-        <div
-          role="status"
-          className="flex items-center justify-between gap-2.5 border border-emerald-500/40 bg-emerald-950/30 px-4 py-3 text-xs sm:text-sm text-emerald-300"
-        >
-          <div className="flex items-center gap-2">
-            <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400" />
-            <span>{dbSuccess}</span>
+          <div className="space-y-1">
+            <span className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-emerald-400">
+              KhumLab Profit Planner
+            </span>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
+              {isEn
+                ? "Step-by-Step Profit & Break-Even Planner"
+                : "คำนวณต้นทุนและกำไรสุทธิทีละขั้น"}
+            </h1>
           </div>
-          <button
-            type="button"
-            onClick={() => setDbSuccess(null)}
-            className="text-xs underline opacity-80 hover:opacity-100"
+
+          <div className="inline-flex shrink-0 self-start border border-emerald-500/25 bg-[#050505] p-1 shadow-[0_0_20px_-6px_rgba(16,185,129,0.16)]">
+            <button
+              type="button"
+              onClick={() => setActiveTab("calculator")}
+              className={`px-4 py-2 text-xs sm:text-sm font-semibold whitespace-nowrap transition-colors ${
+                activeTab === "calculator"
+                  ? "bg-emerald-500 text-slate-950"
+                  : "text-zinc-400 hover:text-zinc-200"
+              }`}
+            >
+              {isEn ? "New Calculation" : "คำนวณรายการใหม่"}
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("history")}
+              className={`px-4 py-2 text-xs sm:text-sm font-semibold whitespace-nowrap transition-colors ${
+                activeTab === "history"
+                  ? "bg-emerald-500 text-slate-950"
+                  : "text-zinc-400 hover:text-zinc-200"
+              }`}
+            >
+              {isEn
+                ? `Saved History (${records.length})`
+                : `ประวัติที่บันทึกไว้ (${records.length})`}
+            </button>
+          </div>
+        </div>
+
+        {dbError && (
+          <div
+            role="alert"
+            className="flex items-center gap-2.5 border border-rose-500/45 bg-[#050505] px-4 py-3 text-xs sm:text-sm text-rose-300 shadow-[0_0_20px_-6px_rgba(244,63,94,0.25)]"
           >
-            ปิด
-          </button>
-        </div>
-      )}
+            <AlertCircle className="h-4 w-4 shrink-0 text-rose-400" />
+            <span>{dbError}</span>
+          </div>
+        )}
 
-      {activeTab === "calculator" ? (
-        <div className="space-y-14">
-          <CalculatorForm
-            values={formValues}
-            compressedImage={compressedImage}
-            existingImageUrl={existingImageUrl}
-            compressingImage={compressingImage}
-            imageError={imageError}
-            onChangeField={handleChangeField}
-            onSelectPreset={handleSelectPreset}
-            onSelectImageFile={handleSelectImageFile}
-            onRemoveImage={handleRemoveImage}
-            onCalculate={handleCalculate}
-            onReset={handleReset}
-          />
+        {dbSuccess && (
+          <div
+            role="status"
+            className="flex items-center justify-between gap-2.5 border border-emerald-500/45 bg-[#050505] px-4 py-3 text-xs sm:text-sm text-emerald-300 shadow-[0_0_20px_-6px_rgba(16,185,129,0.25)]"
+          >
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400" />
+              <span>{dbSuccess}</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setDbSuccess(null)}
+              className="text-xs underline opacity-80 hover:opacity-100"
+            >
+              ปิด
+            </button>
+          </div>
+        )}
 
-          {hasCalculated && (
-            <CalculationReport
-              inputs={numericInputs}
-              metrics={metrics}
-              simulation={simulation}
-              discountPercent={discountPercent}
-              previewImageUrl={activePreviewUrl}
-              saving={saving}
-              onChangeDiscount={setDiscountPercent}
-              onSaveToCloud={handleSaveToCloud}
-              onExportCsv={handleExportCsv}
-              onEditTop={handleEditTop}
+        {activeTab === "calculator" ? (
+          <div className="space-y-14">
+            <CalculatorForm
+              values={formValues}
+              compressedImage={compressedImage}
+              existingImageUrl={existingImageUrl}
+              compressingImage={compressingImage}
+              imageError={imageError}
+              onChangeField={handleChangeField}
+              onSelectPreset={handleSelectPreset}
+              onSelectImageFile={handleSelectImageFile}
+              onRemoveImage={handleRemoveImage}
+              onCalculate={handleCalculate}
+              onReset={handleReset}
             />
-          )}
-        </div>
-      ) : (
-        <HistoryPanel
-          records={records}
-          loading={refreshing}
-          deletingId={deletingId}
-          realtimeConnected={realtimeConnected}
-          onRefresh={fetchHistory}
-          onExportCsv={handleExportCsv}
-          onLoadRecord={handleLoadRecord}
-          onDeleteRecord={handleDeleteRecord}
-        />
-      )}
-    </main>
+
+            {hasCalculated && (
+              <CalculationReport
+                inputs={numericInputs}
+                metrics={metrics}
+                simulation={simulation}
+                discountPercent={discountPercent}
+                previewImageUrl={activePreviewUrl}
+                saving={saving}
+                onChangeDiscount={setDiscountPercent}
+                onSaveToCloud={handleSaveToCloud}
+                onExportCsv={handleExportCsv}
+                onEditTop={handleEditTop}
+              />
+            )}
+          </div>
+        ) : (
+          <HistoryPanel
+            records={records}
+            loading={refreshing}
+            deletingId={deletingId}
+            realtimeConnected={realtimeConnected}
+            onRefresh={fetchHistory}
+            onExportCsv={handleExportCsv}
+            onLoadRecord={handleLoadRecord}
+            onDeleteRecord={handleDeleteRecord}
+          />
+        )}
+      </main>
+    </div>
   );
 }

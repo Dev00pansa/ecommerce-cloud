@@ -3,6 +3,8 @@ import type { CompressedProductImage } from "@/types";
 const MAX_RAW_FILE_BYTES = 5 * 1024 * 1024;
 const MAX_COMPRESSED_BYTES = 120 * 1024;
 const MAX_DIMENSION_PX = 500;
+const AVATAR_SIZE_PX = 200;
+const MAX_AVATAR_BYTES = 45 * 1024;
 
 const ALLOWED_MIME_TYPES = new Set([
   "image/jpeg",
@@ -64,9 +66,7 @@ function loadImageElement(objectUrl: string): Promise<HTMLImageElement> {
   });
 }
 
-export async function compressProductImageFile(
-  file: File
-): Promise<CompressedProductImage> {
+async function validateRawImageFile(file: File): Promise<void> {
   const extension = file.name.split(".").pop()?.trim().toLowerCase() ?? "";
 
   if (
@@ -86,6 +86,12 @@ export async function compressProductImageFile(
   if (!validHeader) {
     throw new Error("ไฟล์ที่เลือกไม่ใช่ไฟล์รูปภาพที่ถูกต้อง");
   }
+}
+
+export async function compressProductImageFile(
+  file: File
+): Promise<CompressedProductImage> {
+  await validateRawImageFile(file);
 
   const tempUrl = URL.createObjectURL(file);
 
@@ -160,6 +166,90 @@ export async function compressProductImageFile(
   }
 }
 
+export async function compressAvatarImageFile(
+  file: File
+): Promise<CompressedProductImage> {
+  await validateRawImageFile(file);
+
+  const tempUrl = URL.createObjectURL(file);
+
+  try {
+    const img = await loadImageElement(tempUrl);
+    const sourceWidth = Math.max(1, img.naturalWidth || img.width);
+    const sourceHeight = Math.max(1, img.naturalHeight || img.height);
+    const cropSize = Math.min(sourceWidth, sourceHeight);
+    const cropX = Math.floor((sourceWidth - cropSize) / 2);
+    const cropY = Math.floor((sourceHeight - cropSize) / 2);
+
+    const canvas = document.createElement("canvas");
+    canvas.width = AVATAR_SIZE_PX;
+    canvas.height = AVATAR_SIZE_PX;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) {
+      throw new Error("เบราว์เซอร์ไม่รองรับการย่อขนาดรูปภาพ");
+    }
+
+    ctx.fillStyle = "#09090B";
+    ctx.fillRect(0, 0, AVATAR_SIZE_PX, AVATAR_SIZE_PX);
+    ctx.drawImage(
+      img,
+      cropX,
+      cropY,
+      cropSize,
+      cropSize,
+      0,
+      0,
+      AVATAR_SIZE_PX,
+      AVATAR_SIZE_PX
+    );
+
+    const qualities = [0.78, 0.64, 0.52, 0.4, 0.3, 0.22];
+    let selectedBlob: Blob | null = null;
+    let selectedMime: "image/webp" | "image/jpeg" = "image/webp";
+
+    for (const quality of qualities) {
+      const candidate = await canvasToBlob(canvas, "image/webp", quality);
+      if (candidate && candidate.type === "image/webp") {
+        selectedBlob = candidate;
+        selectedMime = "image/webp";
+        if (candidate.size <= MAX_AVATAR_BYTES) {
+          break;
+        }
+      } else {
+        const jpegCandidate = await canvasToBlob(canvas, "image/jpeg", quality);
+        if (jpegCandidate) {
+          selectedBlob = jpegCandidate;
+          selectedMime = "image/jpeg";
+          if (jpegCandidate.size <= MAX_AVATAR_BYTES) {
+            break;
+          }
+        }
+      }
+    }
+
+    if (!selectedBlob) {
+      throw new Error("ไม่สามารถบีบอัดรูปโปรไฟล์ได้ กรุณาลองใช้รูปอื่น");
+    }
+
+    if (selectedBlob.size > 50 * 1024) {
+      throw new Error("รูปโปรไฟล์หลังบีบอัดยังมีขนาดเกิน 50 KB กรุณาเลือกรูปอื่น");
+    }
+
+    const previewUrl = URL.createObjectURL(selectedBlob);
+
+    return {
+      blob: selectedBlob,
+      previewUrl,
+      sizeBytes: selectedBlob.size,
+      mimeType: selectedMime,
+      extension: selectedMime === "image/webp" ? "webp" : "jpg",
+    };
+  } finally {
+    URL.revokeObjectURL(tempUrl);
+  }
+}
+
 export function formatFileSizeKb(bytes: number): string {
   const kb = Math.max(1, Math.round(bytes / 1024));
   return `${kb} KB`;
@@ -174,6 +264,28 @@ export function extractProductImageStoragePath(
   if (!trimmed) return null;
 
   const marker = "/product-images/";
+  const markerIndex = trimmed.indexOf(marker);
+  const candidate =
+    markerIndex >= 0
+      ? trimmed.slice(markerIndex + marker.length).split("?")[0] ?? ""
+      : trimmed;
+
+  if (!candidate.startsWith(`${userId}/`) || candidate.includes("..")) {
+    return null;
+  }
+
+  return candidate;
+}
+
+export function extractAvatarStoragePath(
+  avatarUrlOrPath: string | null | undefined,
+  userId: string
+): string | null {
+  if (!avatarUrlOrPath) return null;
+  const trimmed = avatarUrlOrPath.trim();
+  if (!trimmed) return null;
+
+  const marker = "/avatars/";
   const markerIndex = trimmed.indexOf(marker);
   const candidate =
     markerIndex >= 0

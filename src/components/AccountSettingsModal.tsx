@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import {
   AlertCircle,
+  Camera,
   Check,
   CheckCircle2,
   Eye,
@@ -23,6 +24,8 @@ import {
   translateSupabaseError,
   validateUsername,
 } from "@/lib/auth";
+import { uploadUserAvatar } from "@/lib/avatar-upload";
+import { formatFileSizeKb } from "@/lib/image-compression";
 import type { AppLanguage } from "@/types";
 import { PasswordStrengthMeter } from "@/components/PasswordStrengthMeter";
 
@@ -31,9 +34,11 @@ interface AccountSettingsModalProps {
   onClose: () => void;
   username: string;
   initialEmail?: string | null;
+  avatarUrl?: string | null;
   language: AppLanguage;
   onChangeLanguage: (next: AppLanguage) => void;
   onUsernameUpdated: (nextUsername: string) => void;
+  onAvatarUpdated: (nextAvatarUrl: string) => void;
 }
 
 export function AccountSettingsModal({
@@ -41,14 +46,21 @@ export function AccountSettingsModal({
   onClose,
   username,
   initialEmail = null,
+  avatarUrl = null,
   language,
   onChangeLanguage,
   onUsernameUpdated,
+  onAvatarUpdated,
 }: AccountSettingsModalProps) {
   const router = useRouter();
   const isEn = language === "en";
+  const avatarFileInputRef = useRef<HTMLInputElement | null>(null);
 
   const [resolvedEmail, setResolvedEmail] = useState<string>(initialEmail ?? "");
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [avatarError, setAvatarError] = useState<string | null>(null);
+  const [avatarSuccess, setAvatarSuccess] = useState<string | null>(null);
+
   const [editingUsername, setEditingUsername] = useState(false);
   const [nextUsername, setNextUsername] = useState(username);
   const [savingUsername, setSavingUsername] = useState(false);
@@ -63,11 +75,13 @@ export function AccountSettingsModal({
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [passwordSuccess, setPasswordSuccess] = useState<string | null>(null);
 
+  const isBusy = savingUsername || savingPassword || uploadingAvatar;
+
   useEffect(() => {
     if (!isOpen) return;
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape" && !savingUsername && !savingPassword) {
+      if (event.key === "Escape" && !isBusy) {
         onClose();
       }
     };
@@ -76,7 +90,7 @@ export function AccountSettingsModal({
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isOpen, savingUsername, savingPassword, onClose]);
+  }, [isOpen, isBusy, onClose]);
 
   useEffect(() => {
     if (!isOpen || resolvedEmail) return;
@@ -98,6 +112,37 @@ export function AccountSettingsModal({
 
   if (!isOpen) {
     return null;
+  }
+
+  async function handleAvatarFileChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file || uploadingAvatar) return;
+
+    setAvatarError(null);
+    setAvatarSuccess(null);
+    setUploadingAvatar(true);
+
+    try {
+      const result = await uploadUserAvatar(file, avatarUrl);
+      onAvatarUpdated(result.avatarUrl);
+      setAvatarSuccess(
+        isEn
+          ? `Avatar updated (${formatFileSizeKb(result.sizeBytes)})`
+          : `อัปเดตรูปโปรไฟล์เรียบร้อยแล้ว (${formatFileSizeKb(result.sizeBytes)})`
+      );
+      router.refresh();
+    } catch (err) {
+      setAvatarError(
+        err instanceof Error
+          ? err.message
+          : isEn
+            ? "Failed to upload avatar."
+            : "อัปโหลดรูปโปรไฟล์ไม่สำเร็จ"
+      );
+    } finally {
+      setUploadingAvatar(false);
+    }
   }
 
   function startEditUsername() {
@@ -152,7 +197,9 @@ export function AccountSettingsModal({
 
       if (!user) {
         setUsernameError(
-          isEn ? "Session expired. Please sign in again." : "เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่"
+          isEn
+            ? "Session expired. Please sign in again."
+            : "เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่"
         );
         return;
       }
@@ -296,13 +343,13 @@ export function AccountSettingsModal({
       aria-modal="true"
       aria-labelledby="account-settings-title"
       onClick={(e) => {
-        if (e.target === e.currentTarget && !savingUsername && !savingPassword) {
+        if (e.target === e.currentTarget && !isBusy) {
           onClose();
         }
       }}
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4"
     >
-      <div className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto border border-zinc-800 bg-[#070707] text-zinc-100 shadow-[0_0_50px_-12px_rgba(16,185,129,0.22)]">
+      <div className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto border border-emerald-500/30 bg-[#070707] text-zinc-100 shadow-[0_0_50px_-10px_rgba(16,185,129,0.28)]">
         <div
           aria-hidden="true"
           className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-400/75 to-transparent"
@@ -317,14 +364,14 @@ export function AccountSettingsModal({
               id="account-settings-title"
               className="mt-1 text-lg sm:text-xl font-bold tracking-tight text-white"
             >
-              {isEn ? "Account Settings" : "ตั้งค่าบัญชีและความปลอดภัย"}
+              {isEn ? "Account & Password Settings" : "ตั้งค่าบัญชีและรหัสผ่าน"}
             </h2>
           </div>
 
           <button
             type="button"
             onClick={onClose}
-            disabled={savingUsername || savingPassword}
+            disabled={isBusy}
             aria-label={isEn ? "Close settings" : "ปิดหน้าต่างตั้งค่า"}
             className="p-2 text-zinc-400 transition-colors hover:bg-white/[0.05] hover:text-zinc-100 disabled:opacity-50"
           >
@@ -333,17 +380,99 @@ export function AccountSettingsModal({
         </div>
 
         <div className="divide-y divide-zinc-800/90 px-6 py-2">
+          <section className="py-5 space-y-3">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-4 min-w-0">
+                <div className="relative h-14 w-14 shrink-0">
+                  {avatarUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={avatarUrl}
+                      alt={username}
+                      className="h-14 w-14 rounded-full object-cover ring-1 ring-emerald-500/50"
+                    />
+                  ) : (
+                    <div className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-400 ring-1 ring-emerald-500/30">
+                      <UserIcon className="h-6 w-6" />
+                    </div>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => avatarFileInputRef.current?.click()}
+                    disabled={uploadingAvatar}
+                    aria-label={isEn ? "Upload avatar" : "เปลี่ยนรูปโปรไฟล์"}
+                    className="absolute -bottom-0.5 -right-0.5 flex h-6 w-6 items-center justify-center rounded-full border border-emerald-500/50 bg-black text-emerald-400 transition-colors hover:bg-emerald-500 hover:text-slate-950 disabled:opacity-50"
+                  >
+                    {uploadingAvatar ? (
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                    ) : (
+                      <Camera className="h-3 w-3" />
+                    )}
+                  </button>
+                </div>
+
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-zinc-100">
+                    {isEn ? "Profile Photo" : "รูปโปรไฟล์"}
+                  </p>
+                  <p className="text-xs text-zinc-500 mt-0.5">
+                    {isEn
+                      ? "Auto-cropped to 200x200px WebP (max 45 KB)"
+                      : "ครอปจัตุรัส 200x200px และบีบอัด WebP อัตโนมัติ (ไม่เกิน 45 KB)"}
+                  </p>
+                </div>
+              </div>
+
+              <input
+                ref={avatarFileInputRef}
+                type="file"
+                accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                onChange={handleAvatarFileChange}
+                className="hidden"
+              />
+
+              <button
+                type="button"
+                onClick={() => avatarFileInputRef.current?.click()}
+                disabled={uploadingAvatar}
+                className="shrink-0 border border-emerald-500/30 bg-black px-3.5 py-2 text-xs font-medium text-emerald-300 transition-colors hover:border-emerald-400 hover:text-white disabled:opacity-50"
+              >
+                {uploadingAvatar
+                  ? isEn
+                    ? "Uploading..."
+                    : "กำลังอัปโหลด..."
+                  : isEn
+                    ? "Change Photo"
+                    : "เปลี่ยนรูป"}
+              </button>
+            </div>
+
+            {avatarError && (
+              <p className="flex items-start gap-1.5 text-xs text-rose-400">
+                <AlertCircle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+                <span>{avatarError}</span>
+              </p>
+            )}
+
+            {avatarSuccess && (
+              <p className="flex items-center gap-1.5 text-xs font-medium text-emerald-400">
+                <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
+                <span>{avatarSuccess}</span>
+              </p>
+            )}
+          </section>
+
           <section className="py-5 space-y-3.5">
             <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-[0.16em] text-zinc-400">
               <Globe className="h-3.5 w-3.5 text-emerald-400" />
-              <span>{isEn ? "01 — Language" : "01 — การตั้งค่าภาษา"}</span>
+              <span>{isEn ? "Language" : "การตั้งค่าภาษา"}</span>
             </div>
 
             <div className="grid grid-cols-2 gap-2.5">
               <button
                 type="button"
                 onClick={() => onChangeLanguage("th")}
-                className={`flex items-center justify-between border px-4 py-3 text-sm font-medium transition-colors ${
+                className={`flex items-center justify-between border px-4 py-2.5 text-sm font-medium transition-colors ${
                   language === "th"
                     ? "border-emerald-500/70 bg-emerald-950/30 text-emerald-300"
                     : "border-zinc-800 bg-black text-zinc-400 hover:border-zinc-700 hover:text-zinc-200"
@@ -358,7 +487,7 @@ export function AccountSettingsModal({
               <button
                 type="button"
                 onClick={() => onChangeLanguage("en")}
-                className={`flex items-center justify-between border px-4 py-3 text-sm font-medium transition-colors ${
+                className={`flex items-center justify-between border px-4 py-2.5 text-sm font-medium transition-colors ${
                   language === "en"
                     ? "border-emerald-500/70 bg-emerald-950/30 text-emerald-300"
                     : "border-zinc-800 bg-black text-zinc-400 hover:border-zinc-700 hover:text-zinc-200"
@@ -377,8 +506,8 @@ export function AccountSettingsModal({
               <KeyRound className="h-3.5 w-3.5 text-emerald-400" />
               <span>
                 {isEn
-                  ? "02 — Account & Password"
-                  : "02 — ข้อมูลบัญชีและความปลอดภัย"}
+                  ? "Account & Password"
+                  : "ข้อมูลบัญชีและความปลอดภัย"}
               </span>
             </div>
 
@@ -411,7 +540,7 @@ export function AccountSettingsModal({
               {editingUsername && (
                 <form
                   onSubmit={handleSaveUsername}
-                  className="space-y-3 border border-zinc-800 bg-black/80 p-4"
+                  className="space-y-3 border border-emerald-500/25 bg-black p-4"
                 >
                   <div className="space-y-1.5">
                     <label
@@ -430,7 +559,7 @@ export function AccountSettingsModal({
                       value={nextUsername}
                       onChange={(e) => setNextUsername(e.target.value)}
                       disabled={savingUsername}
-                      className="w-full border border-zinc-800 bg-[#050505] px-3.5 py-2.5 text-sm font-mono text-zinc-100 focus:border-emerald-400 focus:outline-none disabled:opacity-60"
+                      className="w-full border border-emerald-500/25 bg-[#050505] px-3.5 py-2.5 text-sm font-mono text-zinc-100 focus:border-emerald-400 focus:outline-none disabled:opacity-60"
                     />
                   </div>
 
@@ -525,7 +654,7 @@ export function AccountSettingsModal({
               {editingPassword && (
                 <form
                   onSubmit={handleSavePassword}
-                  className="space-y-3.5 border border-zinc-800 bg-black/80 p-4"
+                  className="space-y-3.5 border border-emerald-500/25 bg-black p-4"
                 >
                   <div>
                     <label
@@ -550,7 +679,7 @@ export function AccountSettingsModal({
                             : "กรอกรหัสผ่านใหม่ (อย่างน้อย 6 ตัวอักษร)"
                         }
                         disabled={savingPassword}
-                        className="w-full border border-zinc-800 bg-[#050505] pl-3.5 pr-10 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 focus:border-emerald-400 focus:outline-none disabled:opacity-60"
+                        className="w-full border border-emerald-500/25 bg-[#050505] pl-3.5 pr-10 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 focus:border-emerald-400 focus:outline-none disabled:opacity-60"
                       />
                       <button
                         type="button"
@@ -599,7 +728,7 @@ export function AccountSettingsModal({
                           : "พิมพ์รหัสผ่านใหม่อีกครั้งให้ตรงกัน"
                       }
                       disabled={savingPassword}
-                      className="w-full border border-zinc-800 bg-[#050505] px-3.5 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 focus:border-emerald-400 focus:outline-none disabled:opacity-60"
+                      className="w-full border border-emerald-500/25 bg-[#050505] px-3.5 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 focus:border-emerald-400 focus:outline-none disabled:opacity-60"
                     />
                     {confirmPassword && confirmPassword !== newPassword && (
                       <p className="mt-1.5 text-[11px] font-medium text-rose-400">

@@ -2,9 +2,19 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState, type MouseEvent } from "react";
 import {
+  useEffect,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type MouseEvent,
+} from "react";
+import {
+  AlertCircle,
+  Camera,
   ChevronDown,
+  Globe,
+  KeyRound,
   Loader2,
   LogIn,
   LogOut,
@@ -12,18 +22,21 @@ import {
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useAppLanguage } from "@/lib/language";
+import { uploadUserAvatar } from "@/lib/avatar-upload";
 import { KhumLabLogo } from "@/components/KhumLabLogo";
 import { AccountSettingsModal } from "@/components/AccountSettingsModal";
 
 interface NavbarProps {
   username?: string | null;
   email?: string | null;
+  avatarUrl?: string | null;
   isAuthenticated?: boolean;
 }
 
 export function Navbar({
   username = null,
   email = null,
+  avatarUrl = null,
   isAuthenticated = false,
 }: NavbarProps) {
   const pathname = usePathname();
@@ -31,12 +44,46 @@ export function Navbar({
   const [language, setLanguage] = useAppLanguage();
   const isEn = language === "en";
 
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
+  const avatarInputRef = useRef<HTMLInputElement | null>(null);
+
   const [overrideUsername, setOverrideUsername] = useState<string | null>(null);
+  const [overrideAvatarUrl, setOverrideAvatarUrl] = useState<string | null>(null);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [avatarError, setAvatarError] = useState<string | null>(null);
 
   const displayUsername = overrideUsername ?? username ?? "";
+  const displayAvatarUrl = overrideAvatarUrl ?? avatarUrl ?? null;
+
+  useEffect(() => {
+    if (!dropdownOpen) return;
+
+    const handlePointerDown = (event: globalThis.MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setDropdownOpen(false);
+      }
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handlePointerDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [dropdownOpen]);
 
   useEffect(() => {
     if (!logoutConfirmOpen) return;
@@ -62,6 +109,31 @@ export function Navbar({
     }
   }
 
+  async function handleAvatarFileChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file || uploadingAvatar) return;
+
+    setAvatarError(null);
+    setUploadingAvatar(true);
+
+    try {
+      const result = await uploadUserAvatar(file, displayAvatarUrl);
+      setOverrideAvatarUrl(result.avatarUrl);
+      router.refresh();
+    } catch (err) {
+      setAvatarError(
+        err instanceof Error
+          ? err.message
+          : isEn
+            ? "Failed to upload avatar."
+            : "อัปโหลดรูปโปรไฟล์ไม่สำเร็จ"
+      );
+    } finally {
+      setUploadingAvatar(false);
+    }
+  }
+
   async function handleConfirmLogout() {
     if (loggingOut) return;
     setLoggingOut(true);
@@ -72,7 +144,9 @@ export function Navbar({
     }
 
     setLogoutConfirmOpen(false);
+    setDropdownOpen(false);
     setOverrideUsername(null);
+    setOverrideAvatarUrl(null);
     router.push("/login");
     router.refresh();
     setLoggingOut(false);
@@ -140,19 +214,185 @@ export function Navbar({
             {isAuthenticated ? (
               <div className="flex items-center gap-2 sm:gap-3">
                 {displayUsername && (
-                  <button
-                    type="button"
-                    onClick={() => setSettingsOpen(true)}
-                    className="group inline-flex items-center gap-2 rounded-md px-2.5 py-1.5 text-sm font-medium text-zinc-200 transition-colors hover:bg-white/[0.04] hover:text-white focus:outline-none"
-                  >
-                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-400 transition-colors group-hover:bg-emerald-500/25">
-                      <UserIcon className="h-3.5 w-3.5" />
-                    </span>
-                    <span className="max-w-[140px] truncate tracking-tight">
-                      {displayUsername}
-                    </span>
-                    <ChevronDown className="h-3.5 w-3.5 text-zinc-500 transition-colors group-hover:text-zinc-300" />
-                  </button>
+                  <div ref={dropdownRef} className="relative">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAvatarError(null);
+                        setDropdownOpen((prev) => !prev);
+                      }}
+                      aria-expanded={dropdownOpen}
+                      aria-haspopup="menu"
+                      className="group inline-flex items-center gap-2 rounded-md px-2.5 py-1.5 text-sm font-medium text-zinc-200 transition-colors hover:bg-white/[0.04] hover:text-white focus:outline-none"
+                    >
+                      {displayAvatarUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={displayAvatarUrl}
+                          alt={displayUsername}
+                          className="h-7 w-7 shrink-0 rounded-full object-cover ring-1 ring-emerald-500/40"
+                        />
+                      ) : (
+                        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-400 transition-colors group-hover:bg-emerald-500/25">
+                          <UserIcon className="h-3.5 w-3.5" />
+                        </span>
+                      )}
+                      <span className="max-w-[140px] truncate tracking-tight">
+                        {displayUsername}
+                      </span>
+                      <ChevronDown
+                        className={`h-3.5 w-3.5 transition-all duration-200 ${
+                          dropdownOpen
+                            ? "rotate-180 text-emerald-400"
+                            : "text-zinc-500 group-hover:text-zinc-300"
+                        }`}
+                      />
+                    </button>
+
+                    <input
+                      ref={avatarInputRef}
+                      type="file"
+                      accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                      onChange={handleAvatarFileChange}
+                      className="hidden"
+                    />
+
+                    <div
+                      role="menu"
+                      className={`absolute right-0 mt-3 w-80 origin-top-right z-50 bg-[#070707]/95 backdrop-blur-xl border border-emerald-500/30 shadow-[0_12px_40px_-8px_rgba(0,0,0,0.85),0_0_24px_-6px_rgba(16,185,129,0.2)] transition-all duration-200 ease-out ${
+                        dropdownOpen
+                          ? "opacity-100 translate-y-0 scale-100 pointer-events-auto"
+                          : "opacity-0 -translate-y-2 scale-95 pointer-events-none"
+                      }`}
+                    >
+                      <div
+                        aria-hidden="true"
+                        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-400/75 to-transparent"
+                      />
+
+                      <div className="p-4 border-b border-zinc-800/80 space-y-2.5">
+                        <div className="flex items-center gap-3.5">
+                          <div className="relative h-12 w-12 shrink-0">
+                            {displayAvatarUrl ? (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img
+                                src={displayAvatarUrl}
+                                alt={displayUsername}
+                                className="h-12 w-12 rounded-full object-cover ring-1 ring-emerald-500/50"
+                              />
+                            ) : (
+                              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-400 ring-1 ring-emerald-500/30">
+                                <UserIcon className="h-5 w-5" />
+                              </div>
+                            )}
+
+                            <button
+                              type="button"
+                              onClick={() => avatarInputRef.current?.click()}
+                              disabled={uploadingAvatar}
+                              title={
+                                isEn ? "Change profile photo" : "เปลี่ยนรูปโปรไฟล์"
+                              }
+                              aria-label={
+                                isEn ? "Change profile photo" : "เปลี่ยนรูปโปรไฟล์"
+                              }
+                              className="absolute -bottom-0.5 -right-0.5 flex h-5 w-5 items-center justify-center rounded-full border border-emerald-500/60 bg-black text-emerald-400 transition-colors hover:bg-emerald-500 hover:text-slate-950 disabled:opacity-50"
+                            >
+                              {uploadingAvatar ? (
+                                <Loader2 className="h-2.5 w-2.5 animate-spin" />
+                              ) : (
+                                <Camera className="h-2.5 w-2.5" />
+                              )}
+                            </button>
+                          </div>
+
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-semibold text-white truncate">
+                              {displayUsername}
+                            </p>
+                            {email && (
+                              <p className="text-xs font-mono text-zinc-400 truncate mt-0.5">
+                                {email}
+                              </p>
+                            )}
+                            <button
+                              type="button"
+                              onClick={() => avatarInputRef.current?.click()}
+                              disabled={uploadingAvatar}
+                              className="mt-1 text-[11px] font-medium text-emerald-400 transition-colors hover:text-emerald-300 disabled:opacity-50"
+                            >
+                              {uploadingAvatar
+                                ? isEn
+                                  ? "Compressing & uploading..."
+                                  : "กำลังบีบอัดและอัปโหลด..."
+                                : isEn
+                                  ? "Change profile photo"
+                                  : "เปลี่ยนรูปโปรไฟล์"}
+                            </button>
+                          </div>
+                        </div>
+
+                        {avatarError && (
+                          <p className="flex items-start gap-1.5 text-[11px] text-rose-400">
+                            <AlertCircle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+                            <span>{avatarError}</span>
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="p-4 border-b border-zinc-800/80 space-y-2.5">
+                        <div className="flex items-center justify-between text-xs text-zinc-400">
+                          <span className="inline-flex items-center gap-1.5">
+                            <Globe className="h-3.5 w-3.5 text-emerald-400" />
+                            <span>{isEn ? "Language" : "ภาษา / Language"}</span>
+                          </span>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-1.5 border border-zinc-800/90 bg-black p-1">
+                          <button
+                            type="button"
+                            onClick={() => setLanguage("th")}
+                            className={`py-1.5 text-xs font-semibold transition-colors ${
+                              language === "th"
+                                ? "bg-emerald-500 text-slate-950"
+                                : "text-zinc-400 hover:text-zinc-200"
+                            }`}
+                          >
+                            ไทย
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setLanguage("en")}
+                            className={`py-1.5 text-xs font-semibold transition-colors ${
+                              language === "en"
+                                ? "bg-emerald-500 text-slate-950"
+                                : "text-zinc-400 hover:text-zinc-200"
+                            }`}
+                          >
+                            English
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="p-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setDropdownOpen(false);
+                            setSettingsOpen(true);
+                          }}
+                          className="w-full flex items-center gap-2.5 px-3 py-2.5 text-left text-sm font-medium text-zinc-200 transition-colors hover:bg-white/[0.04] hover:text-emerald-300"
+                        >
+                          <KeyRound className="h-4 w-4 text-emerald-400 shrink-0" />
+                          <span>
+                            {isEn
+                              ? "Account & Password Settings"
+                              : "ตั้งค่าบัญชีและรหัสผ่าน"}
+                          </span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 )}
 
                 <span
@@ -162,7 +402,10 @@ export function Navbar({
 
                 <button
                   type="button"
-                  onClick={() => setLogoutConfirmOpen(true)}
+                  onClick={() => {
+                    setDropdownOpen(false);
+                    setLogoutConfirmOpen(true);
+                  }}
                   disabled={loggingOut}
                   className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs sm:text-sm font-medium text-red-400 transition-colors hover:bg-white/[0.04] hover:text-red-300 disabled:opacity-60 focus:outline-none"
                 >
@@ -189,9 +432,11 @@ export function Navbar({
           onClose={() => setSettingsOpen(false)}
           username={displayUsername}
           initialEmail={email}
+          avatarUrl={displayAvatarUrl}
           language={language}
           onChangeLanguage={setLanguage}
           onUsernameUpdated={(next) => setOverrideUsername(next)}
+          onAvatarUpdated={(next) => setOverrideAvatarUrl(next)}
         />
       )}
 

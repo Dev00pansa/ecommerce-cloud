@@ -68,12 +68,17 @@ export function CalculationReport({
   return (
     <section
       id="calculation-report"
-      className="scroll-mt-20 border-t-2 border-emerald-500/70 pt-10 pb-6 space-y-10"
+      className="relative scroll-mt-20 bg-[#050505] border border-emerald-500/30 p-6 sm:p-8 shadow-[0_0_32px_-8px_rgba(16,185,129,0.22)] space-y-10"
     >
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-400/75 to-transparent"
+      />
+
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5">
         <div className="flex items-center gap-4">
           {previewImageUrl && (
-            <div className="h-20 w-20 shrink-0 overflow-hidden border border-zinc-800 bg-zinc-950">
+            <div className="h-20 w-20 shrink-0 overflow-hidden border border-emerald-500/30 bg-black">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={previewImageUrl}
@@ -98,7 +103,9 @@ export function CalculationReport({
           </div>
         </div>
 
-        <div className={`self-start sm:self-center border px-3.5 py-2 text-xs sm:text-sm font-semibold ${statusColorClass}`}>
+        <div
+          className={`self-start sm:self-center border px-3.5 py-2 text-xs sm:text-sm font-semibold ${statusColorClass}`}
+        >
           {statusText}
         </div>
       </div>
@@ -233,7 +240,7 @@ export function CalculationReport({
                 </td>
               </tr>
 
-              <tr className="border-t border-zinc-800 bg-zinc-950/50 font-semibold">
+              <tr className="border-t border-zinc-800 bg-black font-semibold">
                 <td className="py-4 text-zinc-100">คงเหลือกำไรสุทธิต่อชิ้น</td>
                 <td
                   className={`py-4 text-right font-mono text-base tabular-nums ${
@@ -309,7 +316,7 @@ export function CalculationReport({
               กดเพื่อทดลองเลื่อนดูว่าถ้าจัด Flash Sale ลดราคาลง จะยังเหลือกำไรชิ้นละเท่าไหร่
             </p>
           </div>
-          <span className="inline-flex items-center gap-1.5 border border-zinc-800 px-3 py-1.5 text-xs font-mono text-emerald-400">
+          <span className="inline-flex items-center gap-1.5 border border-emerald-500/30 bg-black px-3 py-1.5 text-xs font-mono text-emerald-400">
             <span>ลด {discountPercent}%</span>
             {showPromoSimulator ? (
               <ChevronUp className="h-3.5 w-3.5" />
@@ -413,7 +420,7 @@ export function CalculationReport({
             type="button"
             onClick={onSaveToCloud}
             disabled={saving}
-            className="inline-flex items-center justify-center gap-2 bg-emerald-500 px-6 py-3.5 text-sm sm:text-base font-semibold text-slate-950 transition-colors hover:bg-emerald-400 disabled:opacity-60"
+            className="inline-flex items-center justify-center gap-2 bg-emerald-500 px-6 py-3.5 text-sm sm:text-base font-semibold text-slate-950 shadow-[0_0_24px_-4px_rgba(16,185,129,0.45)] transition-all duration-200 hover:bg-emerald-400 disabled:opacity-60"
           >
             {saving ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -428,7 +435,7 @@ export function CalculationReport({
           <button
             type="button"
             onClick={onExportCsv}
-            className="inline-flex items-center justify-center gap-2 border border-zinc-800 bg-black px-5 py-3.5 text-sm font-medium text-zinc-200 transition-colors hover:border-zinc-700 hover:text-white"
+            className="inline-flex items-center justify-center gap-2 border border-emerald-500/25 bg-black px-5 py-3.5 text-sm font-medium text-zinc-200 shadow-[0_0_20px_-6px_rgba(16,185,129,0.16)] transition-all duration-200 hover:border-emerald-400/50 hover:text-white"
           >
             <Download className="h-4 w-4" />
             <span>ส่งออกไฟล์ CSV</span>

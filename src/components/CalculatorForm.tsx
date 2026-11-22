@@ -35,6 +35,12 @@ function sanitizeNumericInput(raw: string): string {
   return raw.replace(/[^0-9.]/g, "");
 }
 
+const INPUT_SURFACE_CLASS =
+  "w-full bg-[#050505] border border-emerald-500/25 shadow-[0_0_20px_-6px_rgba(16,185,129,0.16)] transition-all duration-200 hover:border-emerald-400/50 focus:border-emerald-400 focus:shadow-[0_0_25px_-4px_rgba(16,185,129,0.3)] focus:outline-none";
+
+const BOX_SURFACE_CLASS =
+  "bg-[#050505] border border-emerald-500/25 shadow-[0_0_20px_-6px_rgba(16,185,129,0.16)] transition-all duration-200 hover:border-emerald-400/50 hover:shadow-[0_0_25px_-4px_rgba(16,185,129,0.3)]";
+
 export function CalculatorForm({
   values,
   compressedImage,
@@ -75,7 +81,7 @@ export function CalculatorForm({
 
   return (
     <form onSubmit={handleFormSubmit} className="space-y-12">
-      <section className="border-t border-zinc-800/90 pt-8 space-y-5">
+      <section className="border-t border-zinc-800/80 pt-8 space-y-5">
         <div className="space-y-1">
           <span className="font-mono text-xs font-semibold uppercase tracking-[0.18em] text-emerald-400">
             STEP 01
@@ -88,7 +94,7 @@ export function CalculatorForm({
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
           {PLATFORM_PRESETS.map((preset) => {
             const active =
               values.platform === preset.id &&
@@ -99,10 +105,10 @@ export function CalculatorForm({
                 key={preset.id}
                 type="button"
                 onClick={() => onSelectPreset(preset)}
-                className={`flex items-center justify-between border px-4 py-4 text-left transition-colors ${
+                className={`flex items-center justify-between px-4 py-4 text-left transition-all duration-200 ${
                   active
-                    ? "border-emerald-400 bg-emerald-950/30 text-white"
-                    : "border-zinc-800 bg-zinc-950/60 text-zinc-300 hover:border-zinc-700 hover:text-white"
+                    ? "bg-[#050505] border border-emerald-400/80 text-white shadow-[0_0_26px_-4px_rgba(16,185,129,0.34),inset_0_0_24px_-12px_rgba(16,185,129,0.3)]"
+                    : `${BOX_SURFACE_CLASS} text-zinc-300 hover:text-white`
                 }`}
               >
                 <div>
@@ -116,8 +122,8 @@ export function CalculatorForm({
                 <span
                   className={`font-mono text-sm font-semibold px-2.5 py-1 border ${
                     active
-                      ? "border-emerald-500/50 bg-emerald-500/15 text-emerald-300"
-                      : "border-zinc-800 bg-black text-zinc-400"
+                      ? "border-emerald-400/60 bg-emerald-500/15 text-emerald-300"
+                      : "border-emerald-500/20 bg-black text-zinc-400"
                   }`}
                 >
                   GP {preset.feePercent}%
@@ -127,7 +133,7 @@ export function CalculatorForm({
           })}
         </div>
 
-        <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-t border-zinc-900 pt-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-t border-zinc-800/70 pt-5">
           <div>
             <label
               htmlFor="calc-platform-fee"
@@ -155,13 +161,13 @@ export function CalculatorForm({
                 )
               }
               placeholder="0"
-              className="w-full border border-zinc-800 bg-black px-3.5 py-2.5 text-base font-mono tabular-nums text-zinc-100 focus:border-emerald-400 focus:outline-none"
+              className={`${INPUT_SURFACE_CLASS} px-3.5 py-2.5 text-base font-mono tabular-nums text-zinc-100`}
             />
           </div>
         </div>
       </section>
 
-      <section className="border-t border-zinc-800/90 pt-8 space-y-5">
+      <section className="border-t border-zinc-800/80 pt-8 space-y-5">
         <div className="space-y-1">
           <span className="font-mono text-xs font-semibold uppercase tracking-[0.18em] text-emerald-400">
             STEP 02
@@ -188,7 +194,7 @@ export function CalculatorForm({
             onChange={(e) => onChangeField("productName", e.target.value)}
             placeholder="เช่น เสื้อยืดคอกลมสีดำ รุ่นพรีเมียม"
             maxLength={120}
-            className="w-full border border-zinc-800 bg-black px-4 py-3 text-base text-zinc-100 placeholder-zinc-600 focus:border-emerald-400 focus:outline-none"
+            className={`${INPUT_SURFACE_CLASS} px-4 py-3 text-base text-zinc-100 placeholder-zinc-600`}
           />
         </div>
 
@@ -213,9 +219,11 @@ export function CalculatorForm({
           />
 
           {activePreviewUrl ? (
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-zinc-800 bg-zinc-950/60 p-4">
+            <div
+              className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 ${BOX_SURFACE_CLASS}`}
+            >
               <div className="flex items-center gap-4">
-                <div className="h-20 w-20 shrink-0 overflow-hidden border border-zinc-800 bg-black">
+                <div className="h-20 w-20 shrink-0 overflow-hidden border border-emerald-500/30 bg-black">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={activePreviewUrl}
@@ -240,7 +248,7 @@ export function CalculatorForm({
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={compressingImage}
-                  className="border border-zinc-700 bg-black px-3.5 py-2 text-xs font-medium text-zinc-200 transition-colors hover:border-emerald-400 hover:text-emerald-400 disabled:opacity-50"
+                  className="border border-emerald-500/30 bg-black px-3.5 py-2 text-xs font-medium text-zinc-200 transition-all duration-200 hover:border-emerald-400 hover:text-emerald-400 disabled:opacity-50"
                 >
                   เปลี่ยนรูป
                 </button>
@@ -264,13 +272,13 @@ export function CalculatorForm({
                   fileInputRef.current?.click();
                 }
               }}
-              className="flex items-center justify-between gap-4 border border-dashed border-zinc-800 bg-zinc-950/40 px-5 py-5 cursor-pointer transition-colors hover:border-emerald-500/60"
+              className={`flex items-center justify-between gap-4 px-5 py-5 cursor-pointer ${BOX_SURFACE_CLASS}`}
             >
               <div className="flex items-center gap-3.5">
                 {compressingImage ? (
                   <Loader2 className="h-5 w-5 text-emerald-400 animate-spin shrink-0" />
                 ) : (
-                  <ImagePlus className="h-5 w-5 text-zinc-400 shrink-0" />
+                  <ImagePlus className="h-5 w-5 text-emerald-400/80 shrink-0" />
                 )}
                 <div>
                   <p className="text-sm font-medium text-zinc-200">
@@ -283,7 +291,7 @@ export function CalculatorForm({
                   </p>
                 </div>
               </div>
-              <span className="shrink-0 border border-zinc-800 bg-black px-3 py-1.5 text-xs font-medium text-zinc-300">
+              <span className="shrink-0 border border-emerald-500/30 bg-black px-3 py-1.5 text-xs font-medium text-emerald-300">
                 เลือกรูป
               </span>
             </div>
@@ -295,7 +303,7 @@ export function CalculatorForm({
         </div>
       </section>
 
-      <section className="border-t border-zinc-800/90 pt-8 space-y-6">
+      <section className="border-t border-zinc-800/80 pt-8 space-y-6">
         <div className="space-y-1">
           <span className="font-mono text-xs font-semibold uppercase tracking-[0.18em] text-emerald-400">
             STEP 03
@@ -309,7 +317,7 @@ export function CalculatorForm({
         </div>
 
         <div className="space-y-5">
-          <div className="grid grid-cols-1 sm:grid-cols-12 items-start gap-2 sm:gap-6 border-b border-zinc-900 pb-5">
+          <div className="grid grid-cols-1 sm:grid-cols-12 items-start gap-2 sm:gap-6 border-b border-zinc-800/60 pb-5">
             <div className="sm:col-span-7">
               <label
                 htmlFor="calc-cost-price"
@@ -333,12 +341,12 @@ export function CalculatorForm({
                   onChangeField("costPrice", sanitizeNumericInput(e.target.value))
                 }
                 placeholder="0"
-                className="w-full border border-zinc-800 bg-black px-4 py-3 text-lg font-mono tabular-nums text-zinc-100 focus:border-emerald-400 focus:outline-none"
+                className={`${INPUT_SURFACE_CLASS} px-4 py-3 text-lg font-mono tabular-nums text-zinc-100`}
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-12 items-start gap-2 sm:gap-6 border-b border-zinc-900 pb-5">
+          <div className="grid grid-cols-1 sm:grid-cols-12 items-start gap-2 sm:gap-6 border-b border-zinc-800/60 pb-5">
             <div className="sm:col-span-7">
               <label
                 htmlFor="calc-packaging-cost"
@@ -365,12 +373,12 @@ export function CalculatorForm({
                   )
                 }
                 placeholder="0"
-                className="w-full border border-zinc-800 bg-black px-4 py-3 text-lg font-mono tabular-nums text-zinc-100 focus:border-emerald-400 focus:outline-none"
+                className={`${INPUT_SURFACE_CLASS} px-4 py-3 text-lg font-mono tabular-nums text-zinc-100`}
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-12 items-start gap-2 sm:gap-6 border-b border-zinc-900 pb-5">
+          <div className="grid grid-cols-1 sm:grid-cols-12 items-start gap-2 sm:gap-6 border-b border-zinc-800/60 pb-5">
             <div className="sm:col-span-7">
               <label
                 htmlFor="calc-ads-cost"
@@ -394,12 +402,12 @@ export function CalculatorForm({
                   onChangeField("adsCost", sanitizeNumericInput(e.target.value))
                 }
                 placeholder="0"
-                className="w-full border border-zinc-800 bg-black px-4 py-3 text-lg font-mono tabular-nums text-zinc-100 focus:border-emerald-400 focus:outline-none"
+                className={`${INPUT_SURFACE_CLASS} px-4 py-3 text-lg font-mono tabular-nums text-zinc-100`}
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-12 items-start gap-2 sm:gap-6 border-b border-zinc-900 pb-5">
+          <div className="grid grid-cols-1 sm:grid-cols-12 items-start gap-2 sm:gap-6 border-b border-zinc-800/60 pb-5">
             <div className="sm:col-span-7">
               <label
                 htmlFor="calc-selling-price"
@@ -426,7 +434,7 @@ export function CalculatorForm({
                   )
                 }
                 placeholder="0"
-                className="w-full border-2 border-emerald-500/80 bg-black px-4 py-3 text-lg font-mono font-bold tabular-nums text-emerald-400 focus:border-emerald-400 focus:outline-none"
+                className="w-full bg-[#050505] border-2 border-emerald-500/65 px-4 py-3 text-lg font-mono font-bold tabular-nums text-emerald-400 shadow-[0_0_24px_-6px_rgba(16,185,129,0.28)] transition-all duration-200 hover:border-emerald-400 focus:border-emerald-400 focus:shadow-[0_0_28px_-4px_rgba(16,185,129,0.42)] focus:outline-none"
               />
             </div>
           </div>
@@ -455,7 +463,7 @@ export function CalculatorForm({
                   onChangeField("fixedCost", sanitizeNumericInput(e.target.value))
                 }
                 placeholder="0"
-                className="w-full border border-zinc-800 bg-black px-4 py-3 text-lg font-mono tabular-nums text-zinc-100 focus:border-emerald-400 focus:outline-none"
+                className={`${INPUT_SURFACE_CLASS} px-4 py-3 text-lg font-mono tabular-nums text-zinc-100`}
               />
             </div>
           </div>
@@ -464,7 +472,7 @@ export function CalculatorForm({
         <div className="pt-4 flex flex-wrap items-center gap-3">
           <button
             type="submit"
-            className="inline-flex items-center justify-center gap-2.5 bg-emerald-500 px-7 py-3.5 text-base font-semibold text-slate-950 transition-colors hover:bg-emerald-400"
+            className="inline-flex items-center justify-center gap-2.5 bg-emerald-500 px-7 py-3.5 text-base font-semibold text-slate-950 shadow-[0_0_24px_-4px_rgba(16,185,129,0.45)] transition-all duration-200 hover:bg-emerald-400"
           >
             <span>ประมวลผลและสรุปกำไร</span>
             <ArrowDown className="h-4 w-4" />
@@ -473,7 +481,7 @@ export function CalculatorForm({
           <button
             type="button"
             onClick={onReset}
-            className="inline-flex items-center justify-center gap-1.5 border border-zinc-800 bg-black px-4 py-3.5 text-sm font-medium text-zinc-400 transition-colors hover:border-zinc-700 hover:text-zinc-200"
+            className={`inline-flex items-center justify-center gap-1.5 px-4 py-3.5 text-sm font-medium text-zinc-400 hover:text-zinc-100 ${BOX_SURFACE_CLASS}`}
           >
             <RotateCcw className="h-3.5 w-3.5" />
             <span>ล้างค่า</span>

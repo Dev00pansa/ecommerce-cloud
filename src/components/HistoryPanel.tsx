@@ -21,6 +21,9 @@ interface HistoryPanelProps {
   onDeleteRecord: (record: EcommerceCalculationRecord) => void;
 }
 
+const SURFACE_CARD_CLASS =
+  "bg-[#050505] border border-emerald-500/25 shadow-[0_0_20px_-6px_rgba(16,185,129,0.16)] transition-all duration-200 hover:border-emerald-400/50 hover:shadow-[0_0_25px_-4px_rgba(16,185,129,0.3)]";
+
 export function HistoryPanel({
   records,
   loading,
@@ -32,14 +35,14 @@ export function HistoryPanel({
   onDeleteRecord,
 }: HistoryPanelProps) {
   return (
-    <section className="border-t border-zinc-800/90 pt-8 space-y-6">
+    <section className="border-t border-zinc-800/80 pt-8 space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <div className="flex items-center gap-2.5">
             <h2 className="text-xl font-bold tracking-tight text-zinc-100">
               ประวัติที่บันทึกไว้ ({records.length})
             </h2>
-            <span className="inline-flex items-center gap-1.5 border border-zinc-800 bg-zinc-950 px-2.5 py-0.5 text-[11px] font-mono text-emerald-400">
+            <span className="inline-flex items-center gap-1.5 border border-emerald-500/30 bg-[#050505] px-2.5 py-0.5 text-[11px] font-mono text-emerald-400">
               <span
                 className={`h-1.5 w-1.5 rounded-full ${
                   realtimeConnected
@@ -59,7 +62,7 @@ export function HistoryPanel({
           <button
             type="button"
             onClick={onExportCsv}
-            className="inline-flex items-center gap-1.5 border border-zinc-800 bg-black px-3.5 py-2 text-xs font-medium text-zinc-200 transition-colors hover:border-zinc-700 hover:text-white"
+            className="inline-flex items-center gap-1.5 border border-emerald-500/25 bg-[#050505] px-3.5 py-2 text-xs font-medium text-zinc-200 shadow-[0_0_20px_-6px_rgba(16,185,129,0.16)] transition-all duration-200 hover:border-emerald-400/50 hover:text-white"
           >
             <Download className="h-3.5 w-3.5" />
             <span>ส่งออก CSV</span>
@@ -69,7 +72,7 @@ export function HistoryPanel({
             type="button"
             onClick={onRefresh}
             disabled={loading}
-            className="inline-flex items-center gap-1.5 border border-zinc-800 bg-black px-3.5 py-2 text-xs font-medium text-zinc-300 transition-colors hover:border-zinc-700 hover:text-white disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 border border-emerald-500/25 bg-[#050505] px-3.5 py-2 text-xs font-medium text-zinc-300 shadow-[0_0_20px_-6px_rgba(16,185,129,0.16)] transition-all duration-200 hover:border-emerald-400/50 hover:text-white disabled:opacity-50"
           >
             <RefreshCw
               className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`}
@@ -80,14 +83,18 @@ export function HistoryPanel({
       </div>
 
       {loading && records.length === 0 ? (
-        <div className="border-y border-zinc-800/90 py-14 text-center space-y-2">
+        <div
+          className={`py-14 text-center space-y-2 ${SURFACE_CARD_CLASS}`}
+        >
           <Loader2 className="mx-auto h-6 w-6 animate-spin text-emerald-400" />
           <p className="text-sm text-zinc-400">
             กำลังโหลดรายการที่บันทึกไว้บน Cloud...
           </p>
         </div>
       ) : records.length === 0 ? (
-        <div className="border-y border-zinc-800/90 py-14 text-center space-y-2">
+        <div
+          className={`py-14 px-6 text-center space-y-2 ${SURFACE_CARD_CLASS}`}
+        >
           <p className="text-base font-semibold text-zinc-200">
             ยังไม่มีรายการที่บันทึกไว้
           </p>
@@ -96,7 +103,7 @@ export function HistoryPanel({
           </p>
         </div>
       ) : (
-        <div className="divide-y divide-zinc-800/90 border-t border-b border-zinc-800/90">
+        <div className="space-y-3.5">
           {records.map((item) => {
             const metrics = calculateEcommerceMetrics({
               productName: item.product_name,
@@ -114,10 +121,10 @@ export function HistoryPanel({
             return (
               <article
                 key={item.id}
-                className="py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                className={`p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${SURFACE_CARD_CLASS}`}
               >
                 <div className="flex items-center gap-4 min-w-0">
-                  <div className="h-16 w-16 shrink-0 overflow-hidden border border-zinc-800 bg-zinc-950 flex items-center justify-center">
+                  <div className="h-16 w-16 shrink-0 overflow-hidden border border-emerald-500/25 bg-black flex items-center justify-center">
                     {item.product_image_url ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
@@ -169,7 +176,7 @@ export function HistoryPanel({
                   <button
                     type="button"
                     onClick={() => onLoadRecord(item)}
-                    className="border border-zinc-700 bg-black px-3.5 py-2 text-xs font-semibold text-zinc-100 transition-colors hover:border-emerald-400 hover:text-emerald-400"
+                    className="border border-emerald-500/30 bg-black px-3.5 py-2 text-xs font-semibold text-zinc-100 transition-all duration-200 hover:border-emerald-400 hover:text-emerald-400"
                   >
                     เปิดดู / แก้ไข
                   </button>

@@ -7,6 +7,7 @@ async function HomeContent() {
   let isAuthenticated = false;
   let username: string | null = null;
   let email: string | null = null;
+  let avatarUrl: string | null = null;
 
   try {
     const supabase = await createServerSupabaseClient();
@@ -18,7 +19,7 @@ async function HomeContent() {
       isAuthenticated = true;
       const { data: profile } = await supabase
         .from("profiles")
-        .select("username, email")
+        .select("username, email, avatar_url")
         .eq("id", user.id)
         .maybeSingle();
 
@@ -28,6 +29,11 @@ async function HomeContent() {
           ? user.user_metadata.username
           : null);
       email = profile?.email ?? user.email ?? null;
+      avatarUrl =
+        profile?.avatar_url ??
+        (typeof user.user_metadata?.avatar_url === "string"
+          ? user.user_metadata.avatar_url
+          : null);
     }
   } catch {
     isAuthenticated = false;
@@ -38,6 +44,7 @@ async function HomeContent() {
       <Navbar
         username={username}
         email={email}
+        avatarUrl={avatarUrl}
         isAuthenticated={isAuthenticated}
       />
       <LandingView isAuthenticated={isAuthenticated} />
