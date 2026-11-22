@@ -1,5 +1,7 @@
 export type ThemeMode = "light" | "dark";
 
+export type AppLanguage = "th" | "en";
+
 export type AuthTabMode = "login" | "register";
 
 export type PasswordStrengthLevel = "weak" | "medium" | "strong";

@@ -6,6 +6,7 @@ import { LandingView } from "@/components/LandingView";
 async function HomeContent() {
   let isAuthenticated = false;
   let username: string | null = null;
+  let email: string | null = null;
 
   try {
     const supabase = await createServerSupabaseClient();
@@ -17,7 +18,7 @@ async function HomeContent() {
       isAuthenticated = true;
       const { data: profile } = await supabase
         .from("profiles")
-        .select("username")
+        .select("username, email")
         .eq("id", user.id)
         .maybeSingle();
 
@@ -26,6 +27,7 @@ async function HomeContent() {
         (typeof user.user_metadata?.username === "string"
           ? user.user_metadata.username
           : null);
+      email = profile?.email ?? user.email ?? null;
     }
   } catch {
     isAuthenticated = false;
@@ -33,7 +35,11 @@ async function HomeContent() {
 
   return (
     <>
-      <Navbar username={username} isAuthenticated={isAuthenticated} />
+      <Navbar
+        username={username}
+        email={email}
+        isAuthenticated={isAuthenticated}
+      />
       <LandingView isAuthenticated={isAuthenticated} />
     </>
   );

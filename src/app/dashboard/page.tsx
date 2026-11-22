@@ -20,7 +20,7 @@ async function DashboardContent() {
   const [{ data: profile }, { data: historyRows }] = await Promise.all([
     supabase
       .from("profiles")
-      .select("username")
+      .select("username, email")
       .eq("id", user.id)
       .maybeSingle(),
     supabase
@@ -37,10 +37,15 @@ async function DashboardContent() {
     (typeof user.user_metadata?.username === "string"
       ? user.user_metadata.username
       : "user");
+  const resolvedEmail = profile?.email ?? user.email ?? null;
 
   return (
     <>
-      <Navbar username={resolvedUsername} isAuthenticated />
+      <Navbar
+        username={resolvedUsername}
+        email={resolvedEmail}
+        isAuthenticated
+      />
       <DashboardClient
         userId={user.id}
         initialRecords={(historyRows as EcommerceCalculationRecord[]) ?? []}
