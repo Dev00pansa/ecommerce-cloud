@@ -478,6 +478,9 @@ export function AuthForm() {
                         : "text-rose-500"
                   }`}
                 >
+                  {usernameStatus === "checking" && (
+                    <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin text-emerald-400" />
+                  )}
                   {usernameStatus === "available" && (
                     <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
                   )}

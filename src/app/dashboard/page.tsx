@@ -4,6 +4,7 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import type { EcommerceCalculationRecord } from "@/types";
 import { Navbar } from "@/components/Navbar";
 import { DashboardClient } from "@/components/DashboardClient";
+import { PageLoader } from "@/components/PageLoader";
 
 async function DashboardContent() {
   const supabase = await createServerSupabaseClient();
@@ -55,9 +56,7 @@ export default function DashboardPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center text-sm text-slate-500">
-          กำลังตรวจสอบสิทธิ์และโหลดเครื่องมือคำนวณ...
-        </div>
+        <PageLoader label="กำลังตรวจสอบสิทธิ์และโหลดเครื่องมือคำนวณ..." />
       }
     >
       <DashboardContent />

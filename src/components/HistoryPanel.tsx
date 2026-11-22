@@ -232,7 +232,11 @@ export function HistoryPanel({
                         : "border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100"
                     }`}
                   >
-                    <Trash2 className="h-3.5 w-3.5" />
+                    {deletingId === item.id ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <Trash2 className="h-3.5 w-3.5" />
+                    )}
                     <span>{deletingId === item.id ? "กำลังลบ..." : "ลบ"}</span>
                   </button>
                 </div>
