@@ -88,5 +88,14 @@ export interface EcommerceCalculationRecord {
   platform_fee_percent: number;
   selling_price: number;
   fixed_cost: number;
+  product_image_url?: string | null;
   created_at: string;
+}
+
+export interface CompressedProductImage {
+  blob: Blob;
+  previewUrl: string;
+  sizeBytes: number;
+  mimeType: "image/webp" | "image/jpeg";
+  extension: "webp" | "jpg";
 }

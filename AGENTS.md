@@ -20,7 +20,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
    - `src/lib/auth.ts`: ฟังก์ชันตรวจสอบความถูกต้องของ Username, Email, Error Translation และระบบประเมินระดับความปลอดภัยรหัสผ่าน (`PasswordStrengthEvaluator`)
    - `src/lib/supabase/`: แยก Client (`client.ts`), Server (`server.ts`), และ Session Guard Middleware Helper (`middleware.ts`) ตามมาตรฐาน `@supabase/ssr`
    - `src/types/`: เก็บ TypeScript Interfaces และ Types ทั้งหมดของโปรเจกต์ (ห้ามใช้ `any`)
-   - `src/components/`: แยกคอมโพเนนต์ย่อยตามหน้าที่ (`Navbar`, `ThemeProvider`, `AuthForm`, `PasswordStrengthMeter`, `CalculatorForm`, `KpiCards`, `PromoSimulator`, `PriceBreakdownChart`, `HistoryPanel`) ไม่เขียนยัดรวมในไฟล์เดียว
+   - `src/components/`: แยกคอมโพเนนต์ย่อยตามหน้าที่ (`Navbar`, `ThemeProvider`, `AuthForm`, `PasswordStrengthMeter`, `CalculatorForm`, `CalculationReport`, `HistoryPanel`, `PageLoader`) ไม่เขียนยัดรวมในไฟล์เดียว
 3. **Human-Readable Code:**
    - ตั้งชื่อตัวแปรและฟังก์ชันให้สื่อความหมายชัดเจนด้วยตัวเอง (Self-Documenting Code) **ห้ามเขียนคอมเมนต์อธิบายโค้ดภาษาไทยพร่ำเพรื่อ** หรือคอมเมนต์อธิบายสิ่งที่โค้ดบอกชัดเจนอยู่แล้ว (อนุญาตเฉพาะ Directive ที่จำเป็นของระบบ เช่น `eslint-disable`)
 

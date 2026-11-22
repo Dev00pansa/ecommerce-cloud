@@ -1,19 +1,27 @@
 import type { PasswordStrengthResult } from "@/types";
 
-const USERNAME_REGEX = /^[a-z0-9_]{4,20}$/;
+const USERNAME_REGEX = /^[A-Za-z0-9_]{4,20}$/;
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+export function sanitizePlainText(raw: string, maxLength = 120): string {
+  return raw
+    .replace(/[\u0000-\u001F\u007F]/g, "")
+    .replace(/[<>]/g, "")
+    .trim()
+    .slice(0, maxLength);
+}
 
 export function validateUsername(raw: string): {
   valid: boolean;
   normalized: string;
   error: string | null;
 } {
-  const normalized = raw.trim().toLowerCase();
+  const normalized = raw.trim();
 
   if (!normalized) {
     return { valid: false, normalized, error: "กรุณากรอกชื่อผู้ใช้ (Username)" };
   }
-  if (/\s/.test(raw.trim())) {
+  if (/\s/.test(normalized)) {
     return {
       valid: false,
       normalized,
@@ -31,7 +39,7 @@ export function validateUsername(raw: string): {
     return {
       valid: false,
       normalized,
-      error: "ชื่อผู้ใช้ใช้ได้เฉพาะตัวอักษรภาษาอังกฤษ a-z ตัวเลข 0-9 และ _ เท่านั้น",
+      error: "ชื่อผู้ใช้ใช้ได้เฉพาะตัวอักษรภาษาอังกฤษ A-Z, a-z ตัวเลข 0-9 และ _ เท่านั้น",
     };
   }
 
@@ -47,7 +55,7 @@ export function validateEmail(raw: string): {
   if (!normalized) {
     return { valid: false, normalized, error: "กรุณากรอกอีเมล" };
   }
-  if (!EMAIL_REGEX.test(normalized)) {
+  if (normalized.length > 254 || !EMAIL_REGEX.test(normalized)) {
     return { valid: false, normalized, error: "รูปแบบอีเมลไม่ถูกต้อง" };
   }
   return { valid: true, normalized, error: null };
@@ -122,8 +130,12 @@ export function translateSupabaseError(error: unknown): string {
   if (!msg) {
     return "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ กรุณาลองใหม่อีกครั้ง";
   }
-  if (msg.includes("invalid login credentials")) {
-    return "ชื่อผู้ใช้/อีเมล หรือรหัสผ่านไม่ถูกต้อง";
+  if (
+    msg.includes("invalid login credentials") ||
+    msg.includes("user not found") ||
+    msg.includes("invalid_credentials")
+  ) {
+    return "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง";
   }
   if (
     msg.includes("user already registered") ||
@@ -131,7 +143,11 @@ export function translateSupabaseError(error: unknown): string {
   ) {
     return "อีเมลนี้ถูกสมัครใช้งานแล้ว กรุณาเข้าสู่ระบบแทน";
   }
-  if (msg.includes("duplicate key") || msg.includes("profiles_username_key")) {
+  if (
+    msg.includes("duplicate key") ||
+    msg.includes("profiles_username_key") ||
+    msg.includes("profiles_username_lower_unique_idx")
+  ) {
     return "ชื่อผู้ใช้ (Username) นี้มีคนใช้แล้ว กรุณาเลือกชื่ออื่น";
   }
   if (
@@ -160,5 +176,5 @@ export function translateSupabaseError(error: unknown): string {
     return "ไม่มีสิทธิ์เข้าถึงข้อมูลส่วนตัวนี้";
   }
 
-  return `เกิดข้อผิดพลาด: ${rawMessage}`;
+  return "ไม่สามารถดำเนินการได้ กรุณาตรวจสอบข้อมูลแล้วลองใหม่อีกครั้ง";
 }

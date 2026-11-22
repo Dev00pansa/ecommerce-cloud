@@ -1,9 +1,16 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type FormEvent,
+  type PointerEvent as ReactPointerEvent,
+} from "react";
 import { useRouter } from "next/navigation";
 import {
   AlertCircle,
+  ArrowRight,
   CheckCircle2,
   Eye,
   EyeOff,
@@ -11,6 +18,7 @@ import {
   Lock,
   LogIn,
   Mail,
+  ShieldCheck,
   User as UserIcon,
   UserPlus,
 } from "lucide-react";
@@ -30,6 +38,10 @@ const AUTH_BACKGROUND_IMAGES: readonly string[] = [
   "/images/auth/bg-4.jpg",
   "/images/auth/bg-5.jpg",
 ];
+
+const MAX_CLIENT_ATTEMPTS = 5;
+const CLIENT_WINDOW_MS = 60_000;
+const MIN_HUMAN_DURATION_MS = 1_500;
 
 export function AuthForm() {
   const router = useRouter();
@@ -52,10 +64,21 @@ export function AuthForm() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showRegisterPassword, setShowRegisterPassword] = useState(false);
 
+  const [honeypotValue, setHoneypotValue] = useState("");
+  const [lockoutSeconds, setLockoutSeconds] = useState<number>(0);
+  const formLoadedAtRef = useRef<number>(0);
+  const attemptTimestampsRef = useRef<number[]>([]);
+
+  const sliderTrackRef = useRef<HTMLDivElement | null>(null);
+  const isDraggingSliderRef = useRef<boolean>(false);
+  const [sliderPercent, setSliderPercent] = useState<number>(0);
+  const [humanVerified, setHumanVerified] = useState<boolean>(false);
+
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
+    formLoadedAtRef.current = Date.now();
     const intervalId = window.setInterval(() => {
       setActiveBgIndex((prev) => (prev + 1) % AUTH_BACKGROUND_IMAGES.length);
     }, 5500);
@@ -65,9 +88,137 @@ export function AuthForm() {
     };
   }, []);
 
+  useEffect(() => {
+    if (lockoutSeconds <= 0) return;
+
+    const timerId = window.setInterval(() => {
+      setLockoutSeconds((prev) => (prev <= 1 ? 0 : prev - 1));
+    }, 1000);
+
+    return () => {
+      window.clearInterval(timerId);
+    };
+  }, [lockoutSeconds]);
+
   function switchTab(nextTab: AuthTabMode) {
     setActiveTab(nextTab);
     setErrorMessage(null);
+    formLoadedAtRef.current = Date.now();
+  }
+
+  function handleSliderPointerDown(event: ReactPointerEvent<HTMLDivElement>) {
+    if (humanVerified || submitting || lockoutSeconds > 0) return;
+    isDraggingSliderRef.current = true;
+    event.currentTarget.setPointerCapture(event.pointerId);
+  }
+
+  function handleSliderPointerMove(event: ReactPointerEvent<HTMLDivElement>) {
+    if (!isDraggingSliderRef.current || humanVerified) return;
+    const track = sliderTrackRef.current;
+    if (!track) return;
+
+    const rect = track.getBoundingClientRect();
+    const handleWidth = 42;
+    const usableWidth = Math.max(rect.width - handleWidth, 1);
+    const relativeX = event.clientX - rect.left - handleWidth / 2;
+    const nextPercent = Math.max(
+      0,
+      Math.min(100, (relativeX / usableWidth) * 100)
+    );
+
+    if (nextPercent >= 88) {
+      setSliderPercent(100);
+      setHumanVerified(true);
+      isDraggingSliderRef.current = false;
+    } else {
+      setSliderPercent(nextPercent);
+    }
+  }
+
+  function handleSliderPointerUp() {
+    if (!isDraggingSliderRef.current) return;
+    isDraggingSliderRef.current = false;
+    if (!humanVerified) {
+      setSliderPercent(0);
+    }
+  }
+
+  async function verifySecurityGuard(action: AuthTabMode): Promise<boolean> {
+    if (honeypotValue.trim().length > 0) {
+      setErrorMessage("ระบบตรวจพบพฤติกรรมอัตโนมัติที่ผิดปกติ คำขอถูกปฏิเสธ");
+      return false;
+    }
+
+    if (lockoutSeconds > 0) {
+      setErrorMessage(
+        `ทำรายการเกินกำหนด กรุณารออีก ${lockoutSeconds} วินาทีก่อนลองใหม่อีกครั้ง`
+      );
+      return false;
+    }
+
+    const elapsedMs = Date.now() - formLoadedAtRef.current;
+    if (elapsedMs < MIN_HUMAN_DURATION_MS) {
+      setErrorMessage("ส่งข้อมูลเร็วผิดปกติ กรุณารอสักครู่แล้วลองใหม่อีกครั้ง");
+      return false;
+    }
+
+    if (action === "register" && !humanVerified) {
+      setErrorMessage("กรุณาเลื่อนแถบยืนยันตัวตนไปทางขวาสุดเพื่อยืนยันว่าไม่ใช่บอท");
+      return false;
+    }
+
+    const now = Date.now();
+    const recent = attemptTimestampsRef.current.filter(
+      (timestamp) => now - timestamp < CLIENT_WINDOW_MS
+    );
+
+    if (recent.length >= MAX_CLIENT_ATTEMPTS) {
+      attemptTimestampsRef.current = recent;
+      setLockoutSeconds(60);
+      setErrorMessage(
+        "พยายามทำรายการเกิน 5 ครั้งภายใน 1 นาที ระบบล็อกชั่วคราว กรุณารอ 60 วินาที"
+      );
+      return false;
+    }
+
+    recent.push(now);
+    attemptTimestampsRef.current = recent;
+
+    try {
+      const response = await fetch("/api/auth/guard", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action,
+          honeypot: honeypotValue,
+          elapsedMs,
+          humanVerified: action === "register" ? humanVerified : true,
+        }),
+      });
+
+      const payload = (await response.json()) as {
+        allowed?: boolean;
+        retryAfterSeconds?: number;
+        error?: string;
+      };
+
+      if (!response.ok || payload.allowed !== true) {
+        if (
+          typeof payload.retryAfterSeconds === "number" &&
+          payload.retryAfterSeconds > 0
+        ) {
+          setLockoutSeconds(payload.retryAfterSeconds);
+        }
+        setErrorMessage(
+          payload.error ?? "ไม่สามารถทำรายการได้ในขณะนี้ กรุณารอสักครู่"
+        );
+        return false;
+      }
+
+      return true;
+    } catch {
+      return true;
+    }
   }
 
   async function verifyUsernameAvailability(rawUsername: string): Promise<boolean> {
@@ -109,10 +260,10 @@ export function AuthForm() {
 
   async function handleLoginSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (submitting) return;
+    if (submitting || lockoutSeconds > 0) return;
 
     setErrorMessage(null);
-    const identifier = loginIdentifier.trim().toLowerCase();
+    const identifier = loginIdentifier.trim();
 
     if (!identifier) {
       setErrorMessage("กรุณากรอกชื่อผู้ใช้ (Username) หรืออีเมล");
@@ -122,6 +273,9 @@ export function AuthForm() {
       setErrorMessage("กรุณากรอกรหัสผ่าน");
       return;
     }
+
+    const guardPassed = await verifySecurityGuard("login");
+    if (!guardPassed) return;
 
     const supabase = createClient();
     if (!supabase) {
@@ -137,13 +291,8 @@ export function AuthForm() {
         { p_identifier: identifier }
       );
 
-      if (rpcError) {
-        setErrorMessage(translateSupabaseError(rpcError));
-        return;
-      }
-
-      if (!resolvedEmail || typeof resolvedEmail !== "string") {
-        setErrorMessage("ไม่พบบัญชีผู้ใช้หรือชื่อผู้ใช้นี้ในระบบ");
+      if (rpcError || !resolvedEmail || typeof resolvedEmail !== "string") {
+        setErrorMessage("ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง");
         return;
       }
 
@@ -153,14 +302,15 @@ export function AuthForm() {
       });
 
       if (signInError) {
-        setErrorMessage(translateSupabaseError(signInError));
+        setErrorMessage("ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง");
         return;
       }
 
+      attemptTimestampsRef.current = [];
       router.push("/dashboard");
       router.refresh();
-    } catch (err) {
-      setErrorMessage(translateSupabaseError(err));
+    } catch {
+      setErrorMessage("ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง");
     } finally {
       setSubmitting(false);
     }
@@ -168,7 +318,7 @@ export function AuthForm() {
 
   async function handleRegisterSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (submitting) return;
+    if (submitting || lockoutSeconds > 0) return;
 
     setErrorMessage(null);
 
@@ -193,6 +343,9 @@ export function AuthForm() {
       setErrorMessage("รหัสผ่านและยืนยันรหัสผ่านไม่ตรงกัน");
       return;
     }
+
+    const guardPassed = await verifySecurityGuard("register");
+    if (!guardPassed) return;
 
     const supabase = createClient();
     if (!supabase) {
@@ -228,6 +381,8 @@ export function AuthForm() {
         setErrorMessage("อีเมลนี้ถูกสมัครใช้งานแล้ว กรุณาเข้าสู่ระบบแทน");
         return;
       }
+
+      attemptTimestampsRef.current = [];
 
       if (data.session) {
         router.push("/dashboard");
@@ -305,7 +460,7 @@ export function AuthForm() {
           </h1>
           <p className={`mt-1 text-xs sm:text-sm ${mutedText}`}>
             {activeTab === "login"
-              ? "ใช้ Username หรือ Email ที่สมัครไว้เพื่อเข้าสู่ Dashboard"
+              ? "ใช้ Username (ตรงตัวพิมพ์เล็ก-ใหญ่) หรือ Email เพื่อเข้าสู่ Dashboard"
               : "สมัครสมาชิกแล้วเข้าใช้งานเครื่องมือคำนวณและบันทึก Cloud ได้ทันที"}
           </p>
         </div>
@@ -347,6 +502,20 @@ export function AuthForm() {
           </div>
         )}
 
+        {lockoutSeconds > 0 && (
+          <div
+            role="alert"
+            className="mb-4 flex items-start gap-2 rounded-lg border border-amber-500/40 bg-amber-500/10 px-3.5 py-2.5 text-xs sm:text-sm text-amber-400"
+          >
+            <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
+            <span>
+              ระบบล็อกชั่วคราวเนื่องจากส่งคำขอถี่เกินไป กรุณารออีก{" "}
+              <strong className="font-mono tabular-nums">{lockoutSeconds}</strong>{" "}
+              วินาที
+            </span>
+          </div>
+        )}
+
         {errorMessage && (
           <div
             role="alert"
@@ -359,6 +528,22 @@ export function AuthForm() {
 
         {activeTab === "login" ? (
           <form onSubmit={handleLoginSubmit} className="space-y-4">
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute -left-[9999px] h-0 w-0 opacity-0 overflow-hidden"
+            >
+              <label htmlFor="login-company-website">Website</label>
+              <input
+                id="login-company-website"
+                type="text"
+                name="company_website"
+                tabIndex={-1}
+                autoComplete="off"
+                value={honeypotValue}
+                onChange={(e) => setHoneypotValue(e.target.value)}
+              />
+            </div>
+
             <div>
               <label
                 htmlFor="login-identifier"
@@ -375,10 +560,11 @@ export function AuthForm() {
                   type="text"
                   autoComplete="username"
                   required
+                  maxLength={120}
                   value={loginIdentifier}
                   onChange={(e) => setLoginIdentifier(e.target.value)}
                   placeholder="เช่น user_01 หรือ you@example.com"
-                  disabled={submitting}
+                  disabled={submitting || lockoutSeconds > 0}
                   className={`w-full rounded-lg border pl-9 pr-3.5 py-2.5 text-sm focus:outline-none disabled:opacity-60 ${inputClass}`}
                 />
               </div>
@@ -400,10 +586,11 @@ export function AuthForm() {
                   type={showLoginPassword ? "text" : "password"}
                   autoComplete="current-password"
                   required
+                  maxLength={128}
                   value={loginPassword}
                   onChange={(e) => setLoginPassword(e.target.value)}
                   placeholder="กรอกรหัสผ่านของคุณ"
-                  disabled={submitting}
+                  disabled={submitting || lockoutSeconds > 0}
                   className={`w-full rounded-lg border pl-9 pr-10 py-2.5 text-sm focus:outline-none disabled:opacity-60 ${inputClass}`}
                 />
                 <button
@@ -423,7 +610,7 @@ export function AuthForm() {
 
             <button
               type="submit"
-              disabled={submitting}
+              disabled={submitting || lockoutSeconds > 0}
               className="w-full flex items-center justify-center gap-2 rounded-lg bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-slate-950 transition-all hover:bg-emerald-400 hover:shadow-[0_0_20px_rgba(16,185,129,0.4)] disabled:opacity-60"
             >
               {submitting ? (
@@ -431,11 +618,33 @@ export function AuthForm() {
               ) : (
                 <LogIn className="h-4 w-4" />
               )}
-              <span>{submitting ? "กำลังเข้าสู่ระบบ..." : "เข้าสู่ระบบ"}</span>
+              <span>
+                {lockoutSeconds > 0
+                  ? `รออีก ${lockoutSeconds} วินาที`
+                  : submitting
+                    ? "กำลังเข้าสู่ระบบ..."
+                    : "เข้าสู่ระบบ"}
+              </span>
             </button>
           </form>
         ) : (
           <form onSubmit={handleRegisterSubmit} className="space-y-4">
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute -left-[9999px] h-0 w-0 opacity-0 overflow-hidden"
+            >
+              <label htmlFor="register-company-website">Website</label>
+              <input
+                id="register-company-website"
+                type="text"
+                name="company_website"
+                tabIndex={-1}
+                autoComplete="off"
+                value={honeypotValue}
+                onChange={(e) => setHoneypotValue(e.target.value)}
+              />
+            </div>
+
             <div>
               <label
                 htmlFor="register-username"
@@ -452,6 +661,7 @@ export function AuthForm() {
                   type="text"
                   autoComplete="username"
                   required
+                  maxLength={20}
                   value={username}
                   onChange={(e) => {
                     setUsername(e.target.value);
@@ -464,7 +674,7 @@ export function AuthForm() {
                     }
                   }}
                   placeholder="เช่น seller_01 (a-z, 0-9, _)"
-                  disabled={submitting}
+                  disabled={submitting || lockoutSeconds > 0}
                   className={`w-full rounded-lg border pl-9 pr-3.5 py-2.5 text-sm font-mono focus:outline-none disabled:opacity-60 ${inputClass}`}
                 />
               </div>
@@ -508,10 +718,11 @@ export function AuthForm() {
                   type="email"
                   autoComplete="email"
                   required
+                  maxLength={254}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="เช่น you@example.com"
-                  disabled={submitting}
+                  disabled={submitting || lockoutSeconds > 0}
                   className={`w-full rounded-lg border pl-9 pr-3.5 py-2.5 text-sm focus:outline-none disabled:opacity-60 ${inputClass}`}
                 />
               </div>
@@ -534,10 +745,11 @@ export function AuthForm() {
                   autoComplete="new-password"
                   required
                   minLength={6}
+                  maxLength={128}
                   value={registerPassword}
                   onChange={(e) => setRegisterPassword(e.target.value)}
                   placeholder="ตั้งรหัสผ่านของคุณ"
-                  disabled={submitting}
+                  disabled={submitting || lockoutSeconds > 0}
                   className={`w-full rounded-lg border pl-9 pr-10 py-2.5 text-sm focus:outline-none disabled:opacity-60 ${inputClass}`}
                 />
                 <button
@@ -574,10 +786,11 @@ export function AuthForm() {
                   type={showRegisterPassword ? "text" : "password"}
                   autoComplete="new-password"
                   required
+                  maxLength={128}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="พิมพ์รหัสผ่านอีกครั้งให้ตรงกัน"
-                  disabled={submitting}
+                  disabled={submitting || lockoutSeconds > 0}
                   className={`w-full rounded-lg border pl-9 pr-3.5 py-2.5 text-sm focus:outline-none disabled:opacity-60 ${inputClass}`}
                 />
               </div>
@@ -588,10 +801,71 @@ export function AuthForm() {
               )}
             </div>
 
+            <div className="pt-1">
+              <div
+                ref={sliderTrackRef}
+                onPointerDown={handleSliderPointerDown}
+                onPointerMove={handleSliderPointerMove}
+                onPointerUp={handleSliderPointerUp}
+                onPointerCancel={handleSliderPointerUp}
+                role="slider"
+                tabIndex={0}
+                aria-label="เลื่อนไปทางขวาเพื่อยืนยันว่าไม่ใช่บอท"
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-valuenow={Math.round(sliderPercent)}
+                onKeyDown={(e) => {
+                  if (e.key === "ArrowRight" || e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setSliderPercent(100);
+                    setHumanVerified(true);
+                  }
+                }}
+                className={`relative h-11 w-full rounded-lg border select-none touch-none overflow-hidden transition-colors ${
+                  humanVerified
+                    ? "border-emerald-500/60 bg-emerald-950/40"
+                    : "border-zinc-800 bg-zinc-950/90 cursor-ew-resize"
+                }`}
+              >
+                <div
+                  style={{ width: `${sliderPercent}%` }}
+                  className="pointer-events-none absolute inset-y-0 left-0 bg-emerald-500/20 transition-[width] duration-75"
+                />
+                <div className="pointer-events-none absolute inset-0 flex items-center justify-center px-11 text-xs font-medium">
+                  {humanVerified ? (
+                    <span className="flex items-center gap-1.5 text-emerald-400 font-semibold">
+                      <ShieldCheck className="h-4 w-4" />
+                      <span>ยืนยันตัวตนเรียบร้อยแล้ว</span>
+                    </span>
+                  ) : (
+                    <span className="text-zinc-400">
+                      เลื่อนไปทางขวาเพื่อยืนยันว่าไม่ใช่บอท
+                    </span>
+                  )}
+                </div>
+                <div
+                  style={{
+                    left: `calc(${sliderPercent}% - ${(sliderPercent * 42) / 100}px)`,
+                  }}
+                  className={`pointer-events-none absolute top-1 bottom-1 w-9 rounded-md flex items-center justify-center transition-colors ${
+                    humanVerified
+                      ? "bg-emerald-500 text-slate-950"
+                      : "bg-zinc-800 text-emerald-400 border border-zinc-700"
+                  }`}
+                >
+                  {humanVerified ? (
+                    <CheckCircle2 className="h-4 w-4" />
+                  ) : (
+                    <ArrowRight className="h-4 w-4" />
+                  )}
+                </div>
+              </div>
+            </div>
+
             <button
               type="submit"
-              disabled={submitting}
-              className="w-full flex items-center justify-center gap-2 rounded-lg bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-slate-950 transition-all hover:bg-emerald-400 hover:shadow-[0_0_20px_rgba(16,185,129,0.4)] disabled:opacity-60"
+              disabled={submitting || lockoutSeconds > 0 || !humanVerified}
+              className="w-full flex items-center justify-center gap-2 rounded-lg bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-slate-950 transition-all hover:bg-emerald-400 hover:shadow-[0_0_20px_rgba(16,185,129,0.4)] disabled:opacity-50"
             >
               {submitting ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -599,7 +873,11 @@ export function AuthForm() {
                 <UserPlus className="h-4 w-4" />
               )}
               <span>
-                {submitting ? "กำลังสร้างบัญชี..." : "สมัครสมาชิกและเริ่มใช้งาน"}
+                {lockoutSeconds > 0
+                  ? `รออีก ${lockoutSeconds} วินาที`
+                  : submitting
+                    ? "กำลังสร้างบัญชี..."
+                    : "สมัครสมาชิกและเริ่มใช้งาน"}
               </span>
             </button>
           </form>
