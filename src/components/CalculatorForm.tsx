@@ -88,19 +88,19 @@ function sanitizeBoundedDecimal(
 }
 
 const INPUT_SURFACE_CLASS =
-  "w-full rounded-xl bg-black/80 border border-emerald-500/25 shadow-[0_0_20px_-6px_rgba(16,185,129,0.16)] transition-all duration-200 hover:border-emerald-400/50 focus:border-emerald-400 focus:shadow-[0_0_25px_-4px_rgba(16,185,129,0.3)] focus:outline-none";
+  "w-full rounded-xl bg-black/80 border border-emerald-500/25 shadow-[0_0_20px_-6px_rgba(16,185,129,0.16)] transition-all duration-200 hover:border-emerald-400/50 focus:border-emerald-400 focus:shadow-[0_0_25px_-4px_rgba(16,185,129,0.3)] focus:outline-none light:bg-white light:border-slate-300 light:text-slate-900 light:placeholder-slate-400 light:shadow-xs light:hover:border-emerald-500 light:focus:border-emerald-600 light:focus:ring-2 light:focus:ring-emerald-600/20 light:focus:shadow-none";
 
 const BOX_SURFACE_CLASS =
-  "rounded-2xl bg-black/75 border border-emerald-500/20 shadow-[0_0_20px_-6px_rgba(16,185,129,0.14)] transition-all duration-200 hover:border-emerald-400/50 hover:shadow-[0_0_25px_-4px_rgba(16,185,129,0.28)]";
+  "rounded-2xl bg-black/75 border border-emerald-500/20 shadow-[0_0_20px_-6px_rgba(16,185,129,0.14)] transition-all duration-200 hover:border-emerald-400/50 hover:shadow-[0_0_25px_-4px_rgba(16,185,129,0.28)] light:bg-slate-50/75 light:border-slate-200 light:shadow-none light:hover:border-emerald-500 light:hover:bg-emerald-50/40 light:hover:shadow-xs";
 
 const GLASS_CARD_CLASS =
-  "rounded-2xl overflow-hidden bg-[#060807]/85 backdrop-blur-md border border-emerald-500/20 shadow-[0_16px_40px_rgba(0,0,0,0.75)]";
+  "rounded-2xl overflow-hidden bg-[#060807]/85 backdrop-blur-md border border-emerald-500/20 shadow-[0_16px_40px_rgba(0,0,0,0.75)] light:bg-white light:border-slate-200 light:shadow-[0_8px_28px_rgba(15,23,42,0.06)]";
 
 const CARD_HEADER_BAND_CLASS =
-  "bg-gradient-to-r from-emerald-950/60 via-[#0a100e] to-[#070908] border-b border-emerald-500/15 px-6 py-4 flex items-center gap-3.5";
+  "bg-gradient-to-r from-emerald-950/60 via-[#0a100e] to-[#070908] border-b border-emerald-500/15 px-6 py-4 flex items-center gap-3.5 light:from-emerald-50 light:via-teal-50/70 light:to-slate-50 light:border-emerald-200/80";
 
 const GLOWING_ICON_BADGE_CLASS =
-  "w-10 h-10 shrink-0 rounded-xl bg-gradient-to-br from-emerald-400/25 to-emerald-600/10 border border-emerald-400/35 text-emerald-400 flex items-center justify-center shadow-[0_0_16px_rgba(16,185,129,0.2)]";
+  "w-10 h-10 shrink-0 rounded-xl bg-gradient-to-br from-emerald-400/25 to-emerald-600/10 border border-emerald-400/35 text-emerald-400 flex items-center justify-center shadow-[0_0_16px_rgba(16,185,129,0.2)] light:from-emerald-100 light:to-emerald-50 light:border-emerald-300 light:text-emerald-700 light:shadow-none";
 
 export function CalculatorForm({
   values,
@@ -216,18 +216,18 @@ export function CalculatorForm({
       className="space-y-6 sm:space-y-8"
     >
       {editingProductName && (
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl border border-emerald-500/40 bg-[#060807]/90 backdrop-blur-md px-5 py-4 shadow-[0_0_24px_-6px_rgba(16,185,129,0.25)]">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl border border-emerald-500/40 bg-[#060807]/90 backdrop-blur-md px-5 py-4 shadow-[0_0_24px_-6px_rgba(16,185,129,0.25)] light:border-emerald-300 light:bg-emerald-50 light:shadow-xs">
           <div className="flex items-start sm:items-center gap-3 min-w-0">
-            <span className="mt-0.5 sm:mt-0 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-400">
+            <span className="mt-0.5 sm:mt-0 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-400 light:bg-emerald-100 light:text-emerald-700">
               <Pencil className="h-4 w-4" />
             </span>
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-white truncate">
+              <p className="text-sm font-semibold text-white light:text-slate-900 truncate">
                 {isEn
                   ? `Editing Record: ${editingProductName}`
                   : `กำลังแก้ไขรายการ: ${editingProductName}`}
               </p>
-              <p className="text-xs text-zinc-400 mt-0.5">
+              <p className="text-xs text-zinc-400 light:text-slate-600 mt-0.5">
                 {isEn
                   ? "Saving will update this existing Cloud record without creating a duplicate."
                   : "เมื่อกดบันทึก ระบบจะอัปเดตทับข้อมูลเดิมในคลาวด์โดยไม่สร้างรายการซ้ำ"}
@@ -239,7 +239,7 @@ export function CalculatorForm({
             <button
               type="button"
               onClick={onCancelEdit}
-              className="inline-flex shrink-0 self-start sm:self-center items-center gap-1.5 rounded-xl border border-zinc-800 bg-black px-3.5 py-2 text-xs font-medium text-zinc-300 transition-colors hover:border-zinc-600 hover:text-white"
+              className="inline-flex shrink-0 self-start sm:self-center items-center gap-1.5 rounded-xl border border-zinc-800 bg-black px-3.5 py-2 text-xs font-medium text-zinc-300 transition-colors hover:border-zinc-600 hover:text-white light:border-slate-300 light:bg-white light:text-slate-700 light:hover:border-slate-400 light:hover:text-slate-900"
             >
               <X className="h-3.5 w-3.5" />
               <span>{isEn ? "Cancel Edit" : "ยกเลิกการแก้ไข"}</span>
@@ -255,15 +255,15 @@ export function CalculatorForm({
           </div>
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-400">
+              <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-400 light:text-emerald-700">
                 STEP 01
               </span>
-              <span className="text-zinc-700">•</span>
-              <h2 className="text-lg sm:text-xl font-bold tracking-tight text-white">
+              <span className="text-zinc-700 light:text-slate-300">•</span>
+              <h2 className="text-lg sm:text-xl font-bold tracking-tight text-white light:text-slate-900">
                 {isEn ? "Where do you sell this product?" : "คุณขายสินค้านี้ที่ไหน?"}
               </h2>
             </div>
-            <p className="text-xs sm:text-sm text-zinc-400 mt-0.5">
+            <p className="text-xs sm:text-sm text-zinc-400 light:text-slate-600 mt-0.5">
               {isEn
                 ? "Pick a marketplace preset to auto-fill GP fees, or customize the percentage below."
                 : "กดเลือกช่องทางขายเพื่อให้ระบบตั้งค่าธรรมเนียม (GP) อัตโนมัติ หรือปรับแก้ตัวเลขเปอร์เซ็นต์เองได้ตามจริง"}
@@ -285,23 +285,23 @@ export function CalculatorForm({
                   onClick={() => onSelectPreset(preset)}
                   className={`flex items-center justify-between rounded-2xl px-4 py-4 text-left transition-all duration-200 ${
                     active
-                      ? "bg-black/90 border border-emerald-400/80 text-white shadow-[0_0_26px_-4px_rgba(16,185,129,0.34),inset_0_0_24px_-12px_rgba(16,185,129,0.3)]"
-                      : `${BOX_SURFACE_CLASS} text-zinc-300 hover:text-white`
+                      ? "bg-black/90 border border-emerald-400/80 text-white shadow-[0_0_26px_-4px_rgba(16,185,129,0.34),inset_0_0_24px_-12px_rgba(16,185,129,0.3)] light:bg-emerald-50/80 light:border-emerald-600 light:text-slate-900 light:shadow-xs"
+                      : `${BOX_SURFACE_CLASS} text-zinc-300 hover:text-white light:text-slate-700 light:hover:text-slate-900`
                   }`}
                 >
                   <div>
                     <span className="block text-base font-semibold">
                       {isEn ? preset.labelEn : preset.label}
                     </span>
-                    <span className="block text-xs text-zinc-500 mt-0.5">
+                    <span className="block text-xs text-zinc-500 light:text-slate-500 mt-0.5">
                       {preset.badge}
                     </span>
                   </div>
                   <span
                     className={`rounded-xl font-mono text-sm font-semibold px-2.5 py-1 border ${
                       active
-                        ? "border-emerald-400/60 bg-emerald-500/15 text-emerald-300"
-                        : "border-emerald-500/20 bg-black text-zinc-400"
+                        ? "border-emerald-400/60 bg-emerald-500/15 text-emerald-300 light:border-emerald-300 light:bg-emerald-100 light:text-emerald-800"
+                        : "border-emerald-500/20 bg-black text-zinc-400 light:border-slate-200 light:bg-white light:text-slate-600"
                     }`}
                   >
                     GP {preset.feePercent}%
@@ -311,17 +311,17 @@ export function CalculatorForm({
             })}
           </div>
 
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-t border-zinc-800/70 pt-5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-t border-zinc-800/70 light:border-slate-200 pt-5">
             <div>
               <label
                 htmlFor="calc-platform-fee"
-                className="block text-sm font-medium text-zinc-200"
+                className="block text-sm font-medium text-zinc-200 light:text-slate-800"
               >
                 {isEn
                   ? "Custom Platform Fee (%)"
                   : "ปรับแก้ค่าธรรมเนียมแพลตฟอร์ม (%)"}
               </label>
-              <p className="text-xs text-zinc-500">
+              <p className="text-xs text-zinc-500 light:text-slate-500">
                 {isEn
                   ? "If your store pays a different GP rate, edit the percentage here directly."
                   : "หากร้านของคุณโดนหักค่าธรรมเนียมต่างจากค่ามาตรฐาน สามารถพิมพ์แก้ตัวเลขช่องนี้ได้เลย"}
@@ -352,17 +352,17 @@ export function CalculatorForm({
           </div>
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-400">
+              <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-400 light:text-emerald-700">
                 STEP 02
               </span>
-              <span className="text-zinc-700">•</span>
-              <h2 className="text-lg sm:text-xl font-bold tracking-tight text-white">
+              <span className="text-zinc-700 light:text-slate-300">•</span>
+              <h2 className="text-lg sm:text-xl font-bold tracking-tight text-white light:text-slate-900">
                 {isEn
                   ? "What product are you selling?"
                   : "สินค้าที่คุณจะขายคืออะไร?"}
               </h2>
             </div>
-            <p className="text-xs sm:text-sm text-zinc-400 mt-0.5">
+            <p className="text-xs sm:text-sm text-zinc-400 light:text-slate-600 mt-0.5">
               {isEn
                 ? "Enter a unique product name or SKU (required) and optionally attach 1 product photo."
                 : "ระบุชื่อสินค้าหรือรุ่นสินค้า (บังคับกรอก) และแนบรูปสินค้าได้ 1 รูป"}
@@ -374,10 +374,13 @@ export function CalculatorForm({
           <div className="space-y-2">
             <label
               htmlFor="calc-product-name"
-              className="block text-sm font-medium text-zinc-200"
+              className="block text-sm font-medium text-zinc-200 light:text-slate-800"
             >
               {isEn ? "Product Name or SKU" : "ชื่อสินค้า หรือ รุ่นสินค้า"}
-              <span className="ml-1 text-emerald-400" aria-hidden="true">
+              <span
+                className="ml-1 text-emerald-400 light:text-emerald-600"
+                aria-hidden="true"
+              >
                 *
               </span>
             </label>
@@ -400,16 +403,16 @@ export function CalculatorForm({
                   : "เช่น เสื้อยืดคอกลมสีดำ รุ่นพรีเมียม"
               }
               maxLength={120}
-              className={`w-full rounded-xl bg-black/80 px-4 py-3 text-base text-zinc-100 placeholder-zinc-600 transition-all duration-200 focus:outline-none ${
+              className={`w-full rounded-xl bg-black/80 px-4 py-3 text-base text-zinc-100 placeholder-zinc-600 transition-all duration-200 focus:outline-none light:bg-white light:text-slate-900 light:placeholder-slate-400 ${
                 productNameErrorMessage
-                  ? "border border-rose-500/80 shadow-[0_0_20px_-6px_rgba(244,63,94,0.35)] focus:border-rose-400"
-                  : "border border-emerald-500/25 shadow-[0_0_20px_-6px_rgba(16,185,129,0.16)] hover:border-emerald-400/50 focus:border-emerald-400 focus:shadow-[0_0_25px_-4px_rgba(16,185,129,0.3)]"
+                  ? "border border-rose-500/80 shadow-[0_0_20px_-6px_rgba(244,63,94,0.35)] focus:border-rose-400 light:border-rose-500 light:shadow-none"
+                  : "border border-emerald-500/25 shadow-[0_0_20px_-6px_rgba(16,185,129,0.16)] hover:border-emerald-400/50 focus:border-emerald-400 focus:shadow-[0_0_25px_-4px_rgba(16,185,129,0.3)] light:border-slate-300 light:shadow-xs light:hover:border-emerald-500 light:focus:border-emerald-600 light:focus:ring-2 light:focus:ring-emerald-600/20 light:focus:shadow-none"
               }`}
             />
             {productNameErrorMessage && (
               <p
                 role="alert"
-                className="flex items-center gap-1.5 text-xs font-medium text-rose-400"
+                className="flex items-center gap-1.5 text-xs font-medium text-rose-400 light:text-rose-600"
               >
                 <AlertCircle className="h-3.5 w-3.5 shrink-0" />
                 <span>{productNameErrorMessage}</span>
@@ -419,13 +422,13 @@ export function CalculatorForm({
 
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-zinc-200">
+              <span className="text-sm font-medium text-zinc-200 light:text-slate-800">
                 {isEn
                   ? "Product Photo (1 image max — auto-resized & compressed)"
                   : "รูปภาพสินค้า (จำกัด 1 รูป — ระบบย่อและบีบอัดขนาดอัตโนมัติ)"}
               </span>
               {compressedImage && (
-                <span className="font-mono text-xs text-emerald-400">
+                <span className="font-mono text-xs text-emerald-400 light:text-emerald-700">
                   {isEn ? "Compressed" : "บีบอัดแล้ว"}{" "}
                   {formatFileSizeKb(compressedImage.sizeBytes)}
                 </span>
@@ -445,7 +448,7 @@ export function CalculatorForm({
                 className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 ${BOX_SURFACE_CLASS}`}
               >
                 <div className="flex items-center gap-4">
-                  <div className="h-20 w-20 shrink-0 overflow-hidden rounded-xl border border-emerald-500/30 bg-black">
+                  <div className="h-20 w-20 shrink-0 overflow-hidden rounded-xl border border-emerald-500/30 bg-black light:border-slate-200 light:bg-white">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={activePreviewUrl}
@@ -454,12 +457,12 @@ export function CalculatorForm({
                     />
                   </div>
                   <div className="space-y-1">
-                    <p className="text-sm font-medium text-zinc-100">
+                    <p className="text-sm font-medium text-zinc-100 light:text-slate-900">
                       {isEn
                         ? "Product photo attached"
                         : "แนบรูปภาพสินค้าเรียบร้อยแล้ว"}
                     </p>
-                    <p className="text-xs text-zinc-400">
+                    <p className="text-xs text-zinc-400 light:text-slate-600">
                       {compressedImage
                         ? isEn
                           ? `Ready to save (${formatFileSizeKb(compressedImage.sizeBytes)})`
@@ -476,7 +479,7 @@ export function CalculatorForm({
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
                     disabled={compressingImage}
-                    className="rounded-xl border border-emerald-500/30 bg-black px-3.5 py-2 text-xs font-medium text-zinc-200 transition-all duration-200 hover:border-emerald-400 hover:text-emerald-400 disabled:opacity-50"
+                    className="rounded-xl border border-emerald-500/30 bg-black px-3.5 py-2 text-xs font-medium text-zinc-200 transition-all duration-200 hover:border-emerald-400 hover:text-emerald-400 light:border-slate-300 light:bg-white light:text-slate-700 light:hover:border-emerald-600 light:hover:text-emerald-700 disabled:opacity-50"
                   >
                     {isEn ? "Change Photo" : "เปลี่ยนรูป"}
                   </button>
@@ -484,7 +487,7 @@ export function CalculatorForm({
                     type="button"
                     onClick={onRemoveImage}
                     disabled={compressingImage}
-                    className="inline-flex items-center gap-1 rounded-xl border border-zinc-800 bg-black px-3 py-2 text-xs font-medium text-rose-400 transition-colors hover:border-rose-500/60 disabled:opacity-50"
+                    className="inline-flex items-center gap-1 rounded-xl border border-zinc-800 bg-black px-3 py-2 text-xs font-medium text-rose-400 transition-colors hover:border-rose-500/60 light:border-slate-300 light:bg-white light:text-rose-600 light:hover:border-rose-400 light:hover:bg-rose-50 disabled:opacity-50"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                     <span>{isEn ? "Remove" : "ลบรูป"}</span>
@@ -504,12 +507,12 @@ export function CalculatorForm({
               >
                 <div className="flex items-center gap-3.5">
                   {compressingImage ? (
-                    <Loader2 className="h-5 w-5 text-emerald-400 animate-spin shrink-0" />
+                    <Loader2 className="h-5 w-5 text-emerald-400 light:text-emerald-600 animate-spin shrink-0" />
                   ) : (
-                    <ImagePlus className="h-5 w-5 text-emerald-400/80 shrink-0" />
+                    <ImagePlus className="h-5 w-5 text-emerald-400/80 light:text-emerald-600 shrink-0" />
                   )}
                   <div>
-                    <p className="text-sm font-medium text-zinc-200">
+                    <p className="text-sm font-medium text-zinc-200 light:text-slate-800">
                       {compressingImage
                         ? isEn
                           ? "Compressing and optimizing photo..."
@@ -518,21 +521,23 @@ export function CalculatorForm({
                           ? "Click to choose 1 product photo (or drag & drop here)"
                           : "กดที่นี่เพื่อเลือกรูปสินค้า 1 รูป (หรือลากไฟล์มาวาง)"}
                     </p>
-                    <p className="text-xs text-zinc-500 mt-0.5">
+                    <p className="text-xs text-zinc-500 light:text-slate-500 mt-0.5">
                       {isEn
                         ? "Supports .jpg, .png, .webp (auto-compressed under 120 KB to save Cloud space)"
                         : "รองรับไฟล์ .jpg, .png, .webp (ย่อขนาดอัตโนมัติไม่เกิน 120 KB เพื่อประหยัดพื้นที่ Cloud)"}
                     </p>
                   </div>
                 </div>
-                <span className="shrink-0 rounded-xl border border-emerald-500/30 bg-black px-3 py-1.5 text-xs font-medium text-emerald-300">
+                <span className="shrink-0 rounded-xl border border-emerald-500/30 bg-black px-3 py-1.5 text-xs font-medium text-emerald-300 light:border-emerald-300 light:bg-emerald-50 light:text-emerald-700">
                   {isEn ? "Browse" : "เลือกรูป"}
                 </span>
               </div>
             )}
 
             {imageError && (
-              <p className="text-xs font-medium text-rose-400">{imageError}</p>
+              <p className="text-xs font-medium text-rose-400 light:text-rose-600">
+                {imageError}
+              </p>
             )}
           </div>
         </div>
@@ -545,17 +550,17 @@ export function CalculatorForm({
           </div>
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-400">
+              <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-400 light:text-emerald-700">
                 STEP 03
               </span>
-              <span className="text-zinc-700">•</span>
-              <h2 className="text-lg sm:text-xl font-bold tracking-tight text-white">
+              <span className="text-zinc-700 light:text-slate-300">•</span>
+              <h2 className="text-lg sm:text-xl font-bold tracking-tight text-white light:text-slate-900">
                 {isEn
                   ? "Enter Unit Costs & Selling Price"
                   : "กรอกต้นทุนและราคาขาย"}
               </h2>
             </div>
-            <p className="text-xs sm:text-sm text-zinc-400 mt-0.5">
+            <p className="text-xs sm:text-sm text-zinc-400 light:text-slate-600 mt-0.5">
               {isEn
                 ? "Enter your actual figures. Leave 0 for any unused expense (up to 299,999 THB per field)."
                 : "กรอกตัวเลขตามความจริง ช่องไหนไม่มีค่าใช้จ่ายให้ใส่เลข 0 ได้เลย (สูงสุดไม่เกิน 299,999 บาทต่อช่อง)"}
@@ -565,17 +570,17 @@ export function CalculatorForm({
 
         <div className="p-6 sm:p-8 space-y-6">
           <div className="space-y-5">
-            <div className="grid grid-cols-1 sm:grid-cols-12 items-start gap-2 sm:gap-6 border-b border-zinc-800/60 pb-5">
+            <div className="grid grid-cols-1 sm:grid-cols-12 items-start gap-2 sm:gap-6 border-b border-zinc-800/60 light:border-slate-200 pb-5">
               <div className="sm:col-span-7">
                 <label
                   htmlFor="calc-cost-price"
-                  className="block text-base font-semibold text-zinc-100"
+                  className="block text-base font-semibold text-zinc-100 light:text-slate-900"
                 >
                   {isEn
                     ? "1. Base Product Cost per Unit (THB)"
                     : "1. ต้นทุนสินค้าต่อชิ้น (บาท)"}
                 </label>
-                <p className="text-xs sm:text-sm text-zinc-400 mt-0.5">
+                <p className="text-xs sm:text-sm text-zinc-400 light:text-slate-600 mt-0.5">
                   {isEn
                     ? "Wholesale purchase price or manufacturing cost for 1 unit."
                     : "ราคาทุนที่คุณรับสินค้ามา หรือต้นทุนผลิตต่อ 1 ชิ้น"}
@@ -597,24 +602,24 @@ export function CalculatorForm({
                   className={`${INPUT_SURFACE_CLASS} px-4 py-3 text-lg font-mono tabular-nums text-zinc-100`}
                 />
                 {clampedFields.costPrice && (
-                  <p className="text-[11px] font-medium text-amber-400">
+                  <p className="text-[11px] font-medium text-amber-400 light:text-amber-700">
                     {maxLimitWarningText}
                   </p>
                 )}
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-12 items-start gap-2 sm:gap-6 border-b border-zinc-800/60 pb-5">
+            <div className="grid grid-cols-1 sm:grid-cols-12 items-start gap-2 sm:gap-6 border-b border-zinc-800/60 light:border-slate-200 pb-5">
               <div className="sm:col-span-7">
                 <label
                   htmlFor="calc-packaging-cost"
-                  className="block text-base font-semibold text-zinc-100"
+                  className="block text-base font-semibold text-zinc-100 light:text-slate-900"
                 >
                   {isEn
                     ? "2. Packaging & Fulfillment Cost per Unit (THB)"
                     : "2. ค่ากล่องและค่าแพ็กต่อชิ้น (บาท)"}
                 </label>
-                <p className="text-xs sm:text-sm text-zinc-400 mt-0.5">
+                <p className="text-xs sm:text-sm text-zinc-400 light:text-slate-600 mt-0.5">
                   {isEn
                     ? "Boxes, bubble wrap, tape, poly mailers, and shipping labels per unit."
                     : "รวมค่ากล่องพัสดุ บับเบิลกันกระแทก เทปกาว และใบปะหน้าต่อ 1 ชิ้น"}
@@ -636,24 +641,24 @@ export function CalculatorForm({
                   className={`${INPUT_SURFACE_CLASS} px-4 py-3 text-lg font-mono tabular-nums text-zinc-100`}
                 />
                 {clampedFields.packagingCost && (
-                  <p className="text-[11px] font-medium text-amber-400">
+                  <p className="text-[11px] font-medium text-amber-400 light:text-amber-700">
                     {maxLimitWarningText}
                   </p>
                 )}
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-12 items-start gap-2 sm:gap-6 border-b border-zinc-800/60 pb-5">
+            <div className="grid grid-cols-1 sm:grid-cols-12 items-start gap-2 sm:gap-6 border-b border-zinc-800/60 light:border-slate-200 pb-5">
               <div className="sm:col-span-7">
                 <label
                   htmlFor="calc-ads-cost"
-                  className="block text-base font-semibold text-zinc-100"
+                  className="block text-base font-semibold text-zinc-100 light:text-slate-900"
                 >
                   {isEn
                     ? "3. Average Ad Spend per Unit / CPA (THB)"
                     : "3. ค่าโฆษณาเฉลี่ยต่อชิ้น (บาท)"}
                 </label>
-                <p className="text-xs sm:text-sm text-zinc-400 mt-0.5">
+                <p className="text-xs sm:text-sm text-zinc-400 light:text-slate-600 mt-0.5">
                   {isEn
                     ? "Average ad spend needed to convert 1 unit (enter 0 if organic)."
                     : "ค่าแอดเฉลี่ยเพื่อให้ขายสินค้าได้ 1 ชิ้น (ถ้าไม่ได้ยิงแอดให้ใส่ 0)"}
@@ -675,24 +680,24 @@ export function CalculatorForm({
                   className={`${INPUT_SURFACE_CLASS} px-4 py-3 text-lg font-mono tabular-nums text-zinc-100`}
                 />
                 {clampedFields.adsCost && (
-                  <p className="text-[11px] font-medium text-amber-400">
+                  <p className="text-[11px] font-medium text-amber-400 light:text-amber-700">
                     {maxLimitWarningText}
                   </p>
                 )}
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-12 items-start gap-2 sm:gap-6 border-b border-zinc-800/60 pb-5">
+            <div className="grid grid-cols-1 sm:grid-cols-12 items-start gap-2 sm:gap-6 border-b border-zinc-800/60 light:border-slate-200 pb-5">
               <div className="sm:col-span-7">
                 <label
                   htmlFor="calc-selling-price"
-                  className="block text-base font-bold text-emerald-400"
+                  className="block text-base font-bold text-emerald-400 light:text-emerald-700"
                 >
                   {isEn
                     ? "4. Planned Selling Price per Unit (THB)"
                     : "4. ราคาที่จะตั้งขายต่อชิ้น (บาท)"}
                 </label>
-                <p className="text-xs sm:text-sm text-zinc-400 mt-0.5">
+                <p className="text-xs sm:text-sm text-zinc-400 light:text-slate-600 mt-0.5">
                   {isEn
                     ? "Storefront retail price you plan to charge customers."
                     : "ราคาขายหน้าร้านที่คุณตั้งใจจะขายให้ลูกค้า"}
@@ -711,10 +716,10 @@ export function CalculatorForm({
                     handleMonetaryChange("sellingPrice", e.target.value)
                   }
                   placeholder="0"
-                  className="w-full rounded-xl bg-black/85 border-2 border-emerald-500/65 px-4 py-3 text-lg font-mono font-bold tabular-nums text-emerald-400 shadow-[0_0_24px_-6px_rgba(16,185,129,0.28)] transition-all duration-200 hover:border-emerald-400 focus:border-emerald-400 focus:shadow-[0_0_28px_-4px_rgba(16,185,129,0.42)] focus:outline-none"
+                  className="w-full rounded-xl bg-black/85 border-2 border-emerald-500/65 px-4 py-3 text-lg font-mono font-bold tabular-nums text-emerald-400 shadow-[0_0_24px_-6px_rgba(16,185,129,0.28)] transition-all duration-200 hover:border-emerald-400 focus:border-emerald-400 focus:shadow-[0_0_28px_-4px_rgba(16,185,129,0.42)] focus:outline-none light:bg-emerald-50/40 light:border-emerald-600 light:text-emerald-800 light:shadow-xs light:hover:border-emerald-700 light:focus:border-emerald-700 light:focus:ring-2 light:focus:ring-emerald-600/20 light:focus:shadow-none"
                 />
                 {clampedFields.sellingPrice && (
-                  <p className="text-[11px] font-medium text-amber-400">
+                  <p className="text-[11px] font-medium text-amber-400 light:text-amber-700">
                     {maxLimitWarningText}
                   </p>
                 )}
@@ -725,13 +730,13 @@ export function CalculatorForm({
               <div className="sm:col-span-7">
                 <label
                   htmlFor="calc-fixed-cost"
-                  className="block text-base font-semibold text-zinc-100"
+                  className="block text-base font-semibold text-zinc-100 light:text-slate-900"
                 >
                   {isEn
                     ? "5. Monthly Fixed Costs (THB) — Optional"
                     : "5. ต้นทุนคงที่ต่อเดือน (บาท) — ถ้ามี"}
                 </label>
-                <p className="text-xs sm:text-sm text-zinc-400 mt-0.5">
+                <p className="text-xs sm:text-sm text-zinc-400 light:text-slate-600 mt-0.5">
                   {isEn
                     ? "Rent, utilities, salaries, or software subscriptions to compute break-even volume (enter 0 if none)."
                     : "เช่น ค่าเช่าที่ ค่าไฟ ค่าจ้างพนักงาน เพื่อคำนวณว่าต้องขายกี่ชิ้นจึงจะคุ้มทุน (ถ้าไม่มีใส่ 0)"}
@@ -753,7 +758,7 @@ export function CalculatorForm({
                   className={`${INPUT_SURFACE_CLASS} px-4 py-3 text-lg font-mono tabular-nums text-zinc-100`}
                 />
                 {clampedFields.fixedCost && (
-                  <p className="text-[11px] font-medium text-amber-400">
+                  <p className="text-[11px] font-medium text-amber-400 light:text-amber-700">
                     {maxLimitWarningText}
                   </p>
                 )}
@@ -761,11 +766,11 @@ export function CalculatorForm({
             </div>
           </div>
 
-          <div className="pt-4 flex flex-wrap items-center gap-3 border-t border-zinc-800/70">
+          <div className="pt-4 flex flex-wrap items-center gap-3 border-t border-zinc-800/70 light:border-slate-200">
             <button
               type="button"
               onClick={handleResetClick}
-              className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-black/80 border border-emerald-500/25 px-4 py-3.5 text-sm font-medium text-zinc-400 shadow-[0_0_20px_-6px_rgba(16,185,129,0.16)] transition-all duration-200 hover:border-emerald-400/50 hover:text-zinc-100"
+              className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-black/80 border border-emerald-500/25 px-4 py-3.5 text-sm font-medium text-zinc-400 shadow-[0_0_20px_-6px_rgba(16,185,129,0.16)] transition-all duration-200 hover:border-emerald-400/50 hover:text-zinc-100 light:bg-white light:border-slate-300 light:text-slate-600 light:shadow-xs light:hover:border-slate-400 light:hover:text-slate-900"
             >
               <RotateCcw className="h-3.5 w-3.5" />
               <span>{isEn ? "Reset" : "ล้างค่า"}</span>
@@ -773,7 +778,7 @@ export function CalculatorForm({
 
             <button
               type="submit"
-              className="inline-flex items-center justify-center gap-2.5 rounded-xl bg-emerald-500 px-7 py-3.5 text-base font-semibold text-slate-950 shadow-[0_0_24px_-4px_rgba(16,185,129,0.45)] transition-all duration-200 hover:bg-emerald-400"
+              className="inline-flex items-center justify-center gap-2.5 rounded-xl bg-emerald-500 px-7 py-3.5 text-base font-semibold text-slate-950 shadow-[0_0_24px_-4px_rgba(16,185,129,0.45)] transition-all duration-200 hover:bg-emerald-400 light:bg-emerald-600 light:text-white light:shadow-sm light:hover:bg-emerald-700"
             >
               <span>
                 {isEn ? "Calculate & Analyze Profit" : "ประมวลผลและสรุปกำไร"}

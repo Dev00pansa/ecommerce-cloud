@@ -465,14 +465,14 @@ export function AuthForm() {
   }
 
   const inputClass =
-    "border-zinc-800 bg-black/90 text-zinc-100 placeholder-zinc-500 transition-all focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/25";
-  const mutedText = "text-zinc-400";
+    "border-zinc-800 bg-black/90 text-zinc-100 placeholder-zinc-500 transition-all focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/25 light:border-slate-300 light:bg-white light:text-slate-900 light:placeholder-slate-400 light:focus:border-emerald-600 light:focus:ring-emerald-600/20";
+  const mutedText = "text-zinc-400 light:text-slate-500";
 
   return (
     <>
       <div
         aria-hidden="true"
-        className="pointer-events-none fixed inset-0 -z-10 overflow-hidden bg-black"
+        className="pointer-events-none fixed inset-0 -z-10 overflow-hidden bg-black light:bg-[#f8fafc]"
       >
         {AUTH_BACKGROUND_IMAGES.map((src, idx) => {
           const isActive = idx === activeBgIndex;
@@ -484,40 +484,35 @@ export function AuthForm() {
               alt=""
               loading={idx === 0 ? "eager" : "lazy"}
               className={`absolute inset-0 h-full w-full object-cover object-center transition-all duration-1000 ease-in-out will-change-[opacity,transform] ${
-                isActive ? "opacity-100 scale-105" : "opacity-0 scale-100"
+                isActive
+                  ? "opacity-100 light:opacity-20 scale-105"
+                  : "opacity-0 scale-100"
               }`}
             />
           );
         })}
 
-        <div className="absolute inset-0 bg-black/75" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_10%,rgba(0,0,0,0.88)_100%)]" />
-        <div
-          className="absolute inset-0 opacity-45"
-          style={{
-            backgroundImage:
-              "radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px)",
-            backgroundSize: "24px 24px",
-          }}
-        />
+        <div className="absolute inset-0 bg-black/75 light:bg-slate-50/85" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_10%,rgba(0,0,0,0.88)_100%)] light:bg-[radial-gradient(circle_at_center,rgba(248,250,252,0.55)_10%,rgba(241,245,249,0.92)_100%)]" />
+        <div className="khumlab-dashboard-dots absolute inset-0 opacity-45 light:opacity-100" />
       </div>
 
-      <div className="relative z-10 mx-auto w-full max-w-md overflow-hidden rounded-xl border border-emerald-500/45 bg-black/85 backdrop-blur-xl p-6 sm:p-8 shadow-[0_0_40px_-8px_rgba(16,185,129,0.35),inset_0_1px_0_0_rgba(52,211,153,0.25)]">
+      <div className="relative z-10 mx-auto w-full max-w-md overflow-hidden rounded-xl border border-emerald-500/45 bg-black/85 backdrop-blur-xl p-6 sm:p-8 shadow-[0_0_40px_-8px_rgba(16,185,129,0.35),inset_0_1px_0_0_rgba(52,211,153,0.25)] light:border-slate-200 light:bg-white/95 light:shadow-[0_16px_44px_rgba(15,23,42,0.1)]">
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-400/80 to-transparent"
+          className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-400/80 light:via-emerald-500/50 to-transparent"
         />
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-emerald-400/80 to-transparent"
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-emerald-400/80 light:via-emerald-500/50 to-transparent"
         />
 
         <div className="mb-6">
-          <span className="inline-flex items-center gap-1.5 rounded-md border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-semibold text-emerald-400 mb-3">
+          <span className="inline-flex items-center gap-1.5 rounded-md border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-semibold text-emerald-400 light:border-emerald-200 light:bg-emerald-50 light:text-emerald-700 mb-3">
             <Lock className="h-3 w-3" />
             <span>KhumLab Cloud Account</span>
           </span>
-          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-zinc-100">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-zinc-100 light:text-slate-900">
             {activeTab === "login"
               ? isEn
                 ? "Sign In to KhumLab"
@@ -537,13 +532,13 @@ export function AuthForm() {
           </p>
         </div>
 
-        <div className="grid grid-cols-2 rounded-lg border border-zinc-800/90 bg-black/90 p-1 mb-6">
+        <div className="grid grid-cols-2 rounded-lg border border-zinc-800/90 bg-black/90 light:border-slate-200 light:bg-slate-100 p-1 mb-6">
           <button
             type="button"
             onClick={() => switchTab("login")}
             className={`flex items-center justify-center gap-1.5 rounded-md py-2 text-xs sm:text-sm font-semibold transition-all ${
               activeTab === "login"
-                ? "bg-emerald-500 text-slate-950 shadow-[0_0_16px_rgba(16,185,129,0.35)]"
+                ? "bg-emerald-500 text-slate-950 shadow-[0_0_16px_rgba(16,185,129,0.35)] light:bg-emerald-600 light:text-white light:shadow-sm"
                 : mutedText
             }`}
           >
@@ -555,7 +550,7 @@ export function AuthForm() {
             onClick={() => switchTab("register")}
             className={`flex items-center justify-center gap-1.5 rounded-md py-2 text-xs sm:text-sm font-semibold transition-all ${
               activeTab === "register"
-                ? "bg-emerald-500 text-slate-950 shadow-[0_0_16px_rgba(16,185,129,0.35)]"
+                ? "bg-emerald-500 text-slate-950 shadow-[0_0_16px_rgba(16,185,129,0.35)] light:bg-emerald-600 light:text-white light:shadow-sm"
                 : mutedText
             }`}
           >
@@ -567,7 +562,7 @@ export function AuthForm() {
         {!envStatus.isConfigured && (
           <div
             role="alert"
-            className="mb-4 flex items-start gap-2 rounded-lg border border-amber-500/40 bg-amber-500/10 px-3.5 py-2.5 text-xs text-amber-500"
+            className="mb-4 flex items-start gap-2 rounded-lg border border-amber-500/40 bg-amber-500/10 px-3.5 py-2.5 text-xs text-amber-500 light:border-amber-300 light:bg-amber-50 light:text-amber-800"
           >
             <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
             <span>{envStatus.errorMessage}</span>
@@ -577,7 +572,7 @@ export function AuthForm() {
         {lockoutSeconds > 0 && (
           <div
             role="alert"
-            className="mb-4 flex items-start gap-2 rounded-lg border border-amber-500/40 bg-amber-500/10 px-3.5 py-2.5 text-xs sm:text-sm text-amber-400"
+            className="mb-4 flex items-start gap-2 rounded-lg border border-amber-500/40 bg-amber-500/10 px-3.5 py-2.5 text-xs sm:text-sm text-amber-400 light:border-amber-300 light:bg-amber-50 light:text-amber-800"
           >
             <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
             <span>
@@ -605,7 +600,7 @@ export function AuthForm() {
         {errorMessage && (
           <div
             role="alert"
-            className="mb-4 flex items-start gap-2 rounded-lg border border-rose-500/40 bg-rose-500/10 px-3.5 py-2.5 text-xs sm:text-sm text-rose-400"
+            className="mb-4 flex items-start gap-2 rounded-lg border border-rose-500/40 bg-rose-500/10 px-3.5 py-2.5 text-xs sm:text-sm text-rose-400 light:border-rose-300 light:bg-rose-50 light:text-rose-700"
           >
             <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
             <span>{errorMessage}</span>
@@ -713,7 +708,7 @@ export function AuthForm() {
             <button
               type="submit"
               disabled={submitting || lockoutSeconds > 0}
-              className="w-full flex items-center justify-center gap-2 rounded-lg bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-slate-950 transition-all hover:bg-emerald-400 hover:shadow-[0_0_20px_rgba(16,185,129,0.4)] disabled:opacity-60"
+              className="w-full flex items-center justify-center gap-2 rounded-lg bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-slate-950 transition-all hover:bg-emerald-400 hover:shadow-[0_0_20px_rgba(16,185,129,0.4)] light:bg-emerald-600 light:text-white light:hover:bg-emerald-700 light:shadow-sm disabled:opacity-60"
             >
               {submitting ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -960,24 +955,24 @@ export function AuthForm() {
                 }}
                 className={`relative h-11 w-full rounded-lg border select-none touch-none overflow-hidden transition-colors ${
                   humanVerified
-                    ? "border-emerald-500/60 bg-emerald-950/40"
-                    : "border-zinc-800 bg-zinc-950/90 cursor-ew-resize"
+                    ? "border-emerald-500/60 bg-emerald-950/40 light:border-emerald-400 light:bg-emerald-50"
+                    : "border-zinc-800 bg-zinc-950/90 light:border-slate-300 light:bg-slate-100 cursor-ew-resize"
                 }`}
               >
                 <div
                   style={{ width: `${sliderPercent}%` }}
-                  className="pointer-events-none absolute inset-y-0 left-0 bg-emerald-500/20 transition-[width] duration-75"
+                  className="pointer-events-none absolute inset-y-0 left-0 bg-emerald-500/20 light:bg-emerald-500/20 transition-[width] duration-75"
                 />
                 <div className="pointer-events-none absolute inset-0 flex items-center justify-center px-11 text-xs font-medium">
                   {humanVerified ? (
-                    <span className="flex items-center gap-1.5 text-emerald-400 font-semibold">
+                    <span className="flex items-center gap-1.5 text-emerald-400 light:text-emerald-700 font-semibold">
                       <ShieldCheck className="h-4 w-4" />
                       <span>
                         {isEn ? "Verification complete" : "ยืนยันตัวตนเรียบร้อยแล้ว"}
                       </span>
                     </span>
                   ) : (
-                    <span className="text-zinc-400">
+                    <span className="text-zinc-400 light:text-slate-600">
                       {isEn
                         ? "Slide right to verify you are human"
                         : "เลื่อนไปทางขวาเพื่อยืนยันว่าไม่ใช่บอท"}
@@ -990,8 +985,8 @@ export function AuthForm() {
                   }}
                   className={`pointer-events-none absolute top-1 bottom-1 w-9 rounded-md flex items-center justify-center transition-colors ${
                     humanVerified
-                      ? "bg-emerald-500 text-slate-950"
-                      : "bg-zinc-800 text-emerald-400 border border-zinc-700"
+                      ? "bg-emerald-500 text-slate-950 light:bg-emerald-600 light:text-white"
+                      : "bg-zinc-800 text-emerald-400 border border-zinc-700 light:bg-white light:text-emerald-600 light:border-slate-300 light:shadow-xs"
                   }`}
                 >
                   {humanVerified ? (
@@ -1006,7 +1001,7 @@ export function AuthForm() {
             <button
               type="submit"
               disabled={submitting || lockoutSeconds > 0 || !humanVerified}
-              className="w-full flex items-center justify-center gap-2 rounded-lg bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-slate-950 transition-all hover:bg-emerald-400 hover:shadow-[0_0_20px_rgba(16,185,129,0.4)] disabled:opacity-50"
+              className="w-full flex items-center justify-center gap-2 rounded-lg bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-slate-950 transition-all hover:bg-emerald-400 hover:shadow-[0_0_20px_rgba(16,185,129,0.4)] light:bg-emerald-600 light:text-white light:hover:bg-emerald-700 light:shadow-sm disabled:opacity-50"
             >
               {submitting ? (
                 <Loader2 className="h-4 w-4 animate-spin" />

@@ -261,9 +261,9 @@ export function HistoryPanel({
         {isCloudFull && (
           <div
             role="alert"
-            className="flex items-center gap-2.5 rounded-2xl border border-amber-500/45 bg-[#060807]/90 backdrop-blur-md px-4 py-3 text-xs sm:text-sm text-amber-300 shadow-[0_0_20px_-6px_rgba(245,158,11,0.25)]"
+            className="flex items-center gap-2.5 rounded-2xl border border-amber-500/45 bg-[#060807]/90 backdrop-blur-md px-4 py-3 text-xs sm:text-sm text-amber-300 shadow-[0_0_20px_-6px_rgba(245,158,11,0.25)] light:border-amber-300 light:bg-amber-50 light:text-amber-800 light:shadow-xs"
           >
-            <AlertCircle className="h-4 w-4 shrink-0 text-amber-400" />
+            <AlertCircle className="h-4 w-4 shrink-0 text-amber-400 light:text-amber-600" />
             <span>
               {isEn
                 ? `Cloud storage is full (${MAX_CLOUD_RECORDS}/${MAX_CLOUD_RECORDS} items). Delete older records before saving more.`
@@ -279,22 +279,22 @@ export function HistoryPanel({
               onClick={() => setSortDropdownOpen((prev) => !prev)}
               aria-expanded={sortDropdownOpen}
               aria-haspopup="listbox"
-              className="inline-flex items-center gap-2.5 rounded-xl border border-emerald-500/30 bg-[#060807]/85 backdrop-blur-md px-4 py-2.5 text-xs sm:text-sm font-medium text-zinc-200 shadow-[0_0_20px_-6px_rgba(16,185,129,0.18)] transition-all duration-200 hover:border-emerald-400/60 hover:text-white focus:outline-none"
+              className="inline-flex items-center gap-2.5 rounded-xl border border-emerald-500/30 bg-[#060807]/85 backdrop-blur-md px-4 py-2.5 text-xs sm:text-sm font-medium text-zinc-200 shadow-[0_0_20px_-6px_rgba(16,185,129,0.18)] transition-all duration-200 hover:border-emerald-400/60 hover:text-white light:border-slate-300 light:bg-white light:text-slate-700 light:shadow-xs light:hover:border-emerald-600 light:hover:text-slate-900 focus:outline-none"
             >
-              <ArrowUpDown className="h-4 w-4 shrink-0 text-emerald-400" />
+              <ArrowUpDown className="h-4 w-4 shrink-0 text-emerald-400 light:text-emerald-600" />
               <span>{currentSortLabel}</span>
               <ChevronDown
                 className={`h-4 w-4 shrink-0 transition-transform duration-200 ${
                   sortDropdownOpen
-                    ? "rotate-180 text-emerald-400"
-                    : "text-zinc-500"
+                    ? "rotate-180 text-emerald-400 light:text-emerald-600"
+                    : "text-zinc-500 light:text-slate-400"
                 }`}
               />
             </button>
 
             <div
               role="listbox"
-              className={`absolute left-0 mt-2.5 w-72 origin-top-left z-30 overflow-hidden rounded-2xl bg-[#050505] border border-emerald-500/30 shadow-[0_14px_40px_rgba(0,0,0,0.9),0_0_24px_-6px_rgba(16,185,129,0.25)] transition-all duration-200 ease-out ${
+              className={`absolute left-0 mt-2.5 w-72 origin-top-left z-30 overflow-hidden rounded-2xl bg-[#050505] border border-emerald-500/30 shadow-[0_14px_40px_rgba(0,0,0,0.9),0_0_24px_-6px_rgba(16,185,129,0.25)] light:bg-white light:border-slate-200 light:shadow-[0_14px_36px_rgba(15,23,42,0.12)] transition-all duration-200 ease-out ${
                 sortDropdownOpen
                   ? "opacity-100 translate-y-0 scale-100 pointer-events-auto"
                   : "opacity-0 -translate-y-2 scale-95 pointer-events-none"
@@ -302,7 +302,7 @@ export function HistoryPanel({
             >
               <div
                 aria-hidden="true"
-                className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-400/75 to-transparent"
+                className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-400/75 light:via-emerald-500/40 to-transparent"
               />
               <div className="p-1.5 space-y-0.5">
                 {SORT_OPTIONS.map((option) => {
@@ -319,13 +319,13 @@ export function HistoryPanel({
                       }}
                       className={`w-full flex items-center justify-between gap-2 rounded-xl px-3.5 py-2.5 text-left text-xs sm:text-sm transition-colors ${
                         active
-                          ? "bg-emerald-500/15 text-emerald-300 font-semibold"
-                          : "text-zinc-300 hover:bg-emerald-500/10 hover:text-white"
+                          ? "bg-emerald-500/15 text-emerald-300 font-semibold light:bg-emerald-50 light:text-emerald-700"
+                          : "text-zinc-300 hover:bg-emerald-500/10 hover:text-white light:text-slate-700 light:hover:bg-slate-100 light:hover:text-slate-900"
                       }`}
                     >
                       <span>{isEn ? option.labelEn : option.labelTh}</span>
                       {active && (
-                        <Check className="h-4 w-4 shrink-0 text-emerald-400" />
+                        <Check className="h-4 w-4 shrink-0 text-emerald-400 light:text-emerald-600" />
                       )}
                     </button>
                   );
@@ -338,7 +338,7 @@ export function HistoryPanel({
             type="button"
             onClick={handleRefreshClick}
             disabled={loading}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-500/25 bg-[#060807]/85 backdrop-blur-md px-4 py-2.5 text-xs sm:text-sm font-medium text-zinc-300 shadow-[0_0_20px_-6px_rgba(16,185,129,0.16)] transition-all duration-200 hover:border-emerald-400/50 hover:text-white disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-500/25 bg-[#060807]/85 backdrop-blur-md px-4 py-2.5 text-xs sm:text-sm font-medium text-zinc-300 shadow-[0_0_20px_-6px_rgba(16,185,129,0.16)] transition-all duration-200 hover:border-emerald-400/50 hover:text-white light:border-slate-300 light:bg-white light:text-slate-700 light:shadow-xs light:hover:border-emerald-600 light:hover:text-emerald-700 disabled:opacity-50"
           >
             <RefreshCw
               className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`}
@@ -351,23 +351,23 @@ export function HistoryPanel({
           aria-disabled={hasNoSelectedRecords}
           className={`rounded-2xl overflow-hidden border transition-all duration-200 ${
             hasNoSelectedRecords
-              ? "bg-[#0d0d0f] border-zinc-800 pointer-events-none select-none shadow-none"
-              : "bg-[#060807]/85 backdrop-blur-md border-emerald-500/20 shadow-[0_16px_40px_rgba(0,0,0,0.75)]"
+              ? "bg-[#0d0d0f] border-zinc-800 pointer-events-none select-none shadow-none light:bg-slate-200/90 light:border-slate-300"
+              : "bg-[#060807]/85 backdrop-blur-md border-emerald-500/20 shadow-[0_16px_40px_rgba(0,0,0,0.75)] light:bg-white light:border-emerald-600/20 light:shadow-[0_8px_28px_rgba(15,23,42,0.06)]"
           }`}
         >
           <div
             className={`px-5 sm:px-6 py-4 flex flex-wrap items-center justify-between gap-3 border-b ${
               hasNoSelectedRecords
-                ? "bg-[#121215] border-zinc-800"
-                : "bg-gradient-to-r from-emerald-950/60 via-[#0a100e] to-[#070908] border-emerald-500/15"
+                ? "bg-[#121215] border-zinc-800 light:bg-slate-200 light:border-slate-300"
+                : "bg-gradient-to-r from-emerald-950/60 via-[#0a100e] to-[#070908] border-emerald-500/15 light:from-emerald-50 light:via-teal-50/70 light:to-slate-50 light:border-emerald-200/80"
             }`}
           >
             <div className="flex items-center gap-3.5 min-w-0">
               <div
                 className={`w-10 h-10 shrink-0 rounded-xl border flex items-center justify-center ${
                   hasNoSelectedRecords
-                    ? "bg-[#19191e] border-zinc-800 text-zinc-500"
-                    : "bg-gradient-to-br from-emerald-400/25 to-emerald-600/10 border-emerald-400/35 text-emerald-400 shadow-[0_0_16px_rgba(16,185,129,0.2)]"
+                    ? "bg-[#19191e] border-zinc-800 text-zinc-500 light:bg-slate-300/70 light:border-slate-300 light:text-slate-500"
+                    : "bg-gradient-to-br from-emerald-400/25 to-emerald-600/10 border-emerald-400/35 text-emerald-400 shadow-[0_0_16px_rgba(16,185,129,0.2)] light:from-emerald-100 light:to-emerald-50 light:border-emerald-300 light:text-emerald-700 light:shadow-none"
                 }`}
               >
                 <FileSpreadsheet className="h-5 w-5" />
@@ -376,7 +376,9 @@ export function HistoryPanel({
                 <div className="flex flex-wrap items-center gap-2">
                   <h2
                     className={`text-sm sm:text-base font-bold ${
-                      hasNoSelectedRecords ? "text-zinc-500" : "text-white"
+                      hasNoSelectedRecords
+                        ? "text-zinc-500 light:text-slate-500"
+                        : "text-white light:text-slate-900"
                     }`}
                   >
                     {isEn
@@ -386,8 +388,8 @@ export function HistoryPanel({
                   <span
                     className={`rounded-full border px-2.5 py-0.5 font-mono text-[11px] font-medium ${
                       hasNoSelectedRecords
-                        ? "border-zinc-800 bg-[#18181c] text-zinc-500"
-                        : "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+                        ? "border-zinc-800 bg-[#18181c] text-zinc-500 light:border-slate-300 light:bg-slate-100 light:text-slate-500"
+                        : "border-emerald-500/30 bg-emerald-500/10 text-emerald-400 light:border-emerald-300 light:bg-emerald-100 light:text-emerald-800"
                     }`}
                   >
                     {isEn
@@ -397,7 +399,9 @@ export function HistoryPanel({
                 </div>
                 <p
                   className={`text-xs mt-0.5 ${
-                    hasNoSelectedRecords ? "text-zinc-600" : "text-zinc-400"
+                    hasNoSelectedRecords
+                      ? "text-zinc-600 light:text-slate-500"
+                      : "text-zinc-400 light:text-slate-600"
                   }`}
                 >
                   {hasNoSelectedRecords
@@ -418,8 +422,8 @@ export function HistoryPanel({
                 onClick={() => setSelectedExportKeys(ALL_CSV_EXPORT_KEYS)}
                 className={`rounded-lg border px-2.5 py-1.5 text-[11px] font-medium transition-colors ${
                   hasNoSelectedRecords
-                    ? "border-zinc-800 bg-[#18181c] text-zinc-600"
-                    : "border-zinc-800 bg-black/80 text-zinc-300 hover:border-emerald-500/50 hover:text-emerald-300"
+                    ? "border-zinc-800 bg-[#18181c] text-zinc-600 light:border-slate-300 light:bg-slate-100 light:text-slate-400"
+                    : "border-zinc-800 bg-black/80 text-zinc-300 hover:border-emerald-500/50 hover:text-emerald-300 light:border-slate-300 light:bg-white light:text-slate-700 light:hover:border-emerald-600 light:hover:text-emerald-700"
                 }`}
               >
                 {isEn ? "Select All" : "เลือกทั้งหมด"}
@@ -430,8 +434,8 @@ export function HistoryPanel({
                 onClick={() => setSelectedExportKeys(DEFAULT_CSV_EXPORT_KEYS)}
                 className={`rounded-lg border px-2.5 py-1.5 text-[11px] font-medium transition-colors ${
                   hasNoSelectedRecords
-                    ? "border-zinc-800 bg-[#18181c] text-zinc-600"
-                    : "border-zinc-800 bg-black/80 text-zinc-300 hover:border-emerald-500/50 hover:text-emerald-300"
+                    ? "border-zinc-800 bg-[#18181c] text-zinc-600 light:border-slate-300 light:bg-slate-100 light:text-slate-400"
+                    : "border-zinc-800 bg-black/80 text-zinc-300 hover:border-emerald-500/50 hover:text-emerald-300 light:border-slate-300 light:bg-white light:text-slate-700 light:hover:border-emerald-600 light:hover:text-emerald-700"
                 }`}
               >
                 {isEn ? "Essentials Only" : "เฉพาะค่าสำคัญ"}
@@ -442,8 +446,8 @@ export function HistoryPanel({
                 onClick={() => setSelectedExportKeys([])}
                 className={`rounded-lg border px-2.5 py-1.5 text-[11px] font-medium transition-colors ${
                   hasNoSelectedRecords
-                    ? "border-zinc-800 bg-[#18181c] text-zinc-600"
-                    : "border-zinc-800 bg-black/80 text-zinc-400 hover:border-rose-500/50 hover:text-rose-300"
+                    ? "border-zinc-800 bg-[#18181c] text-zinc-600 light:border-slate-300 light:bg-slate-100 light:text-slate-400"
+                    : "border-zinc-800 bg-black/80 text-zinc-400 hover:border-rose-500/50 hover:text-rose-300 light:border-slate-300 light:bg-white light:text-slate-600 light:hover:border-rose-400 light:hover:text-rose-600"
                 }`}
               >
                 {isEn ? "Clear All" : "ล้างทั้งหมด"}
@@ -465,21 +469,21 @@ export function HistoryPanel({
                     onClick={() => toggleExportColumn(column.key)}
                     className={`flex items-center gap-2.5 rounded-xl border px-3 py-2 text-left text-xs select-none transition-all duration-150 focus:outline-none ${
                       hasNoSelectedRecords
-                        ? "border-zinc-800/90 bg-[#141417] text-zinc-500"
+                        ? "border-zinc-800/90 bg-[#141417] text-zinc-500 light:border-slate-300 light:bg-slate-100 light:text-slate-500"
                         : checked
-                          ? "border-emerald-500/45 bg-emerald-950/30 text-zinc-100"
-                          : "border-zinc-800/90 bg-black/75 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200"
+                          ? "border-emerald-500/45 bg-emerald-950/30 text-zinc-100 light:border-emerald-500/50 light:bg-emerald-50 light:text-emerald-950 light:font-medium"
+                          : "border-zinc-800/90 bg-black/75 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200 light:border-slate-200 light:bg-slate-50 light:text-slate-600 light:hover:border-slate-300 light:hover:text-slate-900"
                     }`}
                   >
                     <span
                       className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-md border transition-colors ${
                         hasNoSelectedRecords
                           ? checked
-                            ? "border-zinc-700 bg-[#1c1c21] text-zinc-500"
-                            : "border-zinc-800 bg-[#0d0d0f] text-transparent"
+                            ? "border-zinc-700 bg-[#1c1c21] text-zinc-500 light:border-slate-300 light:bg-slate-200 light:text-slate-500"
+                            : "border-zinc-800 bg-[#0d0d0f] text-transparent light:border-slate-300 light:bg-slate-200/70"
                           : checked
-                            ? "border-emerald-400 bg-emerald-500/20 text-emerald-400"
-                            : "border-zinc-700 bg-black text-transparent"
+                            ? "border-emerald-400 bg-emerald-500/20 text-emerald-400 light:border-emerald-600 light:bg-emerald-600 light:text-white"
+                            : "border-zinc-700 bg-black text-transparent light:border-slate-300 light:bg-white"
                       }`}
                     >
                       <Check className="h-3 w-3 stroke-[2.5]" />
@@ -493,7 +497,7 @@ export function HistoryPanel({
             </div>
 
             {!hasNoSelectedRecords && hasNoExportColumns && (
-              <p className="flex items-center gap-1.5 text-xs font-medium text-amber-400">
+              <p className="flex items-center gap-1.5 text-xs font-medium text-amber-400 light:text-amber-700">
                 <AlertCircle className="h-3.5 w-3.5 shrink-0" />
                 <span>
                   {isEn
@@ -505,17 +509,17 @@ export function HistoryPanel({
           </div>
         </div>
 
-        <div className="rounded-2xl overflow-hidden bg-[#060807]/85 backdrop-blur-md border border-emerald-500/20 shadow-[0_16px_40px_rgba(0,0,0,0.75)]">
-          <div className="bg-gradient-to-r from-emerald-950/60 via-[#0a100e] to-[#070908] border-b border-emerald-500/15 px-5 sm:px-6 py-4 flex flex-wrap items-center justify-between gap-3">
+        <div className="rounded-2xl overflow-hidden bg-[#060807]/85 backdrop-blur-md border border-emerald-500/20 shadow-[0_16px_40px_rgba(0,0,0,0.75)] light:bg-white light:border-slate-200 light:shadow-[0_8px_28px_rgba(15,23,42,0.06)]">
+          <div className="bg-gradient-to-r from-emerald-950/60 via-[#0a100e] to-[#070908] border-b border-emerald-500/15 px-5 sm:px-6 py-4 flex flex-wrap items-center justify-between gap-3 light:from-emerald-50 light:via-teal-50/70 light:to-slate-50 light:border-emerald-200/80">
             <div className="flex items-center gap-3.5 min-w-0">
-              <div className="w-10 h-10 shrink-0 rounded-xl bg-gradient-to-br from-emerald-400/25 to-emerald-600/10 border border-emerald-400/35 text-emerald-400 flex items-center justify-center shadow-[0_0_16px_rgba(16,185,129,0.2)]">
+              <div className="w-10 h-10 shrink-0 rounded-xl bg-gradient-to-br from-emerald-400/25 to-emerald-600/10 border border-emerald-400/35 text-emerald-400 flex items-center justify-center shadow-[0_0_16px_rgba(16,185,129,0.2)] light:from-emerald-100 light:to-emerald-50 light:border-emerald-300 light:text-emerald-700 light:shadow-none">
                 <Database className="h-5 w-5" />
               </div>
               <div className="min-w-0">
-                <h2 className="text-sm sm:text-base font-bold text-white">
+                <h2 className="text-sm sm:text-base font-bold text-white light:text-slate-900">
                   {isEn ? "Saved Pricing Plans" : "รายการคำนวณที่บันทึกไว้บนคลาวด์"}
                 </h2>
-                <p className="text-xs text-zinc-400 mt-0.5">
+                <p className="text-xs text-zinc-400 light:text-slate-600 mt-0.5">
                   {isEn
                     ? "Check items to export as CSV or delete in bulk, or click View / Edit to revise."
                     : "ติ๊กเลือกรายการเพื่อส่งออกไฟล์ตารางหรือลบพร้อมกัน หรือกดเปิดดูเพื่อแก้ไขตัวเลข"}
@@ -524,9 +528,9 @@ export function HistoryPanel({
             </div>
 
             {records.length > 0 && (
-              <span className="rounded-full border border-emerald-500/25 bg-black/60 px-3 py-1 font-mono text-xs text-zinc-300">
+              <span className="rounded-full border border-emerald-500/25 bg-black/60 px-3 py-1 font-mono text-xs text-zinc-300 light:border-emerald-200 light:bg-white light:text-slate-600">
                 {isEn ? "Selected " : "เลือกสำหรับดาวน์โหลด "}
-                <strong className="text-emerald-400">
+                <strong className="text-emerald-400 light:text-emerald-700">
                   {selectedCount}/{records.length}
                 </strong>
                 {isEn ? " items" : " รายการ"}
@@ -536,18 +540,18 @@ export function HistoryPanel({
 
           <div className="p-5 sm:p-6 space-y-4">
             {records.length > 0 && (
-              <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-zinc-800/70">
+              <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-zinc-800/70 light:border-slate-200">
                 <div className="flex flex-wrap items-center gap-2.5">
                   <button
                     type="button"
                     onClick={handleToggleSelectAllRecords}
                     className={`inline-flex items-center gap-2 rounded-xl border px-3.5 py-2 text-xs sm:text-sm font-medium transition-all duration-200 ${
                       isAllRecordsSelected
-                        ? "border-emerald-500/40 bg-emerald-500/12 text-emerald-300 hover:border-emerald-400"
-                        : "border-zinc-800 bg-black/80 text-zinc-300 hover:border-emerald-500/40 hover:text-white"
+                        ? "border-emerald-500/40 bg-emerald-500/12 text-emerald-300 hover:border-emerald-400 light:border-emerald-500 light:bg-emerald-50 light:text-emerald-700"
+                        : "border-zinc-800 bg-black/80 text-zinc-300 hover:border-emerald-500/40 hover:text-white light:border-slate-300 light:bg-white light:text-slate-700 light:hover:border-emerald-600 light:hover:text-emerald-700"
                     }`}
                   >
-                    <ListChecks className="h-4 w-4 text-emerald-400 shrink-0" />
+                    <ListChecks className="h-4 w-4 text-emerald-400 light:text-emerald-600 shrink-0" />
                     <span>
                       {isAllRecordsSelected
                         ? isEn
@@ -570,8 +574,8 @@ export function HistoryPanel({
                     }
                     className={`inline-flex items-center gap-2 rounded-xl border px-3.5 py-2 text-xs sm:text-sm font-medium transition-all duration-200 ${
                       canBulkDelete
-                        ? "bg-red-500/15 hover:bg-red-500/25 border-red-500/40 text-red-400 shadow-[0_0_16px_-6px_rgba(239,68,68,0.35)]"
-                        : "bg-zinc-900/70 border-zinc-800 text-zinc-500 opacity-50 cursor-not-allowed"
+                        ? "bg-red-500/15 hover:bg-red-500/25 border-red-500/40 text-red-400 shadow-[0_0_16px_-6px_rgba(239,68,68,0.35)] light:bg-rose-50 light:hover:bg-rose-100 light:border-rose-300 light:text-rose-700 light:shadow-none"
+                        : "bg-zinc-900/70 border-zinc-800 text-zinc-500 opacity-50 cursor-not-allowed light:bg-slate-100 light:border-slate-200 light:text-slate-400"
                     }`}
                   >
                     <Trash2 className="h-4 w-4 shrink-0" />
@@ -583,7 +587,7 @@ export function HistoryPanel({
                   </button>
 
                   {showBulkDeleteHint && (
-                    <span className="text-xs text-zinc-500">
+                    <span className="text-xs text-zinc-500 light:text-slate-500">
                       {isEn
                         ? "(Select more than 2 items to bulk delete)"
                         : "(เลือกมากกว่า 2 รายการเพื่อลบพร้อมกัน)"}
@@ -595,8 +599,8 @@ export function HistoryPanel({
 
             {loading && records.length === 0 ? (
               <div className="py-12 text-center space-y-2">
-                <Loader2 className="mx-auto h-6 w-6 animate-spin text-emerald-400" />
-                <p className="text-sm text-zinc-400">
+                <Loader2 className="mx-auto h-6 w-6 animate-spin text-emerald-400 light:text-emerald-600" />
+                <p className="text-sm text-zinc-400 light:text-slate-600">
                   {isEn
                     ? "Loading your saved Cloud records..."
                     : "กำลังโหลดรายการที่บันทึกไว้บน Cloud..."}
@@ -604,10 +608,10 @@ export function HistoryPanel({
               </div>
             ) : enrichedSortedRecords.length === 0 ? (
               <div className="py-12 px-4 text-center space-y-2">
-                <p className="text-base font-semibold text-zinc-200">
+                <p className="text-base font-semibold text-zinc-200 light:text-slate-800">
                   {isEn ? "No Saved Records Yet" : "ยังไม่มีรายการที่บันทึกไว้"}
                 </p>
-                <p className="text-xs sm:text-sm text-zinc-500">
+                <p className="text-xs sm:text-sm text-zinc-500 light:text-slate-500">
                   {isEn
                     ? 'Click "+ New Calculation" above to analyze a product and save it to Cloud for editing or CSV export.'
                     : "กดปุ่ม “+ คำนวณรายการใหม่” ด้านบน แล้วบันทึกข้อมูลลง Cloud เพื่อเก็บไว้ดูและส่งออกเป็นไฟล์ตารางภายหลัง"}
@@ -628,8 +632,8 @@ export function HistoryPanel({
                       key={item.id}
                       className={`p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl bg-black/70 border transition-all duration-200 ${
                         isSelected
-                          ? "border-emerald-500/45 shadow-[0_0_24px_-6px_rgba(16,185,129,0.22)] hover:border-emerald-400/70"
-                          : "border-zinc-800/90 hover:border-emerald-500/30"
+                          ? "border-emerald-500/45 shadow-[0_0_24px_-6px_rgba(16,185,129,0.22)] hover:border-emerald-400/70 light:bg-emerald-50/55 light:border-emerald-500/60 light:shadow-xs"
+                          : "border-zinc-800/90 hover:border-emerald-500/30 light:bg-slate-50/75 light:border-slate-200 light:hover:border-emerald-400"
                       }`}
                     >
                       <div className="flex items-center gap-3.5 sm:gap-4 min-w-0">
@@ -648,8 +652,8 @@ export function HistoryPanel({
                           }
                           className={`h-8 w-8 shrink-0 rounded-xl border flex items-center justify-center transition-all duration-200 focus:outline-none ${
                             isSelected
-                              ? "bg-emerald-500/20 border-emerald-400 text-emerald-400 shadow-[0_0_12px_rgba(16,185,129,0.3)]"
-                              : "bg-black border-zinc-800 text-zinc-700 hover:border-zinc-600 hover:text-zinc-400"
+                              ? "bg-emerald-500/20 border-emerald-400 text-emerald-400 shadow-[0_0_12px_rgba(16,185,129,0.3)] light:bg-emerald-600 light:border-emerald-600 light:text-white light:shadow-none"
+                              : "bg-black border-zinc-800 text-zinc-700 hover:border-zinc-600 hover:text-zinc-400 light:bg-white light:border-slate-300 light:text-slate-300 light:hover:border-emerald-500 light:hover:text-emerald-600"
                           }`}
                         >
                           <Check
@@ -662,7 +666,7 @@ export function HistoryPanel({
                         </button>
 
                         {item.product_image_url ? (
-                          <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-emerald-500/25 bg-black">
+                          <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-emerald-500/25 bg-black light:border-slate-200 light:bg-white">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                               src={item.product_image_url}
@@ -671,39 +675,45 @@ export function HistoryPanel({
                             />
                           </div>
                         ) : (
-                          <div className="h-16 w-16 shrink-0 rounded-xl bg-zinc-900 border border-zinc-800 flex flex-col items-center justify-center gap-1 select-none">
-                            <ImageIcon className="h-5 w-5 text-zinc-500" />
-                            <span className="text-[10px] font-medium tracking-tight text-zinc-500 leading-none">
+                          <div className="h-16 w-16 shrink-0 rounded-xl bg-zinc-900 border border-zinc-800 flex flex-col items-center justify-center gap-1 select-none light:bg-slate-100 light:border-slate-200">
+                            <ImageIcon className="h-5 w-5 text-zinc-500 light:text-slate-400" />
+                            <span className="text-[10px] font-medium tracking-tight text-zinc-500 light:text-slate-500 leading-none">
                               {isEn ? "No Image" : "ไม่มีรูปภาพ"}
                             </span>
                           </div>
                         )}
 
                         <div className="min-w-0 space-y-1">
-                          <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-400">
-                            <span className="font-medium text-purple-400">
+                          <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-400 light:text-slate-500">
+                            <span className="font-medium text-purple-400 light:text-purple-700">
                               {displayPlatform} (GP{" "}
                               {Number(item.platform_fee_percent)}%)
                             </span>
-                            <span className="text-zinc-700">|</span>
-                            <span className="text-cyan-400/90">
+                            <span className="text-zinc-700 light:text-slate-300">
+                              |
+                            </span>
+                            <span className="text-cyan-400/90 light:text-cyan-700 font-medium">
                               {isEn ? "Price" : "ราคาขาย"} ฿
                               {formatCurrency(Number(item.selling_price) || 0)}
                             </span>
-                            <span className="text-zinc-700">|</span>
-                            <span className="text-zinc-500">
+                            <span className="text-zinc-700 light:text-slate-300">
+                              |
+                            </span>
+                            <span className="text-zinc-500 light:text-slate-500">
                               {new Date(item.created_at).toLocaleString(locale)}
                             </span>
                           </div>
 
-                          <h3 className="text-base sm:text-lg font-semibold text-zinc-100 truncate">
+                          <h3 className="text-base sm:text-lg font-semibold text-zinc-100 light:text-slate-900 truncate">
                             {item.product_name}
                           </h3>
 
                           <div className="flex flex-wrap items-center gap-3 text-xs sm:text-sm font-mono tabular-nums">
                             <span
                               className={`font-bold ${
-                                isLoss ? "text-rose-400" : "text-emerald-400"
+                                isLoss
+                                  ? "text-rose-400 light:text-rose-600"
+                                  : "text-emerald-400 light:text-emerald-700"
                               }`}
                             >
                               {isEn ? "Net Profit" : "กำไรสุทธิ"}{" "}
@@ -711,7 +721,7 @@ export function HistoryPanel({
                               {formatCurrency(Math.abs(metrics.netProfitPerUnit))}
                               {isEn ? "/unit" : "/ชิ้น"}
                             </span>
-                            <span className="text-zinc-500">
+                            <span className="text-zinc-500 light:text-slate-500">
                               (Margin {formatCurrency(metrics.netMarginPercent, 1)}
                               %)
                             </span>
@@ -723,7 +733,7 @@ export function HistoryPanel({
                         <button
                           type="button"
                           onClick={() => onLoadRecord(item)}
-                          className="rounded-xl border border-emerald-500/30 bg-[#050505] px-3.5 py-2 text-xs font-semibold text-zinc-100 transition-all duration-200 hover:border-emerald-400 hover:text-emerald-400"
+                          className="rounded-xl border border-emerald-500/30 bg-[#050505] px-3.5 py-2 text-xs font-semibold text-zinc-100 transition-all duration-200 hover:border-emerald-400 hover:text-emerald-400 light:border-slate-300 light:bg-white light:text-slate-800 light:hover:border-emerald-600 light:hover:bg-emerald-50 light:hover:text-emerald-700"
                         >
                           {isEn ? "View / Edit" : "เปิดดู / แก้ไข"}
                         </button>
@@ -733,7 +743,7 @@ export function HistoryPanel({
                             setDeleteTarget({ mode: "single", record: item })
                           }
                           disabled={deleting}
-                          className="inline-flex items-center justify-center gap-1 rounded-xl border border-zinc-800 bg-[#050505] px-3 py-2 text-xs font-medium text-rose-400 transition-colors hover:border-rose-500/60 disabled:opacity-50"
+                          className="inline-flex items-center justify-center gap-1 rounded-xl border border-zinc-800 bg-[#050505] px-3 py-2 text-xs font-medium text-rose-400 transition-colors hover:border-rose-500/60 light:border-slate-300 light:bg-white light:text-rose-600 light:hover:border-rose-400 light:hover:bg-rose-50 disabled:opacity-50"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                           <span>{isEn ? "Delete" : "ลบ"}</span>
@@ -756,7 +766,7 @@ export function HistoryPanel({
               onExportCsv(selectedSortedRecords, selectedExportKeys)
             }
             disabled={hasNoExportColumns || hasNoSelectedRecords}
-            className="inline-flex items-center gap-2.5 rounded-2xl bg-emerald-500 px-5 py-3.5 text-sm font-semibold text-black shadow-[0_10px_35px_rgba(16,185,129,0.4)] transition-all duration-200 hover:bg-emerald-400 hover:-translate-y-0.5 disabled:translate-y-0 disabled:cursor-not-allowed disabled:border disabled:border-zinc-800 disabled:bg-[#09090B] disabled:text-zinc-400 disabled:shadow-none"
+            className="inline-flex items-center gap-2.5 rounded-2xl bg-emerald-500 px-5 py-3.5 text-sm font-semibold text-black shadow-[0_10px_35px_rgba(16,185,129,0.4)] transition-all duration-200 hover:bg-emerald-400 hover:-translate-y-0.5 light:bg-emerald-600 light:text-white light:hover:bg-emerald-700 light:shadow-lg disabled:translate-y-0 disabled:cursor-not-allowed disabled:border disabled:border-zinc-800 disabled:bg-[#09090B] disabled:text-zinc-400 disabled:shadow-none light:disabled:border-slate-300 light:disabled:bg-slate-200 light:disabled:text-slate-500"
           >
             <Download className="h-4 w-4 shrink-0" />
             <span>
@@ -786,21 +796,21 @@ export function HistoryPanel({
               setDeleteTarget(null);
             }
           }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 light:bg-slate-900/45 backdrop-blur-md p-4"
         >
-          <div className="animate-enter relative w-full max-w-md overflow-hidden rounded-2xl border border-red-500/25 bg-[#070707] p-6 sm:p-7 text-zinc-100 shadow-[0_24px_60px_rgba(0,0,0,0.95),0_0_30px_-8px_rgba(239,68,68,0.2)]">
+          <div className="animate-enter relative w-full max-w-md overflow-hidden rounded-2xl border border-red-500/25 bg-[#070707] p-6 sm:p-7 text-zinc-100 shadow-[0_24px_60px_rgba(0,0,0,0.95),0_0_30px_-8px_rgba(239,68,68,0.2)] light:border-slate-200 light:bg-white light:text-slate-900 light:shadow-[0_24px_60px_rgba(15,23,42,0.18)]">
             <div
               aria-hidden="true"
               className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-red-500/60 to-transparent"
             />
 
             <div className="flex items-center gap-3.5">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-red-500/25 bg-red-500/10 text-red-400">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-red-500/25 bg-red-500/10 text-red-400 light:border-rose-200 light:bg-rose-50 light:text-rose-600">
                 <Trash2 className="h-5 w-5" />
               </div>
               <h2
                 id="delete-confirm-modal-title"
-                className="text-lg font-semibold tracking-tight text-white"
+                className="text-lg font-semibold tracking-tight text-white light:text-slate-900"
               >
                 {deleteTarget.mode === "bulk"
                   ? isEn
@@ -812,11 +822,11 @@ export function HistoryPanel({
               </h2>
             </div>
 
-            <div className="mt-5 rounded-xl border border-red-500/15 bg-red-500/[0.06] px-4 py-3 text-sm font-medium text-zinc-100">
+            <div className="mt-5 rounded-xl border border-red-500/15 bg-red-500/[0.06] px-4 py-3 text-sm font-medium text-zinc-100 light:border-rose-200 light:bg-rose-50 light:text-slate-900">
               {deleteTarget.mode === "bulk" ? (
                 <span>
                   {isEn ? "All " : "รายการที่เลือกทั้งหมด "}
-                  <strong className="font-mono text-red-300">
+                  <strong className="font-mono text-red-300 light:text-rose-700">
                     {deleteTarget.records.length}
                   </strong>
                   {isEn
@@ -830,7 +840,7 @@ export function HistoryPanel({
               )}
             </div>
 
-            <p className="mt-3.5 text-xs text-zinc-400 leading-relaxed">
+            <p className="mt-3.5 text-xs text-zinc-400 light:text-slate-600 leading-relaxed">
               {isEn
                 ? "These records and any attached product images will be permanently removed from Cloud storage and cannot be recovered."
                 : "ข้อมูลและรูปภาพที่แนบไว้จะถูกลบออกจากคลาวด์อย่างถาวร และไม่สามารถกู้คืนได้ในภายหลัง"}
@@ -841,7 +851,7 @@ export function HistoryPanel({
                 type="button"
                 onClick={() => setDeleteTarget(null)}
                 disabled={deleting}
-                className="w-full rounded-xl border border-zinc-800 bg-zinc-900 py-2.5 text-sm font-medium text-zinc-300 transition-colors hover:bg-zinc-800 hover:text-white disabled:opacity-50"
+                className="w-full rounded-xl border border-zinc-800 bg-zinc-900 py-2.5 text-sm font-medium text-zinc-300 transition-colors hover:bg-zinc-800 hover:text-white light:border-slate-300 light:bg-white light:text-slate-700 light:hover:bg-slate-100 light:hover:text-slate-900 disabled:opacity-50"
               >
                 {isEn ? "Cancel" : "ยกเลิก"}
               </button>
@@ -849,7 +859,7 @@ export function HistoryPanel({
                 type="button"
                 onClick={() => void handleConfirmModalDelete()}
                 disabled={deleting}
-                className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-red-500 py-2.5 text-sm font-semibold text-white shadow-[0_0_20px_rgba(239,68,68,0.3)] transition-all hover:bg-red-600 disabled:opacity-60"
+                className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-red-500 py-2.5 text-sm font-semibold text-white shadow-[0_0_20px_rgba(239,68,68,0.3)] transition-all hover:bg-red-600 light:bg-rose-600 light:hover:bg-rose-700 light:shadow-sm disabled:opacity-60"
               >
                 {deleting && <Loader2 className="h-4 w-4 animate-spin" />}
                 <span>

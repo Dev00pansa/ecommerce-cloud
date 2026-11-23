@@ -467,22 +467,22 @@ export function AccountSettingsModal({
           onClose();
         }
       }}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 light:bg-slate-900/45 backdrop-blur-md p-4"
     >
-      <div className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl border border-emerald-500/30 bg-[#050505] text-zinc-100 shadow-[0_24px_60px_-12px_rgba(0,0,0,0.95),0_0_40px_-10px_rgba(16,185,129,0.28)]">
+      <div className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl border border-emerald-500/30 bg-[#050505] text-zinc-100 shadow-[0_24px_60px_-12px_rgba(0,0,0,0.95),0_0_40px_-10px_rgba(16,185,129,0.28)] light:border-slate-200 light:bg-white light:text-slate-900 light:shadow-[0_24px_60px_rgba(15,23,42,0.18)]">
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-400/75 to-transparent"
+          className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-400/75 light:via-emerald-500/50 to-transparent"
         />
 
-        <div className="flex items-center justify-between border-b border-zinc-800/90 px-6 py-5">
+        <div className="flex items-center justify-between border-b border-zinc-800/90 light:border-emerald-200/80 light:bg-gradient-to-r light:from-emerald-50 light:via-teal-50/70 light:to-slate-50 px-6 py-5">
           <div>
-            <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-400">
+            <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-400 light:text-emerald-700">
               {isEn ? "KhumLab Account" : "การตั้งค่าบัญชี KhumLab"}
             </span>
             <h2
               id="account-settings-title"
-              className="mt-1 text-lg sm:text-xl font-bold tracking-tight text-white"
+              className="mt-1 text-lg sm:text-xl font-bold tracking-tight text-white light:text-slate-900"
             >
               {isEn ? "Account & Password Settings" : "ตั้งค่าบัญชีและรหัสผ่าน"}
             </h2>
@@ -493,13 +493,13 @@ export function AccountSettingsModal({
             onClick={onClose}
             disabled={isBusy}
             aria-label={isEn ? "Close settings" : "ปิดหน้าต่างตั้งค่า"}
-            className="rounded-xl p-2 text-zinc-400 transition-colors hover:bg-white/[0.06] hover:text-zinc-100 disabled:opacity-50"
+            className="rounded-xl p-2 text-zinc-400 transition-colors hover:bg-white/[0.06] hover:text-zinc-100 light:text-slate-500 light:hover:bg-slate-200/70 light:hover:text-slate-900 disabled:opacity-50"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
-        <div className="divide-y divide-zinc-800/90 px-6 py-2">
+        <div className="divide-y divide-zinc-800/90 light:divide-slate-200 px-6 py-2">
           <section className="py-5 space-y-3">
             <div className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-4 min-w-0">
@@ -509,20 +509,20 @@ export function AccountSettingsModal({
                     <img
                       src={avatarUrl}
                       alt={username}
-                      className="h-14 w-14 rounded-full object-cover ring-1 ring-emerald-500/50 select-none"
+                      className="h-14 w-14 rounded-full object-cover ring-1 ring-emerald-500/50 light:ring-emerald-600/40 select-none"
                     />
                   ) : (
-                    <div className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-400 ring-1 ring-emerald-500/30">
+                    <div className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-400 ring-1 ring-emerald-500/30 light:bg-emerald-100 light:text-emerald-700 light:ring-emerald-300">
                       <UserIcon className="h-6 w-6" />
                     </div>
                   )}
                 </div>
 
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold text-zinc-100">
+                  <p className="text-sm font-semibold text-zinc-100 light:text-slate-900">
                     {isEn ? "Profile Photo" : "รูปโปรไฟล์"}
                   </p>
-                  <p className="text-xs text-zinc-500 mt-0.5">
+                  <p className="text-xs text-zinc-500 light:text-slate-500 mt-0.5">
                     {isEn
                       ? "Auto-cropped to 200x200px WebP (max 45 KB)"
                       : "ครอปจัตุรัส 200x200px และบีบอัด WebP อัตโนมัติ (ไม่เกิน 45 KB)"}
@@ -542,7 +542,7 @@ export function AccountSettingsModal({
                 type="button"
                 onClick={() => avatarFileInputRef.current?.click()}
                 disabled={uploadingAvatar}
-                className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-emerald-500/30 bg-black px-3.5 py-2 text-xs font-medium text-emerald-300 transition-colors hover:border-emerald-400 hover:text-white disabled:opacity-50"
+                className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-emerald-500/30 bg-black px-3.5 py-2 text-xs font-medium text-emerald-300 transition-colors hover:border-emerald-400 hover:text-white light:border-emerald-300 light:bg-emerald-50 light:text-emerald-700 light:hover:border-emerald-500 light:hover:bg-emerald-100 disabled:opacity-50"
               >
                 {uploadingAvatar && (
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -560,14 +560,14 @@ export function AccountSettingsModal({
             </div>
 
             {avatarError && (
-              <p className="flex items-start gap-1.5 text-xs text-rose-400">
+              <p className="flex items-start gap-1.5 text-xs text-rose-400 light:text-rose-600">
                 <AlertCircle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
                 <span>{avatarError}</span>
               </p>
             )}
 
             {avatarSuccess && (
-              <p className="flex items-center gap-1.5 text-xs font-medium text-emerald-400">
+              <p className="flex items-center gap-1.5 text-xs font-medium text-emerald-400 light:text-emerald-700">
                 <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
                 <span>{avatarSuccess}</span>
               </p>
@@ -575,8 +575,8 @@ export function AccountSettingsModal({
           </section>
 
           <section className="py-5 space-y-5">
-            <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-[0.16em] text-zinc-400">
-              <KeyRound className="h-3.5 w-3.5 text-emerald-400" />
+            <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-[0.16em] text-zinc-400 light:text-slate-500">
+              <KeyRound className="h-3.5 w-3.5 text-emerald-400 light:text-emerald-600" />
               <span>
                 {isEn
                   ? "Account & Password"
@@ -587,17 +587,17 @@ export function AccountSettingsModal({
             <div className="space-y-3">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0 space-y-1">
-                  <span className="flex items-center gap-1.5 text-xs text-zinc-500">
+                  <span className="flex items-center gap-1.5 text-xs text-zinc-500 light:text-slate-500">
                     <UserIcon className="h-3.5 w-3.5" />
                     <span>{isEn ? "Username" : "ชื่อผู้ใช้ (Username)"}</span>
                   </span>
                   {!editingUsername && (
-                    <p className="text-base font-semibold text-zinc-100 truncate">
+                    <p className="text-base font-semibold text-zinc-100 light:text-slate-900 truncate">
                       {username}
                     </p>
                   )}
                   {usernameCooldown.remainingDays > 0 && (
-                    <p className="flex items-center gap-1.5 text-[11px] text-amber-400/90">
+                    <p className="flex items-center gap-1.5 text-[11px] text-amber-400/90 light:text-amber-700">
                       <Clock className="h-3.5 w-3.5 shrink-0" />
                       <span>
                         {isEn
@@ -613,7 +613,7 @@ export function AccountSettingsModal({
                     type="button"
                     onClick={startEditUsername}
                     disabled={usernameCooldown.remainingDays > 0 || loadingCooldown}
-                    className="inline-flex shrink-0 items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-medium text-emerald-400 transition-colors hover:bg-white/[0.05] hover:text-emerald-300 disabled:cursor-not-allowed disabled:opacity-40"
+                    className="inline-flex shrink-0 items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-medium text-emerald-400 transition-colors hover:bg-white/[0.05] hover:text-emerald-300 light:text-emerald-700 light:hover:bg-emerald-50 light:hover:text-emerald-800 disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     <Pencil className="h-3.5 w-3.5" />
                     <span>{isEn ? "Edit Username" : "แก้ไขชื่อผู้ใช้"}</span>
@@ -624,12 +624,12 @@ export function AccountSettingsModal({
               {editingUsername && (
                 <form
                   onSubmit={handleSaveUsername}
-                  className="space-y-3 rounded-xl border border-emerald-500/25 bg-black p-4"
+                  className="space-y-3 rounded-xl border border-emerald-500/25 bg-black p-4 light:border-slate-200 light:bg-slate-50"
                 >
                   <div className="space-y-1.5">
                     <label
                       htmlFor="settings-username-input"
-                      className="block text-xs font-medium text-zinc-300"
+                      className="block text-xs font-medium text-zinc-300 light:text-slate-700"
                     >
                       {isEn
                         ? "New Username (Case-Sensitive: A-Z, a-z, 0-9, _)"
@@ -643,9 +643,9 @@ export function AccountSettingsModal({
                       value={nextUsername}
                       onChange={(e) => setNextUsername(e.target.value)}
                       disabled={savingUsername}
-                      className="w-full rounded-xl border border-emerald-500/25 bg-[#050505] px-3.5 py-2.5 text-sm font-mono text-zinc-100 focus:border-emerald-400 focus:outline-none disabled:opacity-60"
+                      className="w-full rounded-xl border border-emerald-500/25 bg-[#050505] px-3.5 py-2.5 text-sm font-mono text-zinc-100 focus:border-emerald-400 focus:outline-none light:border-slate-300 light:bg-white light:text-slate-900 light:focus:border-emerald-600 disabled:opacity-60"
                     />
-                    <p className="text-[11px] text-zinc-500">
+                    <p className="text-[11px] text-zinc-500 light:text-slate-500">
                       {isEn
                         ? "Note: Username can only be changed once every 30 days."
                         : "หมายเหตุ: สามารถเปลี่ยนชื่อผู้ใช้ได้เดือนละ 1 ครั้ง (ทุก 30 วัน)"}
@@ -653,7 +653,7 @@ export function AccountSettingsModal({
                   </div>
 
                   {usernameError && (
-                    <p className="flex items-start gap-1.5 text-xs text-rose-400">
+                    <p className="flex items-start gap-1.5 text-xs text-rose-400 light:text-rose-600">
                       <AlertCircle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
                       <span>{usernameError}</span>
                     </p>
@@ -664,14 +664,14 @@ export function AccountSettingsModal({
                       type="button"
                       onClick={cancelEditUsername}
                       disabled={savingUsername}
-                      className="rounded-xl px-3.5 py-2 text-xs font-medium text-zinc-400 transition-colors hover:bg-white/[0.05] hover:text-zinc-200 disabled:opacity-50"
+                      className="rounded-xl px-3.5 py-2 text-xs font-medium text-zinc-400 transition-colors hover:bg-white/[0.05] hover:text-zinc-200 light:text-slate-600 light:hover:bg-slate-200/70 light:hover:text-slate-900 disabled:opacity-50"
                     >
                       {isEn ? "Cancel" : "ยกเลิก"}
                     </button>
                     <button
                       type="submit"
                       disabled={savingUsername}
-                      className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-500 px-4 py-2 text-xs font-semibold text-slate-950 transition-colors hover:bg-emerald-400 disabled:opacity-60"
+                      className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-500 px-4 py-2 text-xs font-semibold text-slate-950 transition-colors hover:bg-emerald-400 light:bg-emerald-600 light:text-white light:hover:bg-emerald-700 disabled:opacity-60"
                     >
                       {savingUsername && (
                         <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -691,40 +691,40 @@ export function AccountSettingsModal({
               )}
 
               {usernameSuccess && (
-                <p className="flex items-center gap-1.5 text-xs font-medium text-emerald-400">
+                <p className="flex items-center gap-1.5 text-xs font-medium text-emerald-400 light:text-emerald-700">
                   <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
                   <span>{usernameSuccess}</span>
                 </p>
               )}
             </div>
 
-            <div className="border-t border-zinc-900 pt-4">
-              <span className="flex items-center gap-1.5 text-xs text-zinc-500">
+            <div className="border-t border-zinc-900 light:border-slate-200 pt-4">
+              <span className="flex items-center gap-1.5 text-xs text-zinc-500 light:text-slate-500">
                 <Mail className="h-3.5 w-3.5" />
                 <span>{isEn ? "Email Address" : "อีเมลที่ผูกกับบัญชี"}</span>
               </span>
-              <p className="mt-1 text-sm font-mono text-zinc-200 break-all">
+              <p className="mt-1 text-sm font-mono text-zinc-200 light:text-slate-800 break-all">
                 {resolvedEmail || "—"}
               </p>
             </div>
 
-            <div className="border-t border-zinc-900 pt-4 space-y-3">
+            <div className="border-t border-zinc-900 light:border-slate-200 pt-4 space-y-3">
               <div className="flex items-start justify-between gap-3">
                 <div className="space-y-1">
-                  <span className="flex items-center gap-1.5 text-xs text-zinc-500">
+                  <span className="flex items-center gap-1.5 text-xs text-zinc-500 light:text-slate-500">
                     <Lock className="h-3.5 w-3.5" />
                     <span>{isEn ? "Password" : "รหัสผ่าน"}</span>
                   </span>
-                  <p className="font-mono text-base tracking-widest text-zinc-200">
+                  <p className="font-mono text-base tracking-widest text-zinc-200 light:text-slate-800">
                     ••••••••••••
                   </p>
-                  <p className="text-[11px] leading-relaxed text-zinc-500">
+                  <p className="text-[11px] leading-relaxed text-zinc-500 light:text-slate-500">
                     {isEn
                       ? "Passwords are encrypted one-way in our database for security and cannot be retrieved as plain text."
                       : "ระบบเข้ารหัสรหัสผ่านแบบทางเดียวเพื่อความปลอดภัยสูงสุด จึงไม่สามารถดึงรหัสผ่านเดิมมาแสดงเป็นตัวอักษรได้"}
                   </p>
                   {passwordCooldown.remainingDays > 0 && (
-                    <p className="flex items-center gap-1.5 pt-0.5 text-[11px] text-amber-400/90">
+                    <p className="flex items-center gap-1.5 pt-0.5 text-[11px] text-amber-400/90 light:text-amber-700">
                       <Clock className="h-3.5 w-3.5 shrink-0" />
                       <span>
                         {isEn
@@ -739,7 +739,7 @@ export function AccountSettingsModal({
                   type="button"
                   onClick={toggleEditPassword}
                   disabled={passwordCooldown.remainingDays > 0 || loadingCooldown}
-                  className="shrink-0 rounded-xl px-3 py-1.5 text-xs font-medium text-emerald-400 transition-colors hover:bg-white/[0.05] hover:text-emerald-300 disabled:cursor-not-allowed disabled:opacity-40"
+                  className="shrink-0 rounded-xl px-3 py-1.5 text-xs font-medium text-emerald-400 transition-colors hover:bg-white/[0.05] hover:text-emerald-300 light:text-emerald-700 light:hover:bg-emerald-50 light:hover:text-emerald-800 disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   {editingPassword
                     ? isEn
@@ -754,12 +754,12 @@ export function AccountSettingsModal({
               {editingPassword && (
                 <form
                   onSubmit={handleSavePassword}
-                  className="space-y-3.5 rounded-xl border border-emerald-500/25 bg-black p-4"
+                  className="space-y-3.5 rounded-xl border border-emerald-500/25 bg-black p-4 light:border-slate-200 light:bg-slate-50"
                 >
                   <div>
                     <label
                       htmlFor="settings-new-password"
-                      className="block text-xs font-medium text-zinc-300 mb-1.5"
+                      className="block text-xs font-medium text-zinc-300 light:text-slate-700 mb-1.5"
                     >
                       {isEn ? "New Password" : "รหัสผ่านใหม่"}
                     </label>
@@ -779,7 +779,7 @@ export function AccountSettingsModal({
                             : "กรอกรหัสผ่านใหม่ (อย่างน้อย 6 ตัวอักษร)"
                         }
                         disabled={savingPassword}
-                        className="w-full rounded-xl border border-emerald-500/25 bg-[#050505] pl-3.5 pr-10 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 focus:border-emerald-400 focus:outline-none disabled:opacity-60"
+                        className="w-full rounded-xl border border-emerald-500/25 bg-[#050505] pl-3.5 pr-10 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 focus:border-emerald-400 focus:outline-none light:border-slate-300 light:bg-white light:text-slate-900 light:placeholder-slate-400 light:focus:border-emerald-600 disabled:opacity-60"
                       />
                       <button
                         type="button"
@@ -793,7 +793,7 @@ export function AccountSettingsModal({
                               ? "Show password"
                               : "แสดงรหัสผ่าน"
                         }
-                        className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-lg p-1 text-zinc-400 hover:text-zinc-200"
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-lg p-1 text-zinc-400 hover:text-zinc-200 light:text-slate-400 light:hover:text-slate-700"
                       >
                         {showNewPassword ? (
                           <EyeOff className="h-4 w-4" />
@@ -811,7 +811,7 @@ export function AccountSettingsModal({
                   <div>
                     <label
                       htmlFor="settings-confirm-password"
-                      className="block text-xs font-medium text-zinc-300 mb-1.5"
+                      className="block text-xs font-medium text-zinc-300 light:text-slate-700 mb-1.5"
                     >
                       {isEn
                         ? "Confirm New Password"
@@ -831,16 +831,16 @@ export function AccountSettingsModal({
                           : "พิมพ์รหัสผ่านใหม่อีกครั้งให้ตรงกัน"
                       }
                       disabled={savingPassword}
-                      className="w-full rounded-xl border border-emerald-500/25 bg-[#050505] px-3.5 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 focus:border-emerald-400 focus:outline-none disabled:opacity-60"
+                      className="w-full rounded-xl border border-emerald-500/25 bg-[#050505] px-3.5 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 focus:border-emerald-400 focus:outline-none light:border-slate-300 light:bg-white light:text-slate-900 light:placeholder-slate-400 light:focus:border-emerald-600 disabled:opacity-60"
                     />
                     {confirmPassword && confirmPassword !== newPassword && (
-                      <p className="mt-1.5 text-[11px] font-medium text-rose-400">
+                      <p className="mt-1.5 text-[11px] font-medium text-rose-400 light:text-rose-600">
                         {isEn
                           ? "Passwords do not match"
                           : "รหัสผ่านใหม่ยังไม่ตรงกัน"}
                       </p>
                     )}
-                    <p className="mt-1.5 text-[11px] text-zinc-500">
+                    <p className="mt-1.5 text-[11px] text-zinc-500 light:text-slate-500">
                       {isEn
                         ? "Note: Password can only be changed once every 30 days."
                         : "หมายเหตุ: สามารถเปลี่ยนรหัสผ่านได้เดือนละ 1 ครั้ง (ทุก 30 วัน)"}
@@ -848,7 +848,7 @@ export function AccountSettingsModal({
                   </div>
 
                   {passwordError && (
-                    <p className="flex items-start gap-1.5 text-xs text-rose-400">
+                    <p className="flex items-start gap-1.5 text-xs text-rose-400 light:text-rose-600">
                       <AlertCircle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
                       <span>{passwordError}</span>
                     </p>
@@ -859,14 +859,14 @@ export function AccountSettingsModal({
                       type="button"
                       onClick={toggleEditPassword}
                       disabled={savingPassword}
-                      className="rounded-xl px-3.5 py-2 text-xs font-medium text-zinc-400 transition-colors hover:bg-white/[0.05] hover:text-zinc-200 disabled:opacity-50"
+                      className="rounded-xl px-3.5 py-2 text-xs font-medium text-zinc-400 transition-colors hover:bg-white/[0.05] hover:text-zinc-200 light:text-slate-600 light:hover:bg-slate-200/70 light:hover:text-slate-900 disabled:opacity-50"
                     >
                       {isEn ? "Cancel" : "ยกเลิก"}
                     </button>
                     <button
                       type="submit"
                       disabled={savingPassword}
-                      className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-500 px-4 py-2 text-xs font-semibold text-slate-950 transition-colors hover:bg-emerald-400 disabled:opacity-60"
+                      className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-500 px-4 py-2 text-xs font-semibold text-slate-950 transition-colors hover:bg-emerald-400 light:bg-emerald-600 light:text-white light:hover:bg-emerald-700 disabled:opacity-60"
                     >
                       {savingPassword && (
                         <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -886,7 +886,7 @@ export function AccountSettingsModal({
               )}
 
               {passwordSuccess && (
-                <p className="flex items-center gap-1.5 text-xs font-medium text-emerald-400">
+                <p className="flex items-center gap-1.5 text-xs font-medium text-emerald-400 light:text-emerald-700">
                   <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
                   <span>{passwordSuccess}</span>
                 </p>

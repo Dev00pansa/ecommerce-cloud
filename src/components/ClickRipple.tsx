@@ -59,7 +59,7 @@ export function ClickRipple() {
         <span
           key={ripple.id}
           style={{ left: ripple.x, top: ripple.y }}
-          className="animate-click-ripple absolute h-3.5 w-3.5 rounded-full border border-emerald-400/70 bg-emerald-400/20 shadow-[0_0_10px_rgba(16,185,129,0.4)]"
+          className="animate-click-ripple absolute h-3.5 w-3.5 rounded-full border border-emerald-400/70 bg-emerald-400/20 shadow-[0_0_10px_rgba(16,185,129,0.4)] light:border-emerald-600/60 light:bg-emerald-500/15 light:shadow-none"
         />
       ))}
     </div>

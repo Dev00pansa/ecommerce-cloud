@@ -1,4 +1,4 @@
-# KhumLab `v1.1.0`
+# KhumLab `v1.2.0`
 
 **Live App:** https://khumlab.vercel.app
 
@@ -6,19 +6,20 @@ A real-cost pricing calculator, profit diagnostics engine, and break-even analyt
 
 ## Key Features
 
-- **Full-Site Bilingual Support (TH / EN):** Switch seamlessly between Thai and English across every page, form, diagnostic chart, modal, notification toast, and CSV export header, persisted automatically across sessions.
+- **Dual-Theme Design System (Obsidian Dark Mode & Executive Light Mode):** Switch seamlessly between KhumLab's signature Obsidian Black & Emerald Green glassmorphism dark theme and a high-contrast Executive Clean Light Mode crafted for daylight readability — persisted automatically in `localStorage` without flash-of-wrong-theme.
+- **Public Navbar Theme & Language Controls:** Instant Light/Dark toggle (`Sun` / `Moon`) and bilingual `TH | EN` switcher accessible directly from the Navbar across the Landing page, Login page, Creator Credits page, and Authenticated Dashboard.
+- **Full-Site Bilingual Support (TH / EN):** 100% localized Thai and English experience covering every form, diagnostic engine insight, interactive SVG chart, modal, toast notification, footer, credits page, and exported CSV column header.
 - **Marketplace GP & True Unit Cost Calculator:** Built-in presets for Shopee (13%), TikTok Shop (12%), Lazada (12%), and Direct Sales (0%) with customizable fee overrides, per-unit product cost, packaging materials, average ad spend (CPA), and monthly fixed overhead.
-- **E-Commerce Financial Diagnostic Engine:** Evaluates a composite Profit Health Score (`0–100`, Grades `S–D`), Cost Structure Donut Chart, Discount Sensitivity Simulator (`0%–50%`), Volume & Break-Even Projection Chart (Revenue vs. Cumulative Net Profit), Return Loss risk multiplier, Max Safe CPA / Break-Even ROAS, 3-tier suggested retail prices, and actionable optimization recommendations.
-- **Layered Emerald Glass UI & Semantic Analytics:** Obsidian Black & Emerald Green compartmentalized glassmorphism cards paired with a semantic multi-color data palette for instant readability across desktop and mobile viewports.
-- **Private Cloud Storage (Up to 20 Plans / Account):** Save, edit, single-delete, or bulk-delete pricing plans with Realtime Supabase synchronization, automatic product photo compression (under 120 KB), and duplicate product name protection.
-- **Custom-Column CSV Export:** Choose exactly which products and data columns to export into a UTF-8 BOM CSV spreadsheet ready for Microsoft Excel and Google Sheets.
+- **E-Commerce Financial Diagnostic Engine:** Composite Profit Health Score (`0–100`, Grades `S–D`), multi-color Cost Structure Donut Chart, Discount Sensitivity Simulator (`0%–50%`), paired Revenue vs. Cumulative Net Profit Volume Projection Chart, Return Loss risk multiplier, Max Safe CPA / Break-Even ROAS, 3-tier suggested retail prices, and actionable optimization steps.
+- **Private Cloud Storage (Up to 20 Plans / Account):** Save, edit, single-delete, or bulk-delete pricing plans with Realtime Supabase synchronization, automatic product photo compression (under 120 KB), custom-column CSV export, and duplicate product name protection.
+- **Creator Credits & Architecture Page (`/credits`):** Dedicated bilingual showcase detailing the project origin, developer profile (`@Dev00pansa`), open-source repository links, and full technology architecture.
 - **Backend-First Account Security:** Server-side SSR route protection via `@supabase/ssr`, case-sensitive username authentication, anti-bot registration guard, rate-limit cooldowns, and strict PostgreSQL Row-Level Security (RLS) isolating every user's data and storage objects.
 
 ## Tech Stack & Architecture
 
 - **Framework:** Next.js 16 (App Router, Turbopack)
 - **Language:** TypeScript (Strict Mode)
-- **Styling:** Tailwind CSS v4 & Lucide Icons
+- **Styling:** Tailwind CSS v4 (Custom `light:` variant) & Lucide Icons
 - **Backend & Cloud:** Supabase (Auth, PostgreSQL, Storage, Realtime, RLS)
 - **Hosting:** Vercel (Function Region `sin1` Singapore)
 
@@ -26,8 +27,9 @@ A real-cost pricing calculator, profit diagnostics engine, and break-even analyt
 
 ```text
 src/
-├── app/                # Next.js App Router pages, API guard, OpenGraph image
-├── components/         # Modular UI components (Navbar, AuthForm, CalculatorForm, AnalyticsCharts, HistoryPanel)
+├── app/                # Next.js App Router pages (/, /login, /dashboard, /credits), API guard, OpenGraph
+├── components/         # Modular UI components (Navbar, Footer, CreditsView, CalculatorForm, AnalyticsCharts, HistoryPanel)
+├── context/            # ThemeContext (Obsidian Dark & Executive Light persistence)
 ├── lib/                # Pure calculation engine, auth validators, i18n language store, Supabase SSR clients
 └── types/              # Strict shared TypeScript interfaces and types
 ```
@@ -55,4 +57,4 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
 npm run dev
 ```
 
-Open http://localhost:3000 in your browser to start developing locally, or visit the live production app at https://khumlab.vercel.app.
+Open http://localhost:3000 in your browser to develop locally, or visit the live production app at https://khumlab.vercel.app.

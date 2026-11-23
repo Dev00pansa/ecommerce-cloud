@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { formatCurrency } from "@/lib/calculator";
 import { useAppLanguage } from "@/lib/language";
+import { useTheme } from "@/context/ThemeContext";
 import type {
   CalculationMetrics,
   CalculatorInputValues,
@@ -29,13 +30,13 @@ interface AnalyticsChartsProps {
 }
 
 const GLASS_CARD_CLASS =
-  "rounded-2xl overflow-hidden bg-[#060807]/85 backdrop-blur-md border border-emerald-500/20 shadow-[0_16px_40px_rgba(0,0,0,0.75)]";
+  "rounded-2xl overflow-hidden bg-[#060807]/85 backdrop-blur-md border border-emerald-500/20 shadow-[0_16px_40px_rgba(0,0,0,0.75)] light:bg-white light:border-slate-200 light:shadow-[0_8px_28px_rgba(15,23,42,0.06)]";
 
 const CARD_HEADER_BAND_CLASS =
-  "bg-gradient-to-r from-emerald-950/60 via-[#0a100e] to-[#070908] border-b border-emerald-500/15 px-5 sm:px-6 py-4";
+  "bg-gradient-to-r from-emerald-950/60 via-[#0a100e] to-[#070908] border-b border-emerald-500/15 px-5 sm:px-6 py-4 light:from-emerald-50 light:via-teal-50/70 light:to-slate-50 light:border-emerald-200/80";
 
 const GLOWING_ICON_BADGE_CLASS =
-  "w-10 h-10 shrink-0 rounded-xl bg-gradient-to-br from-emerald-400/25 to-emerald-600/10 border border-emerald-400/35 text-emerald-400 flex items-center justify-center shadow-[0_0_16px_rgba(16,185,129,0.2)]";
+  "w-10 h-10 shrink-0 rounded-xl bg-gradient-to-br from-emerald-400/25 to-emerald-600/10 border border-emerald-400/35 text-emerald-400 flex items-center justify-center shadow-[0_0_16px_rgba(16,185,129,0.2)] light:from-emerald-100 light:to-emerald-50 light:border-emerald-300 light:text-emerald-700 light:shadow-none";
 
 function formatCompactSignedBaht(value: number, locale: string): string {
   const safe = Number.isFinite(value) ? value : 0;
@@ -68,11 +69,25 @@ export function AnalyticsCharts({
   activeDiscountPercent,
 }: AnalyticsChartsProps) {
   const [language] = useAppLanguage();
+  const { isLight } = useTheme();
   const isEn = language === "en";
   const locale = isEn ? "en-US" : "th-TH";
 
   const isIncomplete = analysis.isIncompleteData;
   const isLoss = !isIncomplete && metrics.netProfitPerUnit < 0;
+
+  const svgTrackColor = isLight ? "#e2e8f0" : "#18181b";
+  const svgDonutTrackColor = isLight ? "#e2e8f0" : "#111614";
+  const svgGridStroke = isLight ? "#e2e8f0" : "#18181b";
+  const svgZeroStroke = isLight ? "#94a3b8" : "#52525b";
+  const svgZeroLabelFill = isLight ? "#475569" : "#71717a";
+  const svgProfitLabelFill = isLight ? "#047857" : "#6ee7b7";
+  const svgCyanLabelFill = isLight ? "#0e7490" : "#67e8f9";
+  const svgLossLabelFill = isLight ? "#be123c" : "#fda4af";
+  const svgAxisMutedFill = isLight ? "#475569" : "#a1a1aa";
+  const svgAxisStrongFill = isLight ? "#0f172a" : "#d4d4d8";
+  const svgSelectedStroke = isLight ? "#0f172a" : "#a5f3fc";
+  const svgSelectedAxisFill = isLight ? "#0e7490" : "#67e8f9";
 
   const scoreRadius = 56;
   const scoreCircumference = 2 * Math.PI * scoreRadius;
@@ -81,26 +96,30 @@ export function AnalyticsCharts({
   const gradeStyle =
     analysis.healthGrade === "S" || analysis.healthGrade === "A"
       ? {
-          ring: "#10b981",
-          text: "text-emerald-400",
-          badge: "border-emerald-500/40 bg-emerald-500/12 text-emerald-300",
+          ring: isLight ? "#059669" : "#10b981",
+          text: "text-emerald-400 light:text-emerald-700",
+          badge:
+            "border-emerald-500/40 bg-emerald-500/12 text-emerald-300 light:border-emerald-300 light:bg-emerald-50 light:text-emerald-800",
         }
       : analysis.healthGrade === "B"
         ? {
-            ring: "#06b6d4",
-            text: "text-cyan-400",
-            badge: "border-cyan-500/40 bg-cyan-500/12 text-cyan-300",
+            ring: isLight ? "#0891b2" : "#06b6d4",
+            text: "text-cyan-400 light:text-cyan-700",
+            badge:
+              "border-cyan-500/40 bg-cyan-500/12 text-cyan-300 light:border-cyan-300 light:bg-cyan-50 light:text-cyan-800",
           }
         : analysis.healthGrade === "C" || analysis.healthGrade === "N/A"
           ? {
-              ring: "#f59e0b",
-              text: "text-amber-400",
-              badge: "border-amber-500/40 bg-amber-500/12 text-amber-300",
+              ring: isLight ? "#d97706" : "#f59e0b",
+              text: "text-amber-400 light:text-amber-700",
+              badge:
+                "border-amber-500/40 bg-amber-500/12 text-amber-300 light:border-amber-300 light:bg-amber-50 light:text-amber-800",
             }
           : {
-              ring: "#f43f5e",
-              text: "text-rose-400",
-              badge: "border-rose-500/40 bg-rose-500/12 text-rose-300",
+              ring: isLight ? "#e11d48" : "#f43f5e",
+              text: "text-rose-400 light:text-rose-600",
+              badge:
+                "border-rose-500/40 bg-rose-500/12 text-rose-300 light:border-rose-300 light:bg-rose-50 light:text-rose-700",
             };
 
   const donutRadius = 72;
@@ -203,10 +222,10 @@ export function AnalyticsCharts({
               <Activity className="h-5 w-5" />
             </div>
             <div className="min-w-0">
-              <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-emerald-400">
+              <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-emerald-400 light:text-emerald-700">
                 FINANCIAL DIAGNOSTIC ENGINE — HEALTH SCORE
               </span>
-              <h3 className="text-base sm:text-lg font-bold text-white">
+              <h3 className="text-base sm:text-lg font-bold text-white light:text-slate-900">
                 {isEn
                   ? `Profit Structure Health Score (${analysis.healthScore} / 100)`
                   : `คะแนนสุขภาพโครงสร้างกำไร (${analysis.healthScore} / 100)`}
@@ -223,7 +242,7 @@ export function AnalyticsCharts({
 
         <div className="p-5 sm:p-6">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
-            <div className="lg:col-span-4 flex flex-col items-center justify-center rounded-2xl border border-zinc-800/90 bg-black/65 p-5">
+            <div className="lg:col-span-4 flex flex-col items-center justify-center rounded-2xl border border-zinc-800/90 bg-black/65 p-5 light:border-slate-200 light:bg-slate-50/80">
               <div className="relative h-36 w-36">
                 <svg
                   viewBox="0 0 140 140"
@@ -240,7 +259,7 @@ export function AnalyticsCharts({
                     cy="70"
                     r={scoreRadius}
                     fill="none"
-                    stroke="#18181b"
+                    stroke={svgTrackColor}
                     strokeWidth="12"
                   />
                   {analysis.healthScore > 0 && (
@@ -263,7 +282,7 @@ export function AnalyticsCharts({
                   >
                     {analysis.healthScore}
                   </span>
-                  <span className="mt-1 font-mono text-[11px] text-zinc-500">
+                  <span className="mt-1 font-mono text-[11px] text-zinc-500 light:text-slate-500">
                     {isEn ? "/ 100 pts" : "/ 100 คะแนน"}
                   </span>
                   {analysis.healthGrade !== "N/A" && (
@@ -286,29 +305,29 @@ export function AnalyticsCharts({
                 return (
                   <div
                     key={factor.key}
-                    className="rounded-xl border border-zinc-800/90 bg-black/65 p-4 space-y-2"
+                    className="rounded-xl border border-zinc-800/90 bg-black/65 p-4 space-y-2 light:border-slate-200 light:bg-slate-50/80"
                   >
                     <div className="flex items-center justify-between gap-2 text-xs">
-                      <span className="font-medium text-zinc-200 truncate">
+                      <span className="font-medium text-zinc-200 light:text-slate-800 truncate">
                         {factor.label}
                       </span>
-                      <span className="shrink-0 font-mono font-bold tabular-nums text-zinc-100">
+                      <span className="shrink-0 font-mono font-bold tabular-nums text-zinc-100 light:text-slate-900">
                         {factor.score}/{factor.maxScore}
                       </span>
                     </div>
-                    <div className="h-1.5 w-full overflow-hidden rounded-full bg-zinc-900">
+                    <div className="h-1.5 w-full overflow-hidden rounded-full bg-zinc-900 light:bg-slate-200">
                       <div
                         style={{ width: `${pct}%` }}
                         className={`h-full rounded-full transition-all duration-300 ${
                           pct >= 75
-                            ? "bg-emerald-400"
+                            ? "bg-emerald-400 light:bg-emerald-600"
                             : pct >= 45
-                              ? "bg-amber-400"
-                              : "bg-rose-500"
+                              ? "bg-amber-400 light:bg-amber-500"
+                              : "bg-rose-500 light:bg-rose-600"
                         }`}
                       />
                     </div>
-                    <span className="block font-mono text-[11px] text-zinc-400">
+                    <span className="block font-mono text-[11px] text-zinc-400 light:text-slate-600">
                       {factor.summary}
                     </span>
                   </div>
@@ -330,15 +349,15 @@ export function AnalyticsCharts({
               <PieChart className="h-5 w-5" />
             </div>
             <div className="min-w-0">
-              <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-emerald-400">
+              <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-emerald-400 light:text-emerald-700">
                 CHART 01 — COST STRUCTURE
               </span>
-              <h3 className="text-base sm:text-lg font-bold text-white truncate">
+              <h3 className="text-base sm:text-lg font-bold text-white light:text-slate-900 truncate">
                 {isEn
                   ? "Unit Price Structure Share"
                   : "สัดส่วนโครงสร้างราคาต่อชิ้น"}
               </h3>
-              <p className="text-xs text-zinc-400 truncate">
+              <p className="text-xs text-zinc-400 light:text-slate-600 truncate">
                 {isEn
                   ? "Cost, packing & ads, GP fees, and net profit"
                   : "เปรียบเทียบสัดส่วนต้นทุน ค่าธรรมเนียม และกำไรสุทธิ"}
@@ -364,7 +383,7 @@ export function AnalyticsCharts({
                     cy="100"
                     r={donutRadius}
                     fill="none"
-                    stroke="#111614"
+                    stroke={svgDonutTrackColor}
                     strokeWidth="22"
                   />
 
@@ -404,22 +423,22 @@ export function AnalyticsCharts({
                 </svg>
 
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4">
-                  <span className="text-[11px] text-zinc-400">
+                  <span className="text-[11px] text-zinc-400 light:text-slate-600">
                     {isEn ? "Net Profit/Unit" : "กำไรสุทธิ/ชิ้น"}
                   </span>
                   <span
                     className={`mt-0.5 font-mono text-base sm:text-lg font-bold tabular-nums ${
                       isIncomplete
-                        ? "text-zinc-400"
+                        ? "text-zinc-400 light:text-slate-500"
                         : isLoss
-                          ? "text-rose-400"
-                          : "text-emerald-400"
+                          ? "text-rose-400 light:text-rose-600"
+                          : "text-emerald-400 light:text-emerald-700"
                     }`}
                   >
                     {metrics.netProfitPerUnit >= 0 ? "+" : "-"}฿
                     {formatCurrency(Math.abs(metrics.netProfitPerUnit))}
                   </span>
-                  <span className="mt-0.5 font-mono text-[11px] text-zinc-500">
+                  <span className="mt-0.5 font-mono text-[11px] text-zinc-500 light:text-slate-500">
                     Margin {formatCurrency(metrics.netMarginPercent, 1)}%
                   </span>
                 </div>
@@ -442,15 +461,15 @@ export function AnalyticsCharts({
                           className="h-2.5 w-2.5 shrink-0 rounded-full"
                           style={{ backgroundColor: seg.color }}
                         />
-                        <span className="text-zinc-300 truncate">
+                        <span className="text-zinc-300 light:text-slate-700 truncate">
                           {seg.label}
                         </span>
                       </div>
                       <div className="flex items-center gap-2 shrink-0 font-mono tabular-nums">
-                        <span className="text-zinc-100 font-medium">
+                        <span className="text-zinc-100 light:text-slate-900 font-medium">
                           ฿{formatCurrency(seg.amount)}
                         </span>
-                        <span className="min-w-[44px] text-right text-zinc-500">
+                        <span className="min-w-[44px] text-right text-zinc-500 light:text-slate-500">
                           {formatCurrency(displayShare, 1)}%
                         </span>
                       </div>
@@ -459,11 +478,11 @@ export function AnalyticsCharts({
                 })}
 
                 {isLoss && (
-                  <div className="pt-2 border-t border-zinc-800/80 flex items-center justify-between text-xs font-mono">
-                    <span className="text-rose-400">
+                  <div className="pt-2 border-t border-zinc-800/80 light:border-slate-200 flex items-center justify-between text-xs font-mono">
+                    <span className="text-rose-400 light:text-rose-600">
                       {isEn ? "Net Deficit" : "ส่วนต่างที่ขาดทุน"}
                     </span>
-                    <span className="font-bold text-rose-400">
+                    <span className="font-bold text-rose-400 light:text-rose-600">
                       -฿{formatCurrency(Math.abs(metrics.netProfitPerUnit))}
                     </span>
                   </div>
@@ -484,22 +503,22 @@ export function AnalyticsCharts({
                 <Percent className="h-5 w-5" />
               </div>
               <div className="min-w-0">
-                <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-emerald-400">
+                <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-emerald-400 light:text-emerald-700">
                   CHART 02 — DISCOUNT SENSITIVITY (0%–50%)
                 </span>
-                <h3 className="text-base sm:text-lg font-bold text-white">
+                <h3 className="text-base sm:text-lg font-bold text-white light:text-slate-900">
                   {isEn
                     ? "Promo Discount Profit Impact"
                     : "ผลกระทบต่อกำไรเมื่อจัดโปรโมชันลดราคา"}
                 </h3>
-                <p className="text-xs text-zinc-400">
+                <p className="text-xs text-zinc-400 light:text-slate-600">
                   {isEn
                     ? "Emerald-Cyan = Profitable · Rose-Orange = Selling at a loss"
                     : "เขียว-ฟ้า = ยังเหลือกำไรต่อชิ้น · แดง-ส้ม = เริ่มขาดทุนเข้าเนื้อ"}
                 </p>
               </div>
             </div>
-            <span className="rounded-full border border-cyan-500/35 bg-cyan-500/10 px-3 py-1 font-mono text-[11px] font-semibold text-cyan-300">
+            <span className="rounded-full border border-cyan-500/35 bg-cyan-500/10 px-3 py-1 font-mono text-[11px] font-semibold text-cyan-300 light:border-cyan-200 light:bg-cyan-50 light:text-cyan-800">
               {isEn
                 ? `Max Safe Discount ${formatCurrency(analysis.maxSafeDiscountPercent, 1)}%`
                 : `ลดปลอดภัยสูงสุด ${formatCurrency(analysis.maxSafeDiscountPercent, 1)}%`}
@@ -546,7 +565,7 @@ export function AnalyticsCharts({
                   y1={chartTopPad}
                   x2="542"
                   y2={chartTopPad}
-                  stroke="#18181b"
+                  stroke={svgGridStroke}
                   strokeWidth="1"
                 />
                 <line
@@ -554,7 +573,7 @@ export function AnalyticsCharts({
                   y1={chartTopPad + chartPlotHeight}
                   x2="542"
                   y2={chartTopPad + chartPlotHeight}
-                  stroke="#18181b"
+                  stroke={svgGridStroke}
                   strokeWidth="1"
                 />
                 <line
@@ -562,14 +581,14 @@ export function AnalyticsCharts({
                   y1={discountZeroY}
                   x2="542"
                   y2={discountZeroY}
-                  stroke="#52525b"
+                  stroke={svgZeroStroke}
                   strokeWidth="1.2"
                   strokeDasharray="4 4"
                 />
                 <text
                   x="14"
                   y={Math.max(14, discountZeroY - 4)}
-                  fill="#71717a"
+                  fill={svgZeroLabelFill}
                   fontSize="10"
                   fontFamily="monospace"
                 >
@@ -603,8 +622,8 @@ export function AnalyticsCharts({
                             ? "url(#khumlab-discount-profit)"
                             : "url(#khumlab-discount-loss)"
                         }
-                        fillOpacity={isSelectedSlider ? 1 : 0.82}
-                        stroke={isSelectedSlider ? "#a5f3fc" : "none"}
+                        fillOpacity={isSelectedSlider ? 1 : 0.85}
+                        stroke={isSelectedSlider ? svgSelectedStroke : "none"}
                         strokeWidth={isSelectedSlider ? 2 : 0}
                       />
                       <text
@@ -615,7 +634,11 @@ export function AnalyticsCharts({
                             : Math.min(200, y + barHeight + 13)
                         }
                         textAnchor="middle"
-                        fill={point.isProfitable ? "#67e8f9" : "#fda4af"}
+                        fill={
+                          point.isProfitable
+                            ? svgCyanLabelFill
+                            : svgLossLabelFill
+                        }
                         fontSize="10"
                         fontFamily="monospace"
                         fontWeight="600"
@@ -626,7 +649,11 @@ export function AnalyticsCharts({
                         x={x + barWidth / 2}
                         y={chartTopPad + chartPlotHeight + chartBottomPad - 8}
                         textAnchor="middle"
-                        fill={isSelectedSlider ? "#67e8f9" : "#a1a1aa"}
+                        fill={
+                          isSelectedSlider
+                            ? svgSelectedAxisFill
+                            : svgAxisMutedFill
+                        }
                         fontSize="11"
                         fontFamily="monospace"
                         fontWeight={isSelectedSlider ? "700" : "500"}
@@ -651,15 +678,15 @@ export function AnalyticsCharts({
               <BarChart3 className="h-5 w-5" />
             </div>
             <div className="min-w-0">
-              <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-emerald-400">
+              <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-emerald-400 light:text-emerald-700">
                 CHART 03 — VOLUME & BREAK-EVEN PROJECTION
               </span>
-              <h3 className="text-base sm:text-lg font-bold text-white">
+              <h3 className="text-base sm:text-lg font-bold text-white light:text-slate-900">
                 {isEn
                   ? "Total Revenue vs. Cumulative Net Profit by Sales Volume"
                   : "เปรียบเทียบยอดขายรวม และกำไรสุทธิสะสมตามจำนวนยอดขาย"}
               </h3>
-              <p className="text-xs text-zinc-400">
+              <p className="text-xs text-zinc-400 light:text-slate-600">
                 {inputs.fixedCost > 0
                   ? isEn
                     ? `Net profit shown after deducting ฿${formatCurrency(inputs.fixedCost, 0)} monthly fixed costs across 10 / 50 / 100 / 500 units`
@@ -672,19 +699,19 @@ export function AnalyticsCharts({
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5">
-            <div className="flex items-center gap-3 rounded-full border border-zinc-800 bg-black/60 px-3 py-1 text-[11px] text-zinc-300">
+            <div className="flex items-center gap-3 rounded-full border border-zinc-800 bg-black/60 px-3 py-1 text-[11px] text-zinc-300 light:border-slate-200 light:bg-white light:text-slate-700">
               <span className="inline-flex items-center gap-1.5">
-                <span className="h-2 w-2 rounded-full bg-cyan-400" />
+                <span className="h-2 w-2 rounded-full bg-cyan-400 light:bg-cyan-600" />
                 <span>{isEn ? "Revenue" : "ยอดขายรวม"}</span>
               </span>
               <span className="inline-flex items-center gap-1.5">
-                <span className="h-2 w-2 rounded-full bg-emerald-400" />
+                <span className="h-2 w-2 rounded-full bg-emerald-400 light:bg-emerald-600" />
                 <span>{isEn ? "Net Profit" : "กำไรสุทธิ"}</span>
               </span>
             </div>
 
             {inputs.fixedCost > 0 && (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/35 bg-emerald-500/10 px-3 py-1 font-mono text-[11px] font-semibold text-emerald-300">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/35 bg-emerald-500/10 px-3 py-1 font-mono text-[11px] font-semibold text-emerald-300 light:border-emerald-300 light:bg-emerald-50 light:text-emerald-800">
                 <TrendingUp className="h-3.5 w-3.5" />
                 <span>
                   {metrics.canBreakEven && metrics.breakEvenUnits !== null
@@ -751,7 +778,7 @@ export function AnalyticsCharts({
                   y1={chartTopPad}
                   x2="522"
                   y2={chartTopPad}
-                  stroke="#18181b"
+                  stroke={svgGridStroke}
                   strokeWidth="1"
                 />
                 <line
@@ -759,7 +786,7 @@ export function AnalyticsCharts({
                   y1={chartTopPad + chartPlotHeight}
                   x2="522"
                   y2={chartTopPad + chartPlotHeight}
-                  stroke="#18181b"
+                  stroke={svgGridStroke}
                   strokeWidth="1"
                 />
                 <line
@@ -767,14 +794,14 @@ export function AnalyticsCharts({
                   y1={volumeZeroY}
                   x2="522"
                   y2={volumeZeroY}
-                  stroke="#52525b"
+                  stroke={svgZeroStroke}
                   strokeWidth="1.2"
                   strokeDasharray="4 4"
                 />
                 <text
                   x="14"
                   y={Math.max(14, volumeZeroY - 4)}
-                  fill="#71717a"
+                  fill={svgZeroLabelFill}
                   fontSize="10"
                   fontFamily="monospace"
                 >
@@ -822,13 +849,13 @@ export function AnalyticsCharts({
                         height={revHeight}
                         rx="6"
                         fill="url(#khumlab-vol-revenue)"
-                        fillOpacity="0.86"
+                        fillOpacity="0.88"
                       />
                       <text
                         x={pairStartX + barWidth / 2 - 2}
                         y={revLabelY}
                         textAnchor="middle"
-                        fill="#67e8f9"
+                        fill={svgCyanLabelFill}
                         fontSize="9.5"
                         fontFamily="monospace"
                         fontWeight="600"
@@ -847,13 +874,17 @@ export function AnalyticsCharts({
                             ? "url(#khumlab-vol-profit)"
                             : "url(#khumlab-vol-loss)"
                         }
-                        fillOpacity="0.9"
+                        fillOpacity="0.92"
                       />
                       <text
                         x={pairStartX + barWidth + pairGap + barWidth / 2 + 2}
                         y={profLabelY}
                         textAnchor="middle"
-                        fill={point.isProfitable ? "#6ee7b7" : "#fda4af"}
+                        fill={
+                          point.isProfitable
+                            ? svgProfitLabelFill
+                            : svgLossLabelFill
+                        }
                         fontSize="9.5"
                         fontFamily="monospace"
                         fontWeight="700"
@@ -865,7 +896,7 @@ export function AnalyticsCharts({
                         x={pairStartX + pairWidth / 2}
                         y={chartTopPad + chartPlotHeight + chartBottomPad - 6}
                         textAnchor="middle"
-                        fill="#d4d4d8"
+                        fill={svgAxisStrongFill}
                         fontSize="11.5"
                         fontFamily="monospace"
                         fontWeight="600"
@@ -884,28 +915,30 @@ export function AnalyticsCharts({
                   key={point.units}
                   className={`rounded-xl border p-3.5 space-y-1.5 ${
                     point.isProfitable
-                      ? "border-emerald-500/25 bg-black/65"
-                      : "border-rose-500/30 bg-rose-950/15"
+                      ? "border-emerald-500/25 bg-black/65 light:border-emerald-200 light:bg-emerald-50/45"
+                      : "border-rose-500/30 bg-rose-950/15 light:border-rose-200 light:bg-rose-50/70"
                   }`}
                 >
                   <div className="flex items-center justify-between gap-1 text-xs">
-                    <span className="font-mono font-semibold text-white">
+                    <span className="font-mono font-semibold text-white light:text-slate-900">
                       {point.units.toLocaleString(locale)}{" "}
                       {isEn ? "units" : "ชิ้น"}
                     </span>
-                    <span className="font-mono text-[11px] text-cyan-400">
+                    <span className="font-mono text-[11px] text-cyan-400 light:text-cyan-700 font-medium">
                       ฿{formatCurrency(point.revenue, 0)}
                     </span>
                   </div>
                   <p
                     className={`font-mono text-base sm:text-lg font-bold tabular-nums ${
-                      point.isProfitable ? "text-emerald-400" : "text-rose-400"
+                      point.isProfitable
+                        ? "text-emerald-400 light:text-emerald-700"
+                        : "text-rose-400 light:text-rose-600"
                     }`}
                   >
                     {point.netTotalProfit >= 0 ? "+" : "-"}฿
                     {formatCurrency(Math.abs(point.netTotalProfit), 0)}
                   </p>
-                  <span className="block text-[11px] text-zinc-500">
+                  <span className="block text-[11px] text-zinc-500 light:text-slate-600">
                     {point.isProfitable
                       ? isEn
                         ? "Cumulative Net Profit"
@@ -930,10 +963,10 @@ export function AnalyticsCharts({
               <Sparkles className="h-5 w-5" />
             </div>
             <div className="min-w-0">
-              <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-emerald-400">
+              <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-emerald-400 light:text-emerald-700">
                 ADVANCED SELLER METRICS & SMART ADVISOR
               </span>
-              <h3 className="text-base sm:text-lg font-bold text-white">
+              <h3 className="text-base sm:text-lg font-bold text-white light:text-slate-900">
                 {isEn
                   ? "Deep Seller Metrics & Strategic Recommendations"
                   : "ตัวชี้วัดเชิงลึกและคำแนะนำเชิงกลยุทธ์"}
@@ -944,13 +977,13 @@ export function AnalyticsCharts({
 
         <div className="p-5 sm:p-6 space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <div className="rounded-xl border border-amber-500/25 bg-black/65 p-4 flex flex-col justify-between gap-3">
+            <div className="rounded-xl border border-amber-500/25 bg-black/65 p-4 flex flex-col justify-between gap-3 light:border-amber-200 light:bg-amber-50/40">
               <div className="flex items-start gap-3">
-                <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-amber-500/30 bg-amber-500/12 text-amber-400">
+                <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-amber-500/30 bg-amber-500/12 text-amber-400 light:border-amber-300 light:bg-amber-100 light:text-amber-700">
                   <PackageX className="h-4 w-4" />
                 </span>
                 <div className="space-y-1 min-w-0">
-                  <span className="block text-xs text-zinc-400">
+                  <span className="block text-xs text-zinc-400 light:text-slate-600">
                     {isEn
                       ? "Return / Damage Risk (Return Loss)"
                       : "ความเสี่ยงพัสดุตีกลับ / เสียหาย (Return Loss)"}
@@ -959,10 +992,10 @@ export function AnalyticsCharts({
                     <p
                       className={`font-mono text-2xl font-bold tabular-nums ${
                         analysis.returnLossMultiplier >= 5
-                          ? "text-rose-400"
+                          ? "text-rose-400 light:text-rose-600"
                           : analysis.returnLossMultiplier >= 3
-                            ? "text-amber-300"
-                            : "text-emerald-400"
+                            ? "text-amber-300 light:text-amber-700"
+                            : "text-emerald-400 light:text-emerald-700"
                       }`}
                     >
                       {analysis.returnLossMultiplier}{" "}
@@ -973,13 +1006,13 @@ export function AnalyticsCharts({
                         : "ชิ้น"}
                     </p>
                   ) : (
-                    <p className="font-mono text-lg font-bold text-zinc-500">
+                    <p className="font-mono text-lg font-bold text-zinc-500 light:text-slate-400">
                       —
                     </p>
                   )}
                 </div>
               </div>
-              <p className="text-xs text-zinc-400 leading-relaxed">
+              <p className="text-xs text-zinc-400 light:text-slate-600 leading-relaxed">
                 {isIncomplete
                   ? isEn
                     ? "Enter a selling price to evaluate parcel return risk."
@@ -998,25 +1031,25 @@ export function AnalyticsCharts({
               </p>
             </div>
 
-            <div className="rounded-xl border border-cyan-500/25 bg-black/65 p-4 flex flex-col justify-between gap-3">
+            <div className="rounded-xl border border-cyan-500/25 bg-black/65 p-4 flex flex-col justify-between gap-3 light:border-cyan-200 light:bg-cyan-50/40">
               <div className="flex items-start gap-3">
-                <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-cyan-500/30 bg-cyan-500/12 text-cyan-400">
+                <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-cyan-500/30 bg-cyan-500/12 text-cyan-400 light:border-cyan-300 light:bg-cyan-100 light:text-cyan-700">
                   <Megaphone className="h-4 w-4" />
                 </span>
                 <div className="space-y-1 min-w-0">
-                  <span className="block text-xs text-zinc-400">
+                  <span className="block text-xs text-zinc-400 light:text-slate-600">
                     {isEn
                       ? "Max Allowable Ad Spend (Max Safe CPA)"
                       : "ค่าโฆษณาสูงสุดที่รับได้ (Max Safe CPA)"}
                   </span>
                   <div className="flex flex-wrap items-baseline gap-2">
-                    <p className="font-mono text-2xl font-bold tabular-nums text-cyan-300">
+                    <p className="font-mono text-2xl font-bold tabular-nums text-cyan-300 light:text-cyan-700">
                       {isIncomplete
                         ? "—"
                         : `฿${formatCurrency(analysis.maxSafeTotalAds)}`}
                     </p>
                     {analysis.breakEvenRoas !== null && (
-                      <span className="rounded-full border border-cyan-500/35 bg-cyan-500/10 px-2 py-0.5 font-mono text-[11px] font-semibold text-cyan-300">
+                      <span className="rounded-full border border-cyan-500/35 bg-cyan-500/10 px-2 py-0.5 font-mono text-[11px] font-semibold text-cyan-300 light:border-cyan-300 light:bg-cyan-100 light:text-cyan-800">
                         {isEn ? "Min ROAS" : "ROAS ขั้นต่ำ"}{" "}
                         {formatCurrency(analysis.breakEvenRoas, 2)}x
                       </span>
@@ -1024,7 +1057,7 @@ export function AnalyticsCharts({
                   </div>
                 </div>
               </div>
-              <p className="text-xs text-zinc-400 leading-relaxed">
+              <p className="text-xs text-zinc-400 light:text-slate-600 leading-relaxed">
                 {isIncomplete
                   ? isEn
                     ? "Enter a selling price to calculate your max CPA ceiling and Break-Even ROAS."
@@ -1039,18 +1072,18 @@ export function AnalyticsCharts({
               </p>
             </div>
 
-            <div className="rounded-xl border border-purple-500/25 bg-black/65 p-4 flex flex-col justify-between gap-3">
+            <div className="rounded-xl border border-purple-500/25 bg-black/65 p-4 flex flex-col justify-between gap-3 light:border-purple-200 light:bg-purple-50/40">
               <div className="flex items-start gap-3">
-                <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-purple-500/30 bg-purple-500/12 text-purple-400">
+                <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-purple-500/30 bg-purple-500/12 text-purple-400 light:border-purple-300 light:bg-purple-100 light:text-purple-700">
                   <Wrench className="h-4 w-4" />
                 </span>
                 <div className="space-y-1 min-w-0">
-                  <span className="block text-xs text-zinc-400">
+                  <span className="block text-xs text-zinc-400 light:text-slate-600">
                     {isEn
                       ? "Actionable Optimization Plan (Actionable Fix)"
                       : "ทางออกปรับแก้แบบเจาะจง (Actionable Fix)"}
                   </span>
-                  <p className="text-sm font-semibold text-zinc-100">
+                  <p className="text-sm font-semibold text-zinc-100 light:text-slate-900">
                     {isIncomplete
                       ? isEn
                         ? "Awaiting selling price"
@@ -1067,15 +1100,15 @@ export function AnalyticsCharts({
               </div>
 
               {isIncomplete ? (
-                <p className="text-xs text-zinc-500 leading-relaxed">
+                <p className="text-xs text-zinc-500 light:text-slate-500 leading-relaxed">
                   {isEn
                     ? "Enter a selling price per unit to generate exact pricing and cost-cutting targets."
                     : "ระบุราคาขายต่อชิ้นเพื่อรับตัวเลขปรับราคาและลดต้นทุนอัตโนมัติ"}
                 </p>
               ) : analysis.actionableFix.needsImprovement ? (
-                <div className="space-y-1.5 text-xs text-zinc-300 leading-relaxed">
+                <div className="space-y-1.5 text-xs text-zinc-300 light:text-slate-700 leading-relaxed">
                   <p>
-                    <strong className="text-purple-400">
+                    <strong className="text-purple-400 light:text-purple-700">
                       {isEn ? "Option 1:" : "ทางเลือก 1:"}
                     </strong>{" "}
                     {analysis.actionableFix.targetSellingPrice !== null &&
@@ -1088,7 +1121,7 @@ export function AnalyticsCharts({
                         : "ค่า GP แพลตฟอร์มสูงเกินกว่าจะทำกำไร 25% ได้จากการขึ้นราคา"}
                   </p>
                   <p>
-                    <strong className="text-cyan-400">
+                    <strong className="text-cyan-400 light:text-cyan-700">
                       {isEn ? "Option 2:" : "ทางเลือก 2:"}
                     </strong>{" "}
                     {analysis.actionableFix.costReductionFeasible
@@ -1101,7 +1134,7 @@ export function AnalyticsCharts({
                   </p>
                 </div>
               ) : (
-                <p className="text-xs text-emerald-300/90 leading-relaxed">
+                <p className="text-xs text-emerald-300/90 light:text-emerald-800 leading-relaxed">
                   {isEn ? (
                     <>
                       Your current structure delivers{" "}
@@ -1127,7 +1160,7 @@ export function AnalyticsCharts({
 
           {!isIncomplete && (
             <div className="space-y-3">
-              <p className="text-xs sm:text-sm font-semibold text-zinc-200">
+              <p className="text-xs sm:text-sm font-semibold text-zinc-200 light:text-slate-800">
                 {isEn
                   ? `3-Tier Suggested Retail Pricing (Already factored in ${inputs.platformFeePercent}% GP)`
                   : `ราคาขายแนะนำ 3 ระดับ (คำนวณทบกลับค่า GP ${inputs.platformFeePercent}% เรียบร้อยแล้ว)`}
@@ -1138,24 +1171,24 @@ export function AnalyticsCharts({
                   const isHighMargin = tier.targetMarginPercent === 40;
 
                   const cardBorderClass = tier.recommended
-                    ? "border-emerald-400/55 bg-emerald-500/[0.08] shadow-[0_0_20px_-8px_rgba(16,185,129,0.3)]"
+                    ? "border-emerald-400/55 bg-emerald-500/[0.08] shadow-[0_0_20px_-8px_rgba(16,185,129,0.3)] light:border-emerald-400 light:bg-emerald-50/75 light:shadow-xs"
                     : isCompetitive
-                      ? "border-cyan-500/30 bg-black/65"
+                      ? "border-cyan-500/30 bg-black/65 light:border-cyan-200 light:bg-cyan-50/35"
                       : isHighMargin
-                        ? "border-purple-500/30 bg-black/65"
-                        : "border-zinc-800/90 bg-black/65";
+                        ? "border-purple-500/30 bg-black/65 light:border-purple-200 light:bg-purple-50/35"
+                        : "border-zinc-800/90 bg-black/65 light:border-slate-200 light:bg-slate-50";
 
                   const badgeClass = tier.recommended
-                    ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                    ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 light:bg-emerald-100 light:text-emerald-800 light:border-emerald-300"
                     : isCompetitive
-                      ? "bg-cyan-500/15 text-cyan-300 border border-cyan-500/30"
-                      : "bg-purple-500/15 text-purple-300 border border-purple-500/30";
+                      ? "bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 light:bg-cyan-100 light:text-cyan-800 light:border-cyan-300"
+                      : "bg-purple-500/15 text-purple-300 border border-purple-500/30 light:bg-purple-100 light:text-purple-800 light:border-purple-300";
 
                   const priceClass = tier.recommended
-                    ? "text-emerald-400"
+                    ? "text-emerald-400 light:text-emerald-700"
                     : isCompetitive
-                      ? "text-cyan-300"
-                      : "text-purple-300";
+                      ? "text-cyan-300 light:text-cyan-700"
+                      : "text-purple-300 light:text-purple-700";
 
                   return (
                     <div
@@ -1163,7 +1196,7 @@ export function AnalyticsCharts({
                       className={`rounded-xl border p-4 space-y-2 ${cardBorderClass}`}
                     >
                       <div className="flex items-center justify-between gap-2">
-                        <span className="text-sm font-semibold text-white">
+                        <span className="text-sm font-semibold text-white light:text-slate-900">
                           {tier.tierLabel}
                         </span>
                         <span
@@ -1182,16 +1215,16 @@ export function AnalyticsCharts({
                           >
                             ฿{formatCurrency(tier.suggestedPrice)}
                           </p>
-                          <p className="text-xs text-zinc-400">
+                          <p className="text-xs text-zinc-400 light:text-slate-600">
                             {isEn ? "Est. net profit " : "เหลือกำไรสุทธิ "}
-                            <span className="font-mono font-semibold text-emerald-400">
+                            <span className="font-mono font-semibold text-emerald-400 light:text-emerald-700">
                               +฿{formatCurrency(tier.estimatedProfitPerUnit)}
                               {isEn ? "/unit" : "/ชิ้น"}
                             </span>
                           </p>
                         </>
                       ) : (
-                        <p className="text-xs text-rose-400 pt-1">
+                        <p className="text-xs text-rose-400 light:text-rose-600 pt-1">
                           {isEn
                             ? "Cannot target this margin because the platform GP fee is too high."
                             : "ไม่สามารถตั้งราคาเป้าหมายนี้ได้ เนื่องจากค่า GP แพลตฟอร์มสูงเกินเกณฑ์"}
@@ -1205,7 +1238,7 @@ export function AnalyticsCharts({
           )}
 
           <div className="space-y-2.5">
-            <p className="text-xs sm:text-sm font-semibold text-zinc-200">
+            <p className="text-xs sm:text-sm font-semibold text-zinc-200 light:text-slate-800">
               {isEn
                 ? "Strategic Insights for This Product"
                 : "คำแนะนำเชิงกลยุทธ์เฉพาะสำหรับรายการนี้"}
@@ -1216,28 +1249,28 @@ export function AnalyticsCharts({
                   key={insight.title}
                   className={`rounded-xl border px-4 py-3 flex items-start gap-3 ${
                     insight.severity === "danger"
-                      ? "border-rose-500/30 bg-rose-950/20"
+                      ? "border-rose-500/30 bg-rose-950/20 light:border-rose-200 light:bg-rose-50/75"
                       : insight.severity === "warning"
-                        ? "border-amber-500/25 bg-amber-950/15"
-                        : "border-emerald-500/25 bg-emerald-950/15"
+                        ? "border-amber-500/25 bg-amber-950/15 light:border-amber-200 light:bg-amber-50/75"
+                        : "border-emerald-500/25 bg-emerald-950/15 light:border-emerald-200 light:bg-emerald-50/75"
                   }`}
                 >
                   {insight.severity === "healthy" ? (
-                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" />
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400 light:text-emerald-600" />
                   ) : (
                     <AlertCircle
                       className={`mt-0.5 h-4 w-4 shrink-0 ${
                         insight.severity === "danger"
-                          ? "text-rose-400"
-                          : "text-amber-400"
+                          ? "text-rose-400 light:text-rose-600"
+                          : "text-amber-400 light:text-amber-600"
                       }`}
                     />
                   )}
                   <div className="space-y-0.5 min-w-0">
-                    <p className="text-xs sm:text-sm font-semibold text-zinc-100">
+                    <p className="text-xs sm:text-sm font-semibold text-zinc-100 light:text-slate-900">
                       {insight.title}
                     </p>
-                    <p className="text-xs text-zinc-400 leading-relaxed">
+                    <p className="text-xs text-zinc-400 light:text-slate-600 leading-relaxed">
                       {insight.detail}
                     </p>
                   </div>

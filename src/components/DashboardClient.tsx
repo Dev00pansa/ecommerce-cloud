@@ -812,25 +812,18 @@ export function DashboardClient({
     <div className="relative z-0 flex-1 flex flex-col">
       <div
         aria-hidden="true"
-        className="pointer-events-none fixed inset-0 -z-10 overflow-hidden bg-black"
+        className="pointer-events-none fixed inset-0 -z-10 overflow-hidden bg-black light:bg-[#f8fafc]"
       >
+        <div className="khumlab-dashboard-dots absolute inset-0" />
         <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage:
-              "radial-gradient(rgba(255, 255, 255, 0.075) 1px, transparent 1px)",
-            backgroundSize: "24px 24px",
-          }}
-        />
-        <div
-          className="animate-dashboard-glow-a absolute inset-x-0 top-0 h-[560px]"
+          className="animate-dashboard-glow-a absolute inset-x-0 top-0 h-[560px] light:opacity-30"
           style={{
             background:
               "radial-gradient(ellipse 80% 55% at 50% -8%, rgba(16, 185, 129, 0.22), rgba(16, 185, 129, 0.08) 45%, transparent 78%)",
           }}
         />
-        <div className="animate-dashboard-glow-b absolute -top-24 left-[8%] h-[420px] w-[42vw] min-w-[280px] rounded-full bg-gradient-to-b from-emerald-500/20 via-emerald-500/8 to-transparent blur-3xl" />
-        <div className="animate-dashboard-glow-a absolute -top-28 right-[8%] h-[440px] w-[40vw] min-w-[280px] rounded-full bg-gradient-to-b from-emerald-400/18 via-emerald-500/8 to-transparent blur-3xl" />
+        <div className="animate-dashboard-glow-b absolute -top-24 left-[8%] h-[420px] w-[42vw] min-w-[280px] rounded-full bg-gradient-to-b from-emerald-500/20 via-emerald-500/8 to-transparent light:from-emerald-500/[0.08] light:via-emerald-400/[0.03] blur-3xl" />
+        <div className="animate-dashboard-glow-a absolute -top-28 right-[8%] h-[440px] w-[40vw] min-w-[280px] rounded-full bg-gradient-to-b from-emerald-400/18 via-emerald-500/8 to-transparent light:from-emerald-500/[0.07] light:via-emerald-400/[0.02] blur-3xl" />
         <FloatingBackgroundDocs />
       </div>
 
@@ -845,10 +838,10 @@ export function DashboardClient({
         >
           {activeTab === "calculator" ? (
             <div className="space-y-1">
-              <span className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-emerald-400">
+              <span className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-emerald-400 light:text-emerald-700">
                 KhumLab Profit Planner
               </span>
-              <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white">
+              <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white light:text-slate-900">
                 {isEn
                   ? "Step-by-Step Profit & Break-Even Planner"
                   : "คำนวณต้นทุนและกำไรสุทธิทีละขั้น"}
@@ -856,10 +849,10 @@ export function DashboardClient({
             </div>
           ) : activeTab === "summary" ? (
             <div className="space-y-1">
-              <span className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-emerald-400">
+              <span className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-emerald-400 light:text-emerald-700">
                 KhumLab Analytics Report
               </span>
-              <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white">
+              <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white light:text-slate-900">
                 {isEn
                   ? "Profit Summary & Smart Pricing Analytics"
                   : "สรุปผลและวิเคราะห์กำไรเชิงลึก"}
@@ -868,23 +861,23 @@ export function DashboardClient({
           ) : (
             <div className="space-y-2 max-w-2xl">
               <div className="flex flex-wrap items-center gap-3">
-                <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white">
+                <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white light:text-slate-900">
                   {isEn
                     ? `Cloud Storage (${records.length}/${MAX_CLOUD_RECORDS})`
                     : `คลาวด์เก็บข้อมูล (${records.length}/${MAX_CLOUD_RECORDS})`}
                 </h1>
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-[#050505] px-2.5 py-1 text-[11px] font-mono text-emerald-400">
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-[#050505] px-2.5 py-1 text-[11px] font-mono text-emerald-400 light:border-emerald-200 light:bg-white light:text-emerald-700 light:shadow-xs">
                   <span
                     className={`h-1.5 w-1.5 rounded-full ${
                       realtimeConnected
-                        ? "bg-emerald-400 animate-pulse"
-                        : "bg-amber-400"
+                        ? "bg-emerald-400 light:bg-emerald-600 animate-pulse"
+                        : "bg-amber-400 light:bg-amber-600"
                     }`}
                   />
                   <span>{realtimeConnected ? "Cloud Synced" : "Cloud Ready"}</span>
                 </span>
               </div>
-              <p className="text-sm text-zinc-400 leading-relaxed">
+              <p className="text-sm text-zinc-400 light:text-slate-600 leading-relaxed">
                 {isEn
                   ? `Store up to ${MAX_CLOUD_RECORDS} pricing plans. Open any item to edit or download your selected records as a single table file.`
                   : `บันทึกแผนคำนวณได้สูงสุด ${MAX_CLOUD_RECORDS} รายการ กดเปิดดูเพื่อแก้ไข หรือเลือกรายการที่ต้องการแล้วดาวน์โหลดรวมเป็นไฟล์ตารางเดียว (เปิดใน Excel / Google Sheets ได้ทันที)`}
@@ -896,7 +889,7 @@ export function DashboardClient({
             <button
               type="button"
               onClick={handleStartNewCalculation}
-              className="inline-flex shrink-0 self-start lg:self-auto items-center gap-2 rounded-2xl bg-emerald-500 px-5 py-3 text-sm font-semibold text-black shadow-[0_0_24px_rgba(16,185,129,0.3)] transition-all duration-200 hover:bg-emerald-400 hover:-translate-y-0.5 whitespace-nowrap"
+              className="inline-flex shrink-0 self-start lg:self-auto items-center gap-2 rounded-2xl bg-emerald-500 px-5 py-3 text-sm font-semibold text-black shadow-[0_0_24px_rgba(16,185,129,0.3)] transition-all duration-200 hover:bg-emerald-400 hover:-translate-y-0.5 light:bg-emerald-600 light:text-white light:shadow-sm light:hover:bg-emerald-700 whitespace-nowrap"
             >
               <Plus className="h-4 w-4 stroke-[2.5]" />
               <span>{isEn ? "New Calculation" : "คำนวณรายการใหม่"}</span>
@@ -906,14 +899,14 @@ export function DashboardClient({
               aria-live="polite"
               className={`inline-flex shrink-0 self-start lg:self-auto items-center gap-2 rounded-2xl border px-4 py-2.5 text-xs sm:text-sm pointer-events-none select-none cursor-default whitespace-nowrap ${
                 isCloudFull
-                  ? "border-amber-500/40 bg-amber-500/10 font-semibold text-amber-300"
-                  : "border-emerald-500/25 bg-emerald-500/[0.06] font-medium text-emerald-300/90"
+                  ? "border-amber-500/40 bg-amber-500/10 font-semibold text-amber-300 light:border-amber-300 light:bg-amber-50 light:text-amber-800"
+                  : "border-emerald-500/25 bg-emerald-500/[0.06] font-medium text-emerald-300/90 light:border-emerald-200 light:bg-emerald-50 light:text-emerald-800"
               }`}
             >
               {isCloudFull ? (
-                <AlertCircle className="h-4 w-4 shrink-0 text-amber-400" />
+                <AlertCircle className="h-4 w-4 shrink-0 text-amber-400 light:text-amber-600" />
               ) : (
-                <Cloud className="h-4 w-4 shrink-0 text-emerald-400" />
+                <Cloud className="h-4 w-4 shrink-0 text-emerald-400 light:text-emerald-600" />
               )}
               <span>
                 {isCloudFull

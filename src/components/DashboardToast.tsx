@@ -57,10 +57,10 @@ export function DashboardToast({ toast, onDismiss }: DashboardToastProps) {
       }`}
     >
       <div
-        className={`relative overflow-hidden rounded-2xl bg-[#050505] border px-4 py-3.5 pr-11 ${
+        className={`relative overflow-hidden rounded-2xl bg-[#050505] border px-4 py-3.5 pr-11 light:bg-white ${
           isError
-            ? "border-rose-500/45 shadow-[0_16px_45px_rgba(0,0,0,0.9),0_0_25px_-5px_rgba(244,63,94,0.32)]"
-            : "border-emerald-500/40 shadow-[0_16px_45px_rgba(0,0,0,0.9),0_0_25px_-5px_rgba(16,185,129,0.3)]"
+            ? "border-rose-500/45 shadow-[0_16px_45px_rgba(0,0,0,0.9),0_0_25px_-5px_rgba(244,63,94,0.32)] light:border-rose-300 light:shadow-[0_14px_36px_rgba(15,23,42,0.14)]"
+            : "border-emerald-500/40 shadow-[0_16px_45px_rgba(0,0,0,0.9),0_0_25px_-5px_rgba(16,185,129,0.3)] light:border-emerald-300 light:shadow-[0_14px_36px_rgba(15,23,42,0.14)]"
         }`}
       >
         <div
@@ -72,13 +72,15 @@ export function DashboardToast({ toast, onDismiss }: DashboardToastProps) {
 
         <div className="flex items-start gap-3">
           {isError ? (
-            <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-rose-400" />
+            <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-rose-400 light:text-rose-600" />
           ) : (
-            <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-400" />
+            <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-400 light:text-emerald-600" />
           )}
           <p
             className={`text-xs sm:text-sm font-medium leading-relaxed ${
-              isError ? "text-rose-200" : "text-zinc-100"
+              isError
+                ? "text-rose-200 light:text-rose-700"
+                : "text-zinc-100 light:text-slate-800"
             }`}
           >
             {toast.message}
@@ -89,16 +91,18 @@ export function DashboardToast({ toast, onDismiss }: DashboardToastProps) {
           type="button"
           onClick={onDismiss}
           aria-label={isEn ? "Close notification" : "ปิดการแจ้งเตือน"}
-          className="absolute top-3 right-3 rounded-lg p-1 text-zinc-500 transition-colors hover:bg-white/[0.06] hover:text-zinc-200 focus:outline-none"
+          className="absolute top-3 right-3 rounded-lg p-1 text-zinc-500 transition-colors hover:bg-white/[0.06] hover:text-zinc-200 light:text-slate-400 light:hover:bg-slate-100 light:hover:text-slate-700 focus:outline-none"
         >
           <X className="h-4 w-4" />
         </button>
 
-        <div className="absolute inset-x-0 bottom-0 h-1 bg-zinc-900/90">
+        <div className="absolute inset-x-0 bottom-0 h-1 bg-zinc-900/90 light:bg-slate-100">
           <div
             key={toast.id}
             className={`h-full w-full animate-toast-countdown ${
-              isError ? "bg-rose-400" : "bg-emerald-400"
+              isError
+                ? "bg-rose-400 light:bg-rose-600"
+                : "bg-emerald-400 light:bg-emerald-600"
             }`}
           />
         </div>

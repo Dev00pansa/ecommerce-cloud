@@ -7,19 +7,21 @@ export function PageLoader({ label = "กำลังโหลดข้อมู
     <div
       role="status"
       aria-live="polite"
-      className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center gap-4 px-6"
+      className="fixed inset-0 z-50 bg-black light:bg-[#f8fafc] flex flex-col items-center justify-center gap-4 px-6"
     >
       <div className="relative flex items-center justify-center">
         <div
           aria-hidden="true"
-          className="h-12 w-12 rounded-full border-[3px] border-zinc-800 border-t-emerald-400 animate-spin shadow-[0_0_24px_rgba(16,185,129,0.25)]"
+          className="h-12 w-12 rounded-full border-[3px] border-zinc-800 light:border-slate-200 border-t-emerald-400 light:border-t-emerald-600 animate-spin shadow-[0_0_24px_rgba(16,185,129,0.25)] light:shadow-none"
         />
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute h-2 w-2 rounded-full bg-emerald-400/80 animate-pulse"
+          className="pointer-events-none absolute h-2 w-2 rounded-full bg-emerald-400/80 light:bg-emerald-600/80 animate-pulse"
         />
       </div>
-      <p className="text-sm text-zinc-400 tracking-wide">{label}</p>
+      <p className="text-sm text-zinc-400 light:text-slate-600 tracking-wide">
+        {label}
+      </p>
     </div>
   );
 }

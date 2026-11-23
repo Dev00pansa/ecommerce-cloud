@@ -10,7 +10,7 @@ export function FloatingBackgroundDocs() {
         viewBox="0 0 180 220"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        className="animate-floating-doc-1 absolute top-[8%] left-[2%] sm:left-[3%] w-36 sm:w-44 text-[#10b981] opacity-[0.22] drop-shadow-[0_0_10px_rgba(16,185,129,0.25)]"
+        className="animate-floating-doc-1 absolute top-[8%] left-[2%] sm:left-[3%] w-36 sm:w-44 text-[#10b981] opacity-[0.22] drop-shadow-[0_0_10px_rgba(16,185,129,0.25)] light:text-emerald-700 light:opacity-[0.12] light:drop-shadow-none"
       >
         <path
           d="M20 14H122L160 52V198C160 204.627 154.627 210 148 210H20C13.3726 210 8 204.627 8 198V26C8 19.3726 13.3726 14 20 14Z"
@@ -47,7 +47,7 @@ export function FloatingBackgroundDocs() {
         viewBox="0 0 210 165"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        className="animate-floating-doc-2 absolute top-[11%] right-[2%] sm:right-[4%] w-40 sm:w-52 text-[#34d399] opacity-[0.24] drop-shadow-[0_0_10px_rgba(16,185,129,0.28)]"
+        className="animate-floating-doc-2 absolute top-[11%] right-[2%] sm:right-[4%] w-40 sm:w-52 text-[#34d399] opacity-[0.24] drop-shadow-[0_0_10px_rgba(16,185,129,0.28)] light:text-emerald-700 light:opacity-[0.12] light:drop-shadow-none"
       >
         <rect x="10" y="10" width="190" height="145" rx="14" stroke="currentColor" strokeWidth="1.5" />
         <line x1="10" y1="38" x2="200" y2="38" stroke="currentColor" strokeWidth="1.2" strokeOpacity="0.7" />
@@ -73,7 +73,7 @@ export function FloatingBackgroundDocs() {
         viewBox="0 0 170 210"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        className="animate-floating-doc-3 absolute top-[44%] left-[1.5%] w-32 sm:w-44 text-[#10b981] opacity-[0.2] drop-shadow-[0_0_10px_rgba(16,185,129,0.24)]"
+        className="animate-floating-doc-3 absolute top-[44%] left-[1.5%] w-32 sm:w-44 text-[#10b981] opacity-[0.2] drop-shadow-[0_0_10px_rgba(16,185,129,0.24)] light:text-emerald-700 light:opacity-[0.12] light:drop-shadow-none"
       >
         <path
           d="M22 14H148C154.627 14 160 19.3726 160 26V194L144 182L128 194L112 182L96 194L80 182L64 194L48 182L32 194L16 182V26C16 19.3726 21.3726 14 28 14Z"
@@ -96,7 +96,7 @@ export function FloatingBackgroundDocs() {
         viewBox="0 0 190 190"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        className="animate-floating-doc-4 absolute bottom-[7%] left-[6%] sm:left-[12%] w-36 sm:w-44 text-[#34d399] opacity-[0.21] drop-shadow-[0_0_10px_rgba(16,185,129,0.25)]"
+        className="animate-floating-doc-4 absolute bottom-[7%] left-[6%] sm:left-[12%] w-36 sm:w-44 text-[#34d399] opacity-[0.21] drop-shadow-[0_0_10px_rgba(16,185,129,0.25)] light:text-emerald-700 light:opacity-[0.12] light:drop-shadow-none"
       >
         <rect x="16" y="22" width="136" height="152" rx="14" stroke="currentColor" strokeWidth="1.4" />
         <rect x="36" y="10" width="136" height="152" rx="14" stroke="currentColor" strokeWidth="1.4" strokeDasharray="5 4" strokeOpacity="0.75" />
@@ -116,7 +116,7 @@ export function FloatingBackgroundDocs() {
         viewBox="0 0 210 185"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        className="animate-floating-doc-5 absolute bottom-[12%] right-[2%] lg:right-[5%] w-40 lg:w-52 text-[#10b981] opacity-[0.23] drop-shadow-[0_0_10px_rgba(16,185,129,0.26)]"
+        className="animate-floating-doc-5 absolute bottom-[12%] right-[2%] lg:right-[5%] w-40 lg:w-52 text-[#10b981] opacity-[0.23] drop-shadow-[0_0_10px_rgba(16,185,129,0.26)] light:text-emerald-700 light:opacity-[0.12] light:drop-shadow-none"
       >
         <rect x="12" y="14" width="186" height="156" rx="16" stroke="currentColor" strokeWidth="1.45" />
         <line x1="36" y1="140" x2="176" y2="140" stroke="currentColor" strokeWidth="1.4" />
@@ -132,7 +132,7 @@ export function FloatingBackgroundDocs() {
         viewBox="0 0 180 180"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        className="animate-floating-doc-6 absolute top-[22%] left-[32%] w-36 sm:w-44 text-[#34d399] opacity-[0.19] drop-shadow-[0_0_10px_rgba(16,185,129,0.24)]"
+        className="animate-floating-doc-6 absolute top-[22%] left-[32%] w-36 sm:w-44 text-[#34d399] opacity-[0.19] drop-shadow-[0_0_10px_rgba(16,185,129,0.24)] light:text-emerald-700 light:opacity-[0.12] light:drop-shadow-none"
       >
         <circle cx="90" cy="90" r="68" stroke="currentColor" strokeWidth="1.4" strokeDasharray="6 5" />
         <circle cx="90" cy="90" r="46" stroke="currentColor" strokeWidth="1.6" />
@@ -146,7 +146,7 @@ export function FloatingBackgroundDocs() {
         viewBox="0 0 200 160"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        className="animate-floating-doc-7 absolute top-[54%] left-[44%] w-40 sm:w-48 text-[#10b981] opacity-[0.18] drop-shadow-[0_0_10px_rgba(16,185,129,0.22)]"
+        className="animate-floating-doc-7 absolute top-[54%] left-[44%] w-40 sm:w-48 text-[#10b981] opacity-[0.18] drop-shadow-[0_0_10px_rgba(16,185,129,0.22)] light:text-emerald-700 light:opacity-[0.12] light:drop-shadow-none"
       >
         <rect x="14" y="14" width="172" height="132" rx="16" stroke="currentColor" strokeWidth="1.4" />
         <rect x="30" y="30" width="140" height="24" rx="6" stroke="currentColor" strokeWidth="1.2" fill="currentColor" fillOpacity="0.14" />
@@ -161,7 +161,7 @@ export function FloatingBackgroundDocs() {
         viewBox="0 0 185 185"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        className="animate-floating-doc-8 hidden md:block absolute top-[46%] right-[16%] w-36 lg:w-44 text-[#34d399] opacity-[0.21] drop-shadow-[0_0_10px_rgba(16,185,129,0.25)]"
+        className="animate-floating-doc-8 hidden md:block absolute top-[46%] right-[16%] w-36 lg:w-44 text-[#34d399] opacity-[0.21] drop-shadow-[0_0_10px_rgba(16,185,129,0.25)] light:text-emerald-700 light:opacity-[0.12] light:drop-shadow-none"
       >
         <rect x="16" y="18" width="152" height="148" rx="16" stroke="currentColor" strokeWidth="1.4" />
         <line x1="16" y1="50" x2="168" y2="50" stroke="currentColor" strokeWidth="1.2" strokeOpacity="0.7" />

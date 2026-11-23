@@ -169,33 +169,33 @@ export function WorkflowShowcase({
   return (
     <section
       id="workflow"
-      className="relative w-full overflow-x-clip bg-[#000000] scroll-mt-16 pt-20 pb-20 border-b border-zinc-900/80"
+      className="relative w-full overflow-x-clip bg-[#000000] light:bg-[#f8fafc] scroll-mt-16 pt-20 pb-20 border-b border-zinc-900/80 light:border-slate-200"
     >
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-emerald-950/10 to-transparent"
+        className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-emerald-950/10 light:from-emerald-500/[0.05] to-transparent"
       />
 
       <div className="relative z-10 w-full max-w-[1440px] mx-auto px-8 lg:px-16 pb-10">
         <div className="max-w-3xl space-y-3 text-left">
-          <span className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-emerald-400">
+          <span className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-emerald-400 light:text-emerald-700">
             Step-by-Step Vertical Walkthrough
           </span>
-          <h2 className="py-1 text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-zinc-100 leading-[1.2]">
+          <h2 className="py-1 text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-zinc-100 light:text-slate-900 leading-[1.2]">
             {isEn ? "Get Started in 4 Simple Steps" : "เริ่มต้นใช้งานได้ใน 4 ขั้นตอน"}
           </h2>
-          <p className="flex items-center gap-2 text-base sm:text-lg text-zinc-400">
+          <p className="flex items-center gap-2 text-base sm:text-lg text-zinc-400 light:text-slate-600">
             <span>
               {isEn
                 ? "Scroll down to explore each step of the workflow"
                 : "เลื่อนหน้าจอลงเพื่อดูขั้นตอนการทำงานทีละขั้น"}
             </span>
-            <ArrowDown className="h-4 w-4 text-emerald-400" />
+            <ArrowDown className="h-4 w-4 text-emerald-400 light:text-emerald-600" />
           </p>
         </div>
       </div>
 
-      <div className="w-full bg-[#000000]">
+      <div className="w-full bg-[#000000] light:bg-[#f8fafc]">
         {WORKFLOW_STEPS.map((item, idx) => {
           const isTextRight = item.textSide === "right";
           const isImageLeft = isTextRight;
@@ -215,7 +215,7 @@ export function WorkflowShowcase({
               ref={(el) => {
                 stepRefs.current[idx] = el;
               }}
-              className="relative min-h-[85vh] w-full flex items-center overflow-hidden py-20 bg-[#000000]"
+              className="relative min-h-[85vh] w-full flex items-center overflow-hidden py-20 bg-[#000000] light:bg-[#f8fafc]"
             >
               <div
                 aria-hidden="true"
@@ -228,7 +228,7 @@ export function WorkflowShowcase({
                   style={getRadialFeatherMask(isImageLeft)}
                   className={`h-full w-full transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] will-change-[opacity,transform] ${
                     isVisible
-                      ? "opacity-55 scale-100"
+                      ? "opacity-55 light:opacity-35 scale-100"
                       : "opacity-10 scale-[1.03]"
                   }`}
                 >
@@ -248,33 +248,36 @@ export function WorkflowShowcase({
                 }`}
               >
                 <div
-                  className={`w-full max-w-xl text-left transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] will-change-[opacity,transform] ${
+                  className={`w-full max-w-xl text-left transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] will-change-[opacity,transform] light:rounded-2xl light:bg-white/90 light:backdrop-blur-md light:border light:border-slate-200/90 light:p-7 sm:light:p-9 light:shadow-[0_12px_36px_rgba(15,23,42,0.08)] ${
                     isVisible
                       ? "translate-x-0 opacity-100"
                       : hiddenSlideClass
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <span className="font-mono text-sm font-semibold tracking-[0.2em] text-emerald-400">
+                    <span className="font-mono text-sm font-semibold tracking-[0.2em] text-emerald-400 light:text-emerald-700">
                       {item.step}
                     </span>
-                    <span aria-hidden="true" className="text-zinc-600">
+                    <span
+                      aria-hidden="true"
+                      className="text-zinc-600 light:text-slate-300"
+                    >
                       —
                     </span>
-                    <span className="font-mono text-xs sm:text-sm uppercase tracking-wider text-zinc-400">
+                    <span className="font-mono text-xs sm:text-sm uppercase tracking-wider text-zinc-400 light:text-slate-500">
                       {item.tag}
                     </span>
                   </div>
 
-                  <h3 className="py-1 text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-white leading-[1.2] mt-4">
+                  <h3 className="py-1 text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-white light:text-slate-900 leading-[1.2] mt-4">
                     {title}
                   </h3>
 
-                  <p className="text-base sm:text-lg text-zinc-300 leading-relaxed mt-5 max-w-xl">
+                  <p className="text-base sm:text-lg text-zinc-300 light:text-slate-700 leading-relaxed mt-5 max-w-xl">
                     {desc}
                   </p>
 
-                  <p className="border-l-2 border-emerald-500/80 pl-4 mt-6 text-sm sm:text-base text-zinc-400">
+                  <p className="border-l-2 border-emerald-500/80 light:border-emerald-600 pl-4 mt-6 text-sm sm:text-base text-zinc-400 light:text-slate-600">
                     {highlight}
                   </p>
 
@@ -282,7 +285,7 @@ export function WorkflowShowcase({
                     <div className="mt-8 pt-2">
                       <Link
                         href={startHref}
-                        className="inline-flex items-center gap-2.5 rounded-lg bg-emerald-500 px-6 py-3.5 text-sm sm:text-base font-semibold text-slate-950 transition-all hover:bg-emerald-400"
+                        className="inline-flex items-center gap-2.5 rounded-lg bg-emerald-500 px-6 py-3.5 text-sm sm:text-base font-semibold text-slate-950 transition-all hover:bg-emerald-400 light:bg-emerald-600 light:text-white light:hover:bg-emerald-700 light:shadow-sm"
                       >
                         <Calculator className="h-4 w-4" />
                         <span>

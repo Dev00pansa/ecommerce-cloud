@@ -72,29 +72,29 @@ export function PainPointMarquee() {
           ? "Common e-commerce seller pain points that KhumLab solves"
           : "ปัญหาที่ผู้ขายออนไลน์พบบ่อยซึ่ง KhumLab ช่วยแก้ไขได้"
       }
-      className="relative w-full shrink-0 h-[86px] md:h-[98px] flex items-center overflow-hidden bg-black/65 backdrop-blur-sm border-y border-zinc-800/90"
+      className="relative w-full shrink-0 h-[86px] md:h-[98px] flex items-center overflow-hidden bg-black/65 backdrop-blur-sm border-y border-zinc-800/90 light:bg-white/90 light:border-slate-200"
     >
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 z-20 h-px bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent"
+        className="pointer-events-none absolute inset-x-0 top-0 z-20 h-px bg-gradient-to-r from-transparent via-emerald-500/50 light:via-emerald-500/35 to-transparent"
       />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-px bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent"
-      />
-
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-1/2 -translate-y-1/2 z-0 border-t border-dashed border-zinc-800/40"
+        className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-px bg-gradient-to-r from-transparent via-emerald-500/50 light:via-emerald-500/35 to-transparent"
       />
 
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 md:w-32 bg-gradient-to-r from-black via-black/70 to-transparent"
+        className="pointer-events-none absolute inset-x-0 top-1/2 -translate-y-1/2 z-0 border-t border-dashed border-zinc-800/40 light:border-slate-300/70"
+      />
+
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 md:w-32 bg-gradient-to-r from-black via-black/70 to-transparent light:from-[#f8fafc] light:via-[#f8fafc]/80"
       />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 md:w-32 bg-gradient-to-l from-black via-black/70 to-transparent"
+        className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 md:w-32 bg-gradient-to-l from-black via-black/70 to-transparent light:from-[#f8fafc] light:via-[#f8fafc]/80"
       />
 
       <div className="relative z-[5] flex w-max items-center animate-pain-marquee">
@@ -112,11 +112,11 @@ export function PainPointMarquee() {
                 <div
                   key={`${copyIndex}-${itemIndex}`}
                   style={{ transform: `translateY(${offsetY}px)` }}
-                  className="group inline-flex items-center gap-2.5 px-3.5 py-1 rounded-full bg-zinc-950/80 border border-zinc-800/80 text-xs md:text-sm text-zinc-200 whitespace-nowrap select-none transition-all duration-300 hover:border-emerald-400/80 hover:text-white hover:bg-emerald-950/40 hover:shadow-[0_0_18px_rgba(16,185,129,0.4)]"
+                  className="group inline-flex items-center gap-2.5 px-3.5 py-1 rounded-full bg-zinc-950/80 border border-zinc-800/80 text-xs md:text-sm text-zinc-200 whitespace-nowrap select-none transition-all duration-300 hover:border-emerald-400/80 hover:text-white hover:bg-emerald-950/40 hover:shadow-[0_0_18px_rgba(16,185,129,0.4)] light:bg-white light:border-slate-200 light:text-slate-700 light:shadow-xs light:hover:border-emerald-500 light:hover:bg-emerald-50 light:hover:text-emerald-900 light:hover:shadow-sm"
                 >
                   <span
                     aria-hidden="true"
-                    className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.85)] transition-all duration-300 group-hover:bg-emerald-300 group-hover:scale-125 group-hover:shadow-[0_0_12px_rgba(110,231,183,1)]"
+                    className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.85)] transition-all duration-300 group-hover:bg-emerald-300 group-hover:scale-125 group-hover:shadow-[0_0_12px_rgba(110,231,183,1)] light:bg-emerald-600 light:shadow-none light:group-hover:bg-emerald-700 light:group-hover:shadow-none"
                   />
                   <span>{text}</span>
                 </div>
