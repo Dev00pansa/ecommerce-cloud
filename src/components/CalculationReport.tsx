@@ -442,13 +442,31 @@ export function CalculationReport({
         </div>
       )}
 
-      <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
-        <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-3 pt-2">
+        <button
+          type="button"
+          onClick={onEditTop}
+          className="inline-flex items-center justify-center sm:justify-start gap-1.5 rounded-xl px-4 py-3 text-xs sm:text-sm font-medium text-zinc-400 transition-colors hover:bg-white/[0.04] hover:text-white"
+        >
+          <ArrowUp className="h-4 w-4" />
+          <span>แก้ไขตัวเลขด้านบน</span>
+        </button>
+
+        <div className="flex flex-wrap items-center justify-end gap-3">
+          <button
+            type="button"
+            onClick={onExportCsv}
+            className="inline-flex items-center justify-center gap-2 rounded-xl border border-emerald-500/30 bg-[#050505] px-5 py-3 text-sm font-medium text-zinc-200 shadow-[0_0_20px_-6px_rgba(16,185,129,0.16)] transition-all duration-200 hover:border-emerald-400 hover:text-white"
+          >
+            <Download className="h-4 w-4" />
+            <span>ส่งออกไฟล์ CSV</span>
+          </button>
+
           <button
             type="button"
             onClick={onSaveToCloud}
             disabled={saving || saveBlockedByLimit}
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-500 px-6 py-3.5 text-sm sm:text-base font-semibold text-slate-950 shadow-[0_0_24px_-4px_rgba(16,185,129,0.45)] transition-all duration-200 hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-500 px-6 py-3 text-sm sm:text-base font-semibold text-black shadow-[0_0_24px_rgba(16,185,129,0.3)] transition-all duration-200 hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {saving ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -467,25 +485,7 @@ export function CalculationReport({
                     : "บันทึกข้อมูลนี้ลง Cloud"}
             </span>
           </button>
-
-          <button
-            type="button"
-            onClick={onExportCsv}
-            className="inline-flex items-center justify-center gap-2 rounded-xl border border-emerald-500/25 bg-black px-5 py-3.5 text-sm font-medium text-zinc-200 shadow-[0_0_20px_-6px_rgba(16,185,129,0.16)] transition-all duration-200 hover:border-emerald-400/50 hover:text-white"
-          >
-            <Download className="h-4 w-4" />
-            <span>ส่งออกไฟล์ CSV</span>
-          </button>
         </div>
-
-        <button
-          type="button"
-          onClick={onEditTop}
-          className="inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs sm:text-sm font-medium text-zinc-400 transition-colors hover:bg-white/[0.04] hover:text-emerald-400"
-        >
-          <ArrowUp className="h-4 w-4" />
-          <span>แก้ไขตัวเลขด้านบน</span>
-        </button>
       </div>
     </section>
   );

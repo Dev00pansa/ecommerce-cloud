@@ -30,15 +30,24 @@ import type {
 interface HistoryPanelProps {
   records: EcommerceCalculationRecord[];
   loading: boolean;
-  deletingId: string | null;
+  deleting: boolean;
   onRefresh: () => void;
   onExportCsv: (
     orderedSelectedRecords: EcommerceCalculationRecord[],
     selectedKeys: CsvExportColumnKey[]
   ) => void;
   onLoadRecord: (record: EcommerceCalculationRecord) => void;
-  onDeleteRecord: (record: EcommerceCalculationRecord) => void;
+  onConfirmDeleteSingle: (
+    record: EcommerceCalculationRecord
+  ) => Promise<boolean>;
+  onConfirmDeleteBulk: (
+    targetRecords: EcommerceCalculationRecord[]
+  ) => Promise<boolean>;
 }
+
+type DeleteModalTarget =
+  | { mode: "single"; record: EcommerceCalculationRecord }
+  | { mode: "bulk"; records: EcommerceCalculationRecord[] };
 
 const SORT_OPTIONS: readonly { value: HistorySortOrder; label: string }[] = [
   { value: "date_desc", label: "วันที่บันทึก: ใหม่ล่าสุด → เก่าสุด" },
@@ -50,11 +59,12 @@ const SORT_OPTIONS: readonly { value: HistorySortOrder; label: string }[] = [
 export function HistoryPanel({
   records,
   loading,
-  deletingId,
+  deleting,
   onRefresh,
   onExportCsv,
   onLoadRecord,
-  onDeleteRecord,
+  onConfirmDeleteSingle,
+  onConfirmDeleteBulk,
 }: HistoryPanelProps) {
   const sortDropdownRef = useRef<HTMLDivElement | null>(null);
   const [sortOrder, setSortOrder] = useState<HistorySortOrder>("date_desc");
@@ -63,6 +73,9 @@ export function HistoryPanel({
     CsvExportColumnKey[]
   >(DEFAULT_CSV_EXPORT_KEYS);
   const [excludedRecordIds, setExcludedRecordIds] = useState<string[]>([]);
+  const [deleteTarget, setDeleteTarget] = useState<DeleteModalTarget | null>(
+    null
+  );
 
   useEffect(() => {
     if (!sortDropdownOpen) return;
@@ -89,6 +102,21 @@ export function HistoryPanel({
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [sortDropdownOpen]);
+
+  useEffect(() => {
+    if (!deleteTarget) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && !deleting) {
+        setDeleteTarget(null);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [deleteTarget, deleting]);
 
   const enrichedSortedRecords = useMemo(() => {
     const withMetrics = records.map((item) => ({
@@ -136,11 +164,14 @@ export function HistoryPanel({
     [enrichedSortedRecords, excludedIdSet]
   );
 
+  const selectedCount = selectedSortedRecords.length;
   const isCloudFull = records.length >= MAX_CLOUD_RECORDS;
   const hasNoExportColumns = selectedExportKeys.length === 0;
-  const hasNoSelectedRecords = selectedSortedRecords.length === 0;
+  const hasNoSelectedRecords = selectedCount === 0;
+  const canBulkDelete = selectedCount > 2;
+  const showBulkDeleteHint = selectedCount >= 1 && selectedCount <= 2;
   const isAllRecordsSelected =
-    records.length > 0 && selectedSortedRecords.length === records.length;
+    records.length > 0 && selectedCount === records.length;
 
   const currentSortLabel =
     SORT_OPTIONS.find((opt) => opt.value === sortOrder)?.label ??
@@ -165,6 +196,30 @@ export function HistoryPanel({
       setExcludedRecordIds(records.map((r) => r.id));
     } else {
       setExcludedRecordIds([]);
+    }
+  }
+
+  async function handleConfirmModalDelete() {
+    if (!deleteTarget || deleting) return;
+
+    if (deleteTarget.mode === "single") {
+      const targetId = deleteTarget.record.id;
+      const ok = await onConfirmDeleteSingle(deleteTarget.record);
+      if (ok) {
+        setExcludedRecordIds((prev) => prev.filter((id) => id !== targetId));
+        setDeleteTarget(null);
+      }
+      return;
+    }
+
+    const deletedIds = new Set(deleteTarget.records.map((item) => item.id));
+    const ok = await onConfirmDeleteBulk(deleteTarget.records);
+    if (ok) {
+      const remainingIds = records
+        .filter((item) => !deletedIds.has(item.id))
+        .map((item) => item.id);
+      setExcludedRecordIds(remainingIds);
+      setDeleteTarget(null);
     }
   }
 
@@ -367,26 +422,55 @@ export function HistoryPanel({
 
         <div className="rounded-2xl border border-emerald-500/20 bg-[#050505]/90 p-5 sm:p-6 shadow-[0_0_24px_-8px_rgba(16,185,129,0.16)] space-y-4">
           {records.length > 0 && (
-            <div className="flex flex-wrap items-center justify-between gap-2.5 pb-3 border-b border-zinc-800/70">
-              <button
-                type="button"
-                onClick={handleToggleSelectAllRecords}
-                className={`inline-flex items-center gap-2 rounded-xl border px-3.5 py-2 text-xs sm:text-sm font-medium transition-all duration-200 ${
-                  isAllRecordsSelected
-                    ? "border-emerald-500/40 bg-emerald-500/12 text-emerald-300 hover:border-emerald-400"
-                    : "border-zinc-800 bg-black text-zinc-300 hover:border-emerald-500/40 hover:text-white"
-                }`}
-              >
-                <ListChecks className="h-4 w-4 text-emerald-400 shrink-0" />
-                <span>
-                  {isAllRecordsSelected ? "ยกเลิกเลือกทั้งหมด" : "เลือกทั้งหมด"}
-                </span>
-              </button>
+            <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-zinc-800/70">
+              <div className="flex flex-wrap items-center gap-2.5">
+                <button
+                  type="button"
+                  onClick={handleToggleSelectAllRecords}
+                  className={`inline-flex items-center gap-2 rounded-xl border px-3.5 py-2 text-xs sm:text-sm font-medium transition-all duration-200 ${
+                    isAllRecordsSelected
+                      ? "border-emerald-500/40 bg-emerald-500/12 text-emerald-300 hover:border-emerald-400"
+                      : "border-zinc-800 bg-black text-zinc-300 hover:border-emerald-500/40 hover:text-white"
+                  }`}
+                >
+                  <ListChecks className="h-4 w-4 text-emerald-400 shrink-0" />
+                  <span>
+                    {isAllRecordsSelected
+                      ? "ยกเลิกเลือกทั้งหมด"
+                      : "เลือกทั้งหมด"}
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  disabled={!canBulkDelete || deleting}
+                  onClick={() =>
+                    setDeleteTarget({
+                      mode: "bulk",
+                      records: selectedSortedRecords,
+                    })
+                  }
+                  className={`inline-flex items-center gap-2 rounded-xl border px-3.5 py-2 text-xs sm:text-sm font-medium transition-all duration-200 ${
+                    canBulkDelete
+                      ? "bg-red-500/15 hover:bg-red-500/25 border-red-500/40 text-red-400 shadow-[0_0_16px_-6px_rgba(239,68,68,0.35)]"
+                      : "bg-zinc-900/70 border-zinc-800 text-zinc-500 opacity-50 cursor-not-allowed"
+                  }`}
+                >
+                  <Trash2 className="h-4 w-4 shrink-0" />
+                  <span>ลบรายการที่เลือก ({selectedCount})</span>
+                </button>
+
+                {showBulkDeleteHint && (
+                  <span className="text-xs text-zinc-500">
+                    (เลือกมากกว่า 2 รายการเพื่อลบพร้อมกัน)
+                  </span>
+                )}
+              </div>
 
               <span className="font-mono text-xs text-zinc-400">
                 เลือกรายการสำหรับดาวน์โหลด{" "}
                 <strong className="text-emerald-400">
-                  {selectedSortedRecords.length}/{records.length}
+                  {selectedCount}/{records.length}
                 </strong>{" "}
                 รายการ
               </span>
@@ -512,16 +596,14 @@ export function HistoryPanel({
                       </button>
                       <button
                         type="button"
-                        onClick={() => onDeleteRecord(item)}
-                        disabled={deletingId === item.id}
+                        onClick={() =>
+                          setDeleteTarget({ mode: "single", record: item })
+                        }
+                        disabled={deleting}
                         className="inline-flex items-center justify-center gap-1 rounded-xl border border-zinc-800 bg-[#050505] px-3 py-2 text-xs font-medium text-rose-400 transition-colors hover:border-rose-500/60 disabled:opacity-50"
                       >
-                        {deletingId === item.id ? (
-                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                        ) : (
-                          <Trash2 className="h-3.5 w-3.5" />
-                        )}
-                        <span>{deletingId === item.id ? "กำลังลบ..." : "ลบ"}</span>
+                        <Trash2 className="h-3.5 w-3.5" />
+                        <span>ลบ</span>
                       </button>
                     </div>
                   </article>
@@ -548,9 +630,84 @@ export function HistoryPanel({
                 ? "เลือกอย่างน้อย 1 หัวข้อก่อนดาวน์โหลด"
                 : hasNoSelectedRecords
                   ? "เลือกรายการสินค้าก่อนดาวน์โหลด"
-                  : `ดาวน์โหลดตาราง (${selectedSortedRecords.length} รายการ)`}
+                  : `ดาวน์โหลดตาราง (${selectedCount} รายการ)`}
             </span>
           </button>
+        </div>
+      )}
+
+      {deleteTarget && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="delete-confirm-modal-title"
+          onClick={(e) => {
+            if (e.target === e.currentTarget && !deleting) {
+              setDeleteTarget(null);
+            }
+          }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4"
+        >
+          <div className="animate-enter relative w-full max-w-md overflow-hidden rounded-2xl border border-red-500/25 bg-[#070707] p-6 sm:p-7 text-zinc-100 shadow-[0_24px_60px_rgba(0,0,0,0.95),0_0_30px_-8px_rgba(239,68,68,0.2)]">
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-red-500/60 to-transparent"
+            />
+
+            <div className="flex items-center gap-3.5">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-red-500/25 bg-red-500/10 text-red-400">
+                <Trash2 className="h-5 w-5" />
+              </div>
+              <h2
+                id="delete-confirm-modal-title"
+                className="text-lg font-semibold tracking-tight text-white"
+              >
+                {deleteTarget.mode === "bulk"
+                  ? "ยืนยันการลบข้อมูลที่เลือกทั้งหมด?"
+                  : "ยืนยันการลบรายการนี้?"}
+              </h2>
+            </div>
+
+            <div className="mt-5 rounded-xl border border-red-500/15 bg-red-500/[0.06] px-4 py-3 text-sm font-medium text-zinc-100">
+              {deleteTarget.mode === "bulk" ? (
+                <span>
+                  รายการที่เลือกทั้งหมด{" "}
+                  <strong className="font-mono text-red-300">
+                    {deleteTarget.records.length}
+                  </strong>{" "}
+                  รายการ (รวมรูปภาพสินค้าที่แนบไว้)
+                </span>
+              ) : (
+                <span className="block truncate">
+                  {deleteTarget.record.product_name}
+                </span>
+              )}
+            </div>
+
+            <p className="mt-3.5 text-xs text-zinc-400 leading-relaxed">
+              ข้อมูลและรูปภาพที่แนบไว้จะถูกลบออกจากคลาวด์อย่างถาวร และไม่สามารถกู้คืนได้ในภายหลัง
+            </p>
+
+            <div className="mt-6 grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => setDeleteTarget(null)}
+                disabled={deleting}
+                className="w-full rounded-xl border border-zinc-800 bg-zinc-900 py-2.5 text-sm font-medium text-zinc-300 transition-colors hover:bg-zinc-800 hover:text-white disabled:opacity-50"
+              >
+                ยกเลิก
+              </button>
+              <button
+                type="button"
+                onClick={() => void handleConfirmModalDelete()}
+                disabled={deleting}
+                className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-red-500 py-2.5 text-sm font-semibold text-white shadow-[0_0_20px_rgba(239,68,68,0.3)] transition-all hover:bg-red-600 disabled:opacity-60"
+              >
+                {deleting && <Loader2 className="h-4 w-4 animate-spin" />}
+                <span>{deleting ? "กำลังลบ..." : "ยืนยันการลบ"}</span>
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </>
