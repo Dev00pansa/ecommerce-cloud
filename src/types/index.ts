@@ -132,3 +132,47 @@ export type HistorySortOrder =
   | "date_asc"
   | "profit_desc"
   | "profit_asc";
+
+export interface DiscountSensitivityPoint {
+  discountPercent: number;
+  discountedPrice: number;
+  profitPerUnit: number;
+  marginPercent: number;
+  isProfitable: boolean;
+}
+
+export interface VolumeProjectionPoint {
+  units: number;
+  revenue: number;
+  grossProfit: number;
+  netTotalProfit: number;
+  isProfitable: boolean;
+}
+
+export interface TargetPriceRecommendation {
+  targetMarginPercent: number;
+  tierLabel: string;
+  tierSubtitle: string;
+  recommended: boolean;
+  suggestedPrice: number | null;
+  estimatedProfitPerUnit: number | null;
+  feasible: boolean;
+}
+
+export interface PricingAdvisorInsight {
+  severity: "healthy" | "warning" | "danger";
+  title: string;
+  detail: string;
+}
+
+export interface FinancialAnalysisResult {
+  discountCurve: DiscountSensitivityPoint[];
+  volumeProjections: VolumeProjectionPoint[];
+  targetPrices: TargetPriceRecommendation[];
+  minBreakEvenSellingPrice: number | null;
+  maxSafeAdditionalAds: number;
+  maxSafeTotalAds: number;
+  maxSafeDiscountPercent: number;
+  healthLevel: "excellent" | "good" | "thin" | "loss";
+  insights: PricingAdvisorInsight[];
+}

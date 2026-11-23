@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useRef, useState, type MouseEvent } from "react";
 import {
+  BarChart3,
   Calculator,
   Calendar,
   ChevronDown,
@@ -11,6 +12,7 @@ import {
   Globe,
   KeyRound,
   Loader2,
+  Lock,
   LogIn,
   LogOut,
   User as UserIcon,
@@ -46,8 +48,12 @@ function ToolsDropdownItems({
   const searchParams = useSearchParams();
   const isOnDashboard = pathname.startsWith("/dashboard");
   const activeTabParam = searchParams.get("tab");
+  const isSummaryActive = isOnDashboard && activeTabParam === "summary";
   const isCalculatorActive = isOnDashboard && activeTabParam === "calculator";
-  const isCloudActive = isOnDashboard && activeTabParam !== "calculator";
+  const isCloudActive =
+    isOnDashboard &&
+    activeTabParam !== "calculator" &&
+    activeTabParam !== "summary";
 
   return (
     <div className="p-2 space-y-1">
@@ -140,6 +146,58 @@ function ToolsDropdownItems({
           </span>
         </div>
       </Link>
+
+      {isSummaryActive ? (
+        <div
+          onClick={onSelect}
+          className="flex items-start gap-3 rounded-xl px-3.5 py-3 border bg-emerald-500/12 border-emerald-500/35 cursor-default"
+        >
+          <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-500/25 text-emerald-300">
+            <BarChart3 className="h-4 w-4" />
+          </span>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center justify-between gap-2">
+              <span className="block text-sm font-semibold text-emerald-400">
+                {isEn ? "Profit Summary & Analytics" : "สรุปผลและวิเคราะห์กำไร"}
+              </span>
+              <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-semibold text-emerald-300">
+                <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]" />
+                <span>{isEn ? "Active" : "กำลังใช้งาน"}</span>
+              </span>
+            </div>
+            <span className="mt-0.5 block text-xs text-zinc-400 leading-snug">
+              {isEn
+                ? "Charts, sensitivity breakdown, and smart pricing advice"
+                : "กราฟวิเคราะห์เชิงลึกและคำแนะนำการตั้งราคา"}
+            </span>
+          </div>
+        </div>
+      ) : (
+        <div
+          aria-disabled="true"
+          className="flex items-start gap-3 rounded-xl px-3.5 py-3 border border-transparent opacity-50 pointer-events-none select-none cursor-not-allowed"
+        >
+          <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-zinc-900 text-zinc-500">
+            <BarChart3 className="h-4 w-4" />
+          </span>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center justify-between gap-2">
+              <span className="block text-sm font-semibold text-zinc-400 truncate">
+                {isEn ? "Profit Analytics" : "สรุปผลและวิเคราะห์กำไร"}
+              </span>
+              <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-zinc-800 bg-zinc-900/90 px-2 py-0.5 text-[10px] font-medium text-zinc-400">
+                <Lock className="h-2.5 w-2.5 shrink-0" />
+                <span>{isEn ? "Calculate first" : "ต้องกดประมวลผลก่อน"}</span>
+              </span>
+            </div>
+            <span className="mt-0.5 block text-xs text-zinc-500 leading-snug">
+              {isEn
+                ? "Charts, sensitivity breakdown, and smart pricing advice"
+                : "กราฟวิเคราะห์เชิงลึกและคำแนะนำการตั้งราคา"}
+            </span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -350,7 +408,7 @@ export function Navbar({
 
                 <div
                   role="menu"
-                  className={`absolute left-0 mt-3 w-80 origin-top-left z-50 overflow-hidden rounded-2xl bg-[#050505] border border-emerald-500/30 shadow-[0_12px_40px_-8px_rgba(0,0,0,0.85),0_0_24px_-6px_rgba(16,185,129,0.2)] transition-all duration-200 ease-out ${
+                  className={`absolute left-0 mt-3 w-[355px] origin-top-left z-50 overflow-hidden rounded-2xl bg-[#050505] border border-emerald-500/30 shadow-[0_12px_40px_-8px_rgba(0,0,0,0.85),0_0_24px_-6px_rgba(16,185,129,0.2)] transition-all duration-200 ease-out ${
                     toolsDropdownOpen
                       ? "opacity-100 translate-y-0 scale-100 pointer-events-auto"
                       : "opacity-0 -translate-y-2 scale-95 pointer-events-none"

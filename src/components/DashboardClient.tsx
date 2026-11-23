@@ -8,6 +8,7 @@ import { sanitizePlainText, translateSupabaseError } from "@/lib/auth";
 import { useAppLanguage } from "@/lib/language";
 import {
   MAX_CLOUD_RECORDS,
+  buildFinancialAnalysis,
   calculateEcommerceMetrics,
   exportCalculationsToCsv,
   parseSafeNonNegativeNumber,
@@ -39,7 +40,10 @@ interface DashboardClientProps {
   initialRecords: EcommerceCalculationRecord[];
 }
 
-type DashboardTab = "calculator" | "history";
+type DashboardTab = "calculator" | "history" | "summary";
+
+const SAVE_COOLDOWN_MS = 20_000;
+const SAVE_COOLDOWN_STORAGE_KEY = "khumlab_save_cooldown_until";
 
 const DEFAULT_FORM_VALUES: CalculatorFormStrings = {
   productName: "เสื้อยืดคอกลมสีดำ รุ่นพรีเมียม",
@@ -66,6 +70,24 @@ const EMPTY_FORM_VALUES: CalculatorFormStrings = {
 const RECORD_SELECT_COLUMNS =
   "id, user_id, product_name, platform, cost_price, packaging_cost, ads_cost, platform_fee_percent, selling_price, fixed_cost, product_image_url, created_at";
 
+function getStoredCooldownSeconds(): number {
+  if (typeof window === "undefined") return 0;
+  try {
+    const raw = window.localStorage.getItem(SAVE_COOLDOWN_STORAGE_KEY);
+    if (!raw) return 0;
+    const until = Number(raw);
+    if (!Number.isFinite(until)) return 0;
+    const remainingMs = until - Date.now();
+    if (remainingMs <= 0) {
+      window.localStorage.removeItem(SAVE_COOLDOWN_STORAGE_KEY);
+      return 0;
+    }
+    return Math.ceil(remainingMs / 1000);
+  } catch {
+    return 0;
+  }
+}
+
 export function DashboardClient({
   userId,
   initialRecords,
@@ -77,12 +99,7 @@ export function DashboardClient({
 
   const topFormRef = useRef<HTMLDivElement | null>(null);
   const toastCounterRef = useRef(0);
-  const activeTab: DashboardTab =
-    searchParams.get("tab") === "calculator" ? "calculator" : "history";
-
-  function handleSwitchTab(nextTab: DashboardTab) {
-    router.replace(`/dashboard?tab=${nextTab}`, { scroll: false });
-  }
+  const summaryEnteredRef = useRef(false);
 
   const [formValues, setFormValues] =
     useState<CalculatorFormStrings>(DEFAULT_FORM_VALUES);
@@ -102,10 +119,27 @@ export function DashboardClient({
   const [refreshing, setRefreshing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [saveCooldownSeconds, setSaveCooldownSeconds] = useState<number>(0);
   const [realtimeConnected, setRealtimeConnected] = useState(false);
   const [toast, setToast] = useState<DashboardToastData | null>(null);
 
+  const rawTab = searchParams.get("tab");
+  const needsRedirectFromSummary = rawTab === "summary" && !hasCalculated;
+  const activeTab: DashboardTab =
+    rawTab === "summary" && hasCalculated
+      ? "summary"
+      : rawTab === "calculator" || needsRedirectFromSummary
+        ? "calculator"
+        : "history";
+
   const isCloudFull = records.length >= MAX_CLOUD_RECORDS;
+
+  const handleSwitchTab = useCallback(
+    (nextTab: DashboardTab) => {
+      router.replace(`/dashboard?tab=${nextTab}`, { scroll: false });
+    },
+    [router]
+  );
 
   const showToast = useCallback(
     (message: string, variant: "success" | "error" = "success") => {
@@ -121,6 +155,43 @@ export function DashboardClient({
 
   const dismissToast = useCallback(() => {
     setToast(null);
+  }, []);
+
+  useEffect(() => {
+    if (needsRedirectFromSummary) {
+      router.replace("/dashboard?tab=calculator", { scroll: false });
+    }
+  }, [needsRedirectFromSummary, router]);
+
+  useEffect(() => {
+    if (rawTab === "summary" && hasCalculated) {
+      summaryEnteredRef.current = true;
+      return;
+    }
+
+    if (rawTab !== "summary" && summaryEnteredRef.current) {
+      summaryEnteredRef.current = false;
+      const timerId = window.setTimeout(() => {
+        setHasCalculated(false);
+      }, 0);
+      return () => {
+        window.clearTimeout(timerId);
+      };
+    }
+  }, [rawTab, hasCalculated]);
+
+  useEffect(() => {
+    const syncCooldown = () => {
+      setSaveCooldownSeconds(getStoredCooldownSeconds());
+    };
+
+    const initialTimer = window.setTimeout(syncCooldown, 0);
+    const intervalId = window.setInterval(syncCooldown, 250);
+
+    return () => {
+      window.clearTimeout(initialTimer);
+      window.clearInterval(intervalId);
+    };
   }, []);
 
   useEffect(() => {
@@ -162,6 +233,11 @@ export function DashboardClient({
   const simulation = useMemo(
     () => simulatePromoDiscount(numericInputs, metrics, discountPercent),
     [numericInputs, metrics, discountPercent]
+  );
+
+  const analysis = useMemo(
+    () => buildFinancialAnalysis(numericInputs, metrics),
+    [numericInputs, metrics]
   );
 
   const fetchHistory = useCallback(async () => {
@@ -282,19 +358,21 @@ export function DashboardClient({
   }
 
   function handleCalculate() {
+    summaryEnteredRef.current = false;
     setHasCalculated(true);
+    handleSwitchTab("summary");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
 
-    window.requestAnimationFrame(() => {
-      window.setTimeout(() => {
-        const reportEl = document.getElementById("calculation-report");
-        if (reportEl) {
-          reportEl.scrollIntoView({ behavior: "smooth", block: "start" });
-        }
-      }, 60);
-    });
+  function handleBackToCalculator() {
+    summaryEnteredRef.current = false;
+    setHasCalculated(false);
+    handleSwitchTab("calculator");
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function handleReset() {
+    summaryEnteredRef.current = false;
     setFormValues(EMPTY_FORM_VALUES);
     setDiscountPercent(15);
     setHasCalculated(false);
@@ -302,6 +380,7 @@ export function DashboardClient({
   }
 
   function handleStartNewCalculation() {
+    summaryEnteredRef.current = false;
     setEditingRecord(null);
     setFormValues(EMPTY_FORM_VALUES);
     setDiscountPercent(15);
@@ -312,6 +391,7 @@ export function DashboardClient({
   }
 
   function handleCancelEdit() {
+    summaryEnteredRef.current = false;
     setEditingRecord(null);
     setFormValues(EMPTY_FORM_VALUES);
     setDiscountPercent(15);
@@ -320,26 +400,30 @@ export function DashboardClient({
     showToast("ยกเลิกการแก้ไขรายการเดิมแล้ว", "success");
   }
 
-  function handleEditTop() {
-    if (topFormRef.current) {
-      topFormRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
-    } else {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-  }
-
   async function handleSaveToCloud() {
     const supabase = createClient();
     if (!supabase || saving) return;
 
     const isEditing = editingRecord !== null;
 
-    if (!isEditing && records.length >= MAX_CLOUD_RECORDS) {
-      showToast(
-        `พื้นที่คลาวด์เต็ม (${MAX_CLOUD_RECORDS}/${MAX_CLOUD_RECORDS} รายการ) กรุณาลบรายการเก่าออกก่อนบันทึกเพิ่ม`,
-        "error"
-      );
-      return;
+    if (!isEditing) {
+      const activeCooldown = getStoredCooldownSeconds();
+      if (activeCooldown > 0) {
+        setSaveCooldownSeconds(activeCooldown);
+        showToast(
+          `กรุณารอสักครู่ (${activeCooldown} วินาที) ก่อนบันทึกรายการใหม่`,
+          "error"
+        );
+        return;
+      }
+
+      if (records.length >= MAX_CLOUD_RECORDS) {
+        showToast(
+          `พื้นที่คลาวด์เต็ม (${MAX_CLOUD_RECORDS}/${MAX_CLOUD_RECORDS} รายการ) กรุณาลบรายการเก่าออกก่อนบันทึกเพิ่ม`,
+          "error"
+        );
+        return;
+      }
     }
 
     setSaving(true);
@@ -428,6 +512,7 @@ export function DashboardClient({
           setRecords((prev) =>
             prev.map((item) => (item.id === updated.id ? updated : item))
           );
+          summaryEnteredRef.current = false;
           setEditingRecord(null);
           setHasCalculated(false);
           handleRemoveImage();
@@ -467,6 +552,16 @@ export function DashboardClient({
               ? prev
               : [created, ...prev]
           );
+
+          try {
+            window.localStorage.setItem(
+              SAVE_COOLDOWN_STORAGE_KEY,
+              String(Date.now() + SAVE_COOLDOWN_MS)
+            );
+          } catch {}
+          setSaveCooldownSeconds(Math.ceil(SAVE_COOLDOWN_MS / 1000));
+
+          summaryEnteredRef.current = false;
           setHasCalculated(false);
           handleRemoveImage();
           handleSwitchTab("history");
@@ -571,6 +666,7 @@ export function DashboardClient({
   }
 
   function handleLoadRecord(record: EcommerceCalculationRecord) {
+    summaryEnteredRef.current = false;
     handleRemoveImage();
     setEditingRecord(record);
     setFormValues({
@@ -584,7 +680,7 @@ export function DashboardClient({
       fixedCost: String(record.fixed_cost),
     });
     setExistingImageUrl(record.product_image_url ?? null);
-    setHasCalculated(true);
+    setHasCalculated(false);
     handleSwitchTab("calculator");
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -665,6 +761,17 @@ export function DashboardClient({
                   : "คำนวณต้นทุนและกำไรสุทธิทีละขั้น"}
               </h1>
             </div>
+          ) : activeTab === "summary" ? (
+            <div className="space-y-1">
+              <span className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-emerald-400">
+                KhumLab Analytics Report
+              </span>
+              <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white">
+                {isEn
+                  ? "Profit Summary & Smart Pricing Analytics"
+                  : "สรุปผลและวิเคราะห์กำไรเชิงลึก"}
+              </h1>
+            </div>
           ) : (
             <div className="space-y-2 max-w-2xl">
               <div className="flex flex-wrap items-center gap-3">
@@ -729,40 +836,38 @@ export function DashboardClient({
         </div>
 
         {activeTab === "calculator" ? (
-          <div className="space-y-6 sm:space-y-8">
-            <CalculatorForm
-              values={formValues}
-              compressedImage={compressedImage}
-              existingImageUrl={existingImageUrl}
-              compressingImage={compressingImage}
-              imageError={imageError}
-              editingProductName={editingRecord?.product_name ?? null}
-              onCancelEdit={handleCancelEdit}
-              onChangeField={handleChangeField}
-              onSelectPreset={handleSelectPreset}
-              onSelectImageFile={handleSelectImageFile}
-              onRemoveImage={handleRemoveImage}
-              onCalculate={handleCalculate}
-              onReset={handleReset}
-            />
-
-            {hasCalculated && (
-              <CalculationReport
-                inputs={numericInputs}
-                metrics={metrics}
-                simulation={simulation}
-                discountPercent={discountPercent}
-                previewImageUrl={activePreviewUrl}
-                saving={saving}
-                isCloudFull={isCloudFull}
-                isEditing={Boolean(editingRecord)}
-                onChangeDiscount={setDiscountPercent}
-                onSaveToCloud={handleSaveToCloud}
-                onExportCsv={handleExportReportCsv}
-                onEditTop={handleEditTop}
-              />
-            )}
-          </div>
+          <CalculatorForm
+            values={formValues}
+            compressedImage={compressedImage}
+            existingImageUrl={existingImageUrl}
+            compressingImage={compressingImage}
+            imageError={imageError}
+            editingProductName={editingRecord?.product_name ?? null}
+            onCancelEdit={handleCancelEdit}
+            onChangeField={handleChangeField}
+            onSelectPreset={handleSelectPreset}
+            onSelectImageFile={handleSelectImageFile}
+            onRemoveImage={handleRemoveImage}
+            onCalculate={handleCalculate}
+            onReset={handleReset}
+          />
+        ) : activeTab === "summary" ? (
+          <CalculationReport
+            inputs={numericInputs}
+            metrics={metrics}
+            simulation={simulation}
+            analysis={analysis}
+            discountPercent={discountPercent}
+            previewImageUrl={activePreviewUrl}
+            saving={saving}
+            isCloudFull={isCloudFull}
+            isEditing={Boolean(editingRecord)}
+            saveCooldownSeconds={saveCooldownSeconds}
+            onChangeDiscount={setDiscountPercent}
+            onSaveToCloud={handleSaveToCloud}
+            onExportCsv={handleExportReportCsv}
+            onBackToCalculator={handleBackToCalculator}
+          />
         ) : (
           <HistoryPanel
             records={records}

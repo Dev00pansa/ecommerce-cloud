@@ -3,9 +3,10 @@
 import { useState } from "react";
 import {
   AlertCircle,
-  ArrowUp,
+  ArrowLeft,
   ChevronDown,
   ChevronUp,
+  Clock,
   CloudUpload,
   Download,
   Image as ImageIcon,
@@ -15,41 +16,48 @@ import { MAX_CLOUD_RECORDS, formatCurrency } from "@/lib/calculator";
 import type {
   CalculationMetrics,
   CalculatorInputValues,
+  FinancialAnalysisResult,
   PromoSimulationResult,
 } from "@/types";
+import { AnalyticsCharts } from "@/components/AnalyticsCharts";
 
 interface CalculationReportProps {
   inputs: CalculatorInputValues;
   metrics: CalculationMetrics;
   simulation: PromoSimulationResult;
+  analysis: FinancialAnalysisResult;
   discountPercent: number;
   previewImageUrl: string | null;
   saving: boolean;
   isCloudFull: boolean;
   isEditing?: boolean;
+  saveCooldownSeconds?: number;
   onChangeDiscount: (next: number) => void;
   onSaveToCloud: () => void;
   onExportCsv: () => void;
-  onEditTop: () => void;
+  onBackToCalculator: () => void;
 }
 
 export function CalculationReport({
   inputs,
   metrics,
   simulation,
+  analysis,
   discountPercent,
   previewImageUrl,
   saving,
   isCloudFull,
   isEditing = false,
+  saveCooldownSeconds = 0,
   onChangeDiscount,
   onSaveToCloud,
   onExportCsv,
-  onEditTop,
+  onBackToCalculator,
 }: CalculationReportProps) {
-  const [showPromoSimulator, setShowPromoSimulator] = useState(false);
+  const [showPromoSimulator, setShowPromoSimulator] = useState(true);
 
   const saveBlockedByLimit = isCloudFull && !isEditing;
+  const saveBlockedByCooldown = !isEditing && saveCooldownSeconds > 0;
 
   const productTitle = inputs.productName.trim() || "สินค้าไม่ได้ระบุชื่อ";
   const isLoss = metrics.netProfitPerUnit < 0;
@@ -318,6 +326,13 @@ export function CalculationReport({
         </div>
       </div>
 
+      <AnalyticsCharts
+        inputs={inputs}
+        metrics={metrics}
+        analysis={analysis}
+        activeDiscountPercent={discountPercent}
+      />
+
       <div className="border-t border-b border-zinc-800/90 py-5">
         <button
           type="button"
@@ -445,11 +460,11 @@ export function CalculationReport({
       <div className="flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-3 pt-2">
         <button
           type="button"
-          onClick={onEditTop}
-          className="inline-flex items-center justify-center sm:justify-start gap-1.5 rounded-xl px-4 py-3 text-xs sm:text-sm font-medium text-zinc-400 transition-colors hover:bg-white/[0.04] hover:text-white"
+          onClick={onBackToCalculator}
+          className="inline-flex items-center justify-center sm:justify-start gap-2 rounded-xl border border-zinc-800/90 bg-black/70 px-4 py-3 text-xs sm:text-sm font-medium text-zinc-300 transition-colors hover:border-zinc-700 hover:bg-white/[0.04] hover:text-white"
         >
-          <ArrowUp className="h-4 w-4" />
-          <span>แก้ไขตัวเลขด้านบน</span>
+          <ArrowLeft className="h-4 w-4" />
+          <span>ย้อนกลับ</span>
         </button>
 
         <div className="flex flex-wrap items-center justify-end gap-3">
@@ -465,24 +480,32 @@ export function CalculationReport({
           <button
             type="button"
             onClick={onSaveToCloud}
-            disabled={saving || saveBlockedByLimit}
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-500 px-6 py-3 text-sm sm:text-base font-semibold text-black shadow-[0_0_24px_rgba(16,185,129,0.3)] transition-all duration-200 hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-50"
+            disabled={saving || saveBlockedByLimit || saveBlockedByCooldown}
+            className={`inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm sm:text-base font-semibold transition-all duration-200 disabled:cursor-not-allowed ${
+              saveBlockedByCooldown
+                ? "border border-zinc-800 bg-zinc-900 text-zinc-400"
+                : "bg-emerald-500 text-black shadow-[0_0_24px_rgba(16,185,129,0.3)] hover:bg-emerald-400 disabled:opacity-50"
+            }`}
           >
             {saving ? (
               <Loader2 className="h-4 w-4 animate-spin" />
+            ) : saveBlockedByCooldown ? (
+              <Clock className="h-4 w-4" />
             ) : (
               <CloudUpload className="h-4 w-4" />
             )}
             <span>
               {saveBlockedByLimit
                 ? `พื้นที่คลาวด์เต็ม (${MAX_CLOUD_RECORDS}/${MAX_CLOUD_RECORDS})`
-                : saving
-                  ? isEditing
-                    ? "กำลังบันทึกการแก้ไข..."
-                    : "กำลังบันทึกลง Cloud..."
-                  : isEditing
-                    ? "บันทึกการแก้ไขลง Cloud"
-                    : "บันทึกข้อมูลนี้ลง Cloud"}
+                : saveBlockedByCooldown
+                  ? `รอสักครู่ (${saveCooldownSeconds} วินาที)`
+                  : saving
+                    ? isEditing
+                      ? "กำลังบันทึกการแก้ไข..."
+                      : "กำลังบันทึกลง Cloud..."
+                    : isEditing
+                      ? "บันทึกการแก้ไขลง Cloud"
+                      : "บันทึกข้อมูลนี้ลง Cloud"}
             </span>
           </button>
         </div>
