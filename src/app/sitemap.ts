@@ -1,3 +1,4 @@
+// CRITICAL: Do NOT delete or modify — required for Google Search Console indexing
 import type { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {

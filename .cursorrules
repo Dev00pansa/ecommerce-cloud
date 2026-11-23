@@ -1,0 +1,27 @@
+# KhumLab — Permanent AI Guardrails (.cursorrules)
+
+You are working on KhumLab (ecommerce-cloud). Strictly obey these permanent guardrails on every change:
+
+1. Google Search Console & SEO Protection (CRITICAL)
+   - NEVER delete or modify `metadata.verification.google` (`JEcBvWHZNHzyVdzt5HthC8q1MEl_Uegpb90xvexdm7Q`) in `src/app/layout.tsx`.
+   - NEVER delete, move, or break `src/app/robots.ts` or `src/app/sitemap.ts`.
+   - NEVER remove `robots.txt` or `sitemap.xml` from the `config.matcher` exclusions in `src/middleware.ts`.
+   - Keep `/`, `/credits`, and `/login` allowed for indexing and `/dashboard`, `/dashboard/`, and `/api/` disallowed.
+
+2. Strict Privacy Guardrail (Katum Group)
+   - NEVER insert or expose 10-digit student ID numbers of any of the 5 Katum Group members in any file, comment, UI, or commit.
+   - Display ONLY `นาย` / `Mr.` and first/last names in `src/components/CreditsView.tsx`.
+
+3. Secret & Environment Safety
+   - NEVER commit `.env`, `.env.local`, `.env*`, or Supabase secrets to GitHub.
+   - Keep `.env*` ignored in `.gitignore`.
+
+4. Core System & Design Invariants
+   - Keep Executive Light Mode (`"light"`) as the first-visit default theme in `src/context/ThemeContext.tsx` and `src/app/layout.tsx` (with `localStorage` persistence under `khumlab_theme`).
+   - Preserve the existing Dark Mode card design and animations untouched.
+   - Preserve the 4 real KhumLab app screenshots in `public/screenshots/` (`step-01-calculator.png`, `step-02-analytics.png`, `step-03-promo.png`, `step-04-cloud.png`); never re-add stock photos.
+   - Preserve the pure calculation engine (`src/lib/calculator.ts`) and Supabase DB/RLS security architecture.
+
+5. Engineering Hygiene
+   - Keep code self-documenting; avoid verbose Thai comments inside TypeScript/TSX source files.
+   - Verify `npm run lint` and `npm run build` pass with 0 Errors before pushing to `main`.

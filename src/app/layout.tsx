@@ -39,6 +39,7 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
+  // CRITICAL: Do NOT delete or modify — required for Google Search Console indexing
   verification: {
     google: "JEcBvWHZNHzyVdzt5HthC8q1MEl_Uegpb90xvexdm7Q",
   },
