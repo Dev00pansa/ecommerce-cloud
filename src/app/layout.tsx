@@ -18,26 +18,45 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://khumlab.vercel.app"),
-  title: "KhumLab | ระบบคำนวณต้นทุน ตั้งราคาขาย และจุดคุ้มทุน E-Commerce",
+  title: "KhumLab — เครื่องมือคำนวณต้นทุน ราคาขาย และวิเคราะห์กำไร E-Commerce",
   description:
-    "KhumLab เว็บแอปพลิเคชันคำนวณต้นทุน ตั้งราคาขาย จำลองโปรโมชัน และวิเคราะห์จุดคุ้มทุนสำหรับผู้ประกอบการ E-Commerce พร้อมบันทึกข้อมูลส่วนตัวบน Cloud",
+    "KhumLab เครื่องมือคำนวณต้นทุนจริง ตั้งราคาขาย หักค่า GP แพลตฟอร์ม (Shopee, TikTok Shop, Lazada) จำลองโปรโมชัน และวิเคราะห์จุดคุ้มทุน | Real-cost E-Commerce profit calculator, break-even analytics, and flash sale simulator.",
+  keywords: [
+    "KhumLab",
+    "คำนวณต้นทุน",
+    "คำนวณกำไร",
+    "ตั้งราคาขาย",
+    "คำนวณค่า GP Shopee",
+    "คำนวณราคาขาย TikTok Shop",
+    "วิเคราะห์จุดคุ้มทุน",
+    "E-Commerce profit calculator",
+    "break-even calculator",
+  ],
+  alternates: {
+    canonical: "https://khumlab.vercel.app",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
   icons: {
     icon: "/images/khumlab-logo.svg",
   },
   openGraph: {
-    title: "KhumLab | ระบบคำนวณต้นทุน ตั้งราคาขาย และจุดคุ้มทุน E-Commerce",
+    title: "KhumLab — เครื่องมือคำนวณต้นทุน ราคาขาย และวิเคราะห์กำไร E-Commerce",
     description:
-      "คำนวณต้นทุนจริง ตั้งราคาขาย จำลองโปรโมชัน และวิเคราะห์จุดคุ้มทุนสำหรับผู้ขายออนไลน์ พร้อมระบบคลาวด์เก็บข้อมูล",
+      "คำนวณต้นทุนจริง ตั้งราคาขาย จำลองส่วนลดโปรโมชัน และวิเคราะห์จุดคุ้มทุนสำหรับผู้ขายออนไลน์ พร้อมระบบคลาวด์เก็บข้อมูล | E-Commerce Profit & Break-Even Intelligence.",
     url: "https://khumlab.vercel.app",
     siteName: "KhumLab",
     locale: "th_TH",
+    alternateLocale: ["en_US"],
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "KhumLab | ระบบคำนวณต้นทุน ตั้งราคาขาย และจุดคุ้มทุน E-Commerce",
+    title: "KhumLab — เครื่องมือคำนวณต้นทุน ราคาขาย และวิเคราะห์กำไร E-Commerce",
     description:
-      "คำนวณต้นทุนจริง ตั้งราคาขาย จำลองโปรโมชัน และวิเคราะห์จุดคุ้มทุนสำหรับผู้ขายออนไลน์ พร้อมระบบคลาวด์เก็บข้อมูล",
+      "คำนวณต้นทุนจริง ตั้งราคาขาย จำลองส่วนลดโปรโมชัน และวิเคราะห์จุดคุ้มทุนสำหรับผู้ขายออนไลน์ | E-Commerce Profit & Break-Even Intelligence.",
   },
 };
 
