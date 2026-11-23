@@ -60,20 +60,26 @@ export function CalculationReport({
   const saveBlockedByCooldown = !isEditing && saveCooldownSeconds > 0;
 
   const productTitle = inputs.productName.trim() || "สินค้าไม่ได้ระบุชื่อ";
-  const isLoss = metrics.netProfitPerUnit < 0;
-  const isThinMargin = !isLoss && metrics.netMarginPercent < 15;
+  const isIncomplete = analysis.isIncompleteData;
+  const isLoss = !isIncomplete && metrics.netProfitPerUnit < 0;
+  const isThinMargin =
+    !isIncomplete && !isLoss && metrics.netMarginPercent < 15;
 
-  const statusText = isLoss
-    ? "ราคาขายนี้ขาดทุนต่อชิ้น"
-    : isThinMargin
-      ? "กำไรบาง ระวังขาดทุนตอนจัดโปร"
-      : "กำไรดี พร้อมลุยขาย";
+  const statusText = isIncomplete
+    ? "ข้อมูลไม่สมบูรณ์ — ยังไม่ได้ตั้งราคาขาย"
+    : isLoss
+      ? "ราคาขายนี้ขาดทุนต่อชิ้น"
+      : isThinMargin
+        ? "กำไรบาง ระวังขาดทุนตอนจัดโปร"
+        : "กำไรดี พร้อมลุยขาย";
 
-  const statusColorClass = isLoss
-    ? "text-rose-400 border-rose-500/50 bg-rose-950/30"
-    : isThinMargin
-      ? "text-amber-300 border-amber-500/50 bg-amber-950/30"
-      : "text-emerald-400 border-emerald-500/50 bg-emerald-950/30";
+  const statusColorClass = isIncomplete
+    ? "text-amber-300 border-amber-500/45 bg-amber-950/25"
+    : isLoss
+      ? "text-rose-400 border-rose-500/50 bg-rose-950/30"
+      : isThinMargin
+        ? "text-amber-300 border-amber-500/50 bg-amber-950/30"
+        : "text-emerald-400 border-emerald-500/50 bg-emerald-950/30";
 
   const sellingBase = inputs.sellingPrice > 0 ? inputs.sellingPrice : 0;
   const shareOfSelling = (amount: number): string => {
@@ -133,6 +139,21 @@ export function CalculationReport({
           {statusText}
         </div>
       </div>
+
+      {analysis.hasZeroProductCostWarning && (
+        <div
+          role="alert"
+          className="flex items-start gap-3 rounded-2xl border border-amber-500/45 bg-amber-950/20 px-4 py-3.5 text-xs sm:text-sm text-amber-200 shadow-[0_0_24px_-8px_rgba(245,158,11,0.3)]"
+        >
+          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" />
+          <p className="leading-relaxed">
+            <strong className="font-semibold text-amber-300">
+              ข้อสังเกตสำคัญ:
+            </strong>{" "}
+            ตรวจพบต้นทุนสินค้าเป็น 0 บาท — หากเป็นสินค้าที่จับต้องได้ กรุณาตรวจสอบว่าไม่ได้ลืมกรอกราคาทุนรับมาหรือต้นทุนผลิต เพราะจะทำให้ตัวเลขกำไรสูงเกินจริง
+          </p>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 sm:grid-cols-4 border-y border-zinc-800/90 divide-y sm:divide-y-0 sm:divide-x divide-zinc-800/90">
         <div className="py-5 sm:pr-5">

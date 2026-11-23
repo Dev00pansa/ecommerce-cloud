@@ -1,12 +1,14 @@
 "use client";
 
 import {
+  Activity,
   AlertCircle,
   CheckCircle2,
   Megaphone,
-  Percent,
+  PackageX,
   Sparkles,
   TrendingUp,
+  Wrench,
 } from "lucide-react";
 import { formatCurrency } from "@/lib/calculator";
 import type {
@@ -41,7 +43,41 @@ export function AnalyticsCharts({
   analysis,
   activeDiscountPercent,
 }: AnalyticsChartsProps) {
-  const isLoss = metrics.netProfitPerUnit < 0;
+  const isIncomplete = analysis.isIncompleteData;
+  const isLoss = !isIncomplete && metrics.netProfitPerUnit < 0;
+
+  const scoreRadius = 56;
+  const scoreCircumference = 2 * Math.PI * scoreRadius;
+  const scoreStrokeLength = (analysis.healthScore / 100) * scoreCircumference;
+
+  const gradeStyle =
+    analysis.healthGrade === "S" || analysis.healthGrade === "A"
+      ? {
+          ring: "#10b981",
+          text: "text-emerald-400",
+          badge: "border-emerald-500/40 bg-emerald-500/12 text-emerald-300",
+          bar: "bg-emerald-400",
+        }
+      : analysis.healthGrade === "B"
+        ? {
+            ring: "#38bdf8",
+            text: "text-sky-400",
+            badge: "border-sky-500/40 bg-sky-500/12 text-sky-300",
+            bar: "bg-sky-400",
+          }
+        : analysis.healthGrade === "C" || analysis.healthGrade === "N/A"
+          ? {
+              ring: "#f59e0b",
+              text: "text-amber-400",
+              badge: "border-amber-500/40 bg-amber-500/12 text-amber-300",
+              bar: "bg-amber-400",
+            }
+          : {
+              ring: "#f43f5e",
+              text: "text-rose-400",
+              badge: "border-rose-500/40 bg-rose-500/12 text-rose-300",
+              bar: "bg-rose-400",
+            };
 
   const donutRadius = 72;
   const donutCircumference = 2 * Math.PI * donutRadius;
@@ -115,29 +151,123 @@ export function AnalyticsCharts({
   const volumeZeroY =
     chartTopPad + (volumeMax / volumeRange) * chartPlotHeight;
 
-  const advisorBadge =
-    analysis.healthLevel === "loss"
-      ? {
-          text: "ต้องปรับโครงสร้างราคาด่วน",
-          className: "border-rose-500/40 bg-rose-500/10 text-rose-300",
-        }
-      : analysis.healthLevel === "thin"
-        ? {
-            text: "กำไรบาง ควรเพิ่มกันชน",
-            className: "border-amber-500/40 bg-amber-500/10 text-amber-300",
-          }
-        : analysis.healthLevel === "good"
-          ? {
-              text: "สุขภาพกำไรอยู่ในเกณฑ์ดี",
-              className: "border-emerald-500/35 bg-emerald-500/10 text-emerald-300",
-            }
-          : {
-              text: "สุขภาพกำไรแข็งแกร่งมาก",
-              className: "border-emerald-400/50 bg-emerald-500/15 text-emerald-300",
-            };
-
   return (
     <div className="space-y-6 sm:space-y-8">
+      <div className="rounded-2xl bg-[#070707] border border-emerald-500/25 p-5 sm:p-7 shadow-[0_0_26px_-10px_rgba(16,185,129,0.22)] space-y-6">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-emerald-500/30 bg-emerald-500/12 text-emerald-400">
+              <Activity className="h-5 w-5" />
+            </span>
+            <div>
+              <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-emerald-400">
+                FINANCIAL DIAGNOSTIC ENGINE — HEALTH SCORE
+              </span>
+              <h3 className="text-base sm:text-lg font-bold text-white">
+                คะแนนสุขภาพโครงสร้างกำไร ({analysis.healthScore} / 100)
+              </h3>
+            </div>
+          </div>
+
+          <span
+            className={`rounded-full border px-3.5 py-1 text-xs font-semibold ${gradeStyle.badge}`}
+          >
+            {analysis.healthGradeLabel}
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+          <div className="lg:col-span-4 flex flex-col items-center justify-center rounded-2xl border border-zinc-800/90 bg-black/75 p-5">
+            <div className="relative h-36 w-36">
+              <svg
+                viewBox="0 0 140 140"
+                className="h-full w-full"
+                role="img"
+                aria-label={`คะแนนสุขภาพโครงสร้างกำไร ${analysis.healthScore} จาก 100`}
+              >
+                <circle
+                  cx="70"
+                  cy="70"
+                  r={scoreRadius}
+                  fill="none"
+                  stroke="#18181b"
+                  strokeWidth="12"
+                />
+                {analysis.healthScore > 0 && (
+                  <circle
+                    cx="70"
+                    cy="70"
+                    r={scoreRadius}
+                    fill="none"
+                    stroke={gradeStyle.ring}
+                    strokeWidth="12"
+                    strokeLinecap="round"
+                    strokeDasharray={`${scoreStrokeLength} ${scoreCircumference}`}
+                    transform="rotate(-90 70 70)"
+                  />
+                )}
+              </svg>
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                <span
+                  className={`font-mono text-3xl font-bold tabular-nums leading-none ${gradeStyle.text}`}
+                >
+                  {analysis.healthScore}
+                </span>
+                <span className="mt-1 font-mono text-[11px] text-zinc-500">
+                  / 100 คะแนน
+                </span>
+                {analysis.healthGrade !== "N/A" && (
+                  <span
+                    className={`mt-1.5 rounded-md border px-2 py-0.5 font-mono text-[11px] font-bold ${gradeStyle.badge}`}
+                  >
+                    GRADE {analysis.healthGrade}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="lg:col-span-8 grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            {analysis.healthBreakdown.map((factor) => {
+              const pct =
+                factor.maxScore > 0
+                  ? Math.min(100, (factor.score / factor.maxScore) * 100)
+                  : 0;
+              return (
+                <div
+                  key={factor.key}
+                  className="rounded-xl border border-zinc-800/90 bg-black/75 p-4 space-y-2"
+                >
+                  <div className="flex items-center justify-between gap-2 text-xs">
+                    <span className="font-medium text-zinc-200 truncate">
+                      {factor.label}
+                    </span>
+                    <span className="shrink-0 font-mono font-bold tabular-nums text-zinc-100">
+                      {factor.score}/{factor.maxScore}
+                    </span>
+                  </div>
+                  <div className="h-1.5 w-full overflow-hidden rounded-full bg-zinc-900">
+                    <div
+                      style={{ width: `${pct}%` }}
+                      className={`h-full rounded-full transition-all duration-300 ${
+                        pct >= 75
+                          ? "bg-emerald-400"
+                          : pct >= 45
+                            ? "bg-amber-400"
+                            : "bg-rose-400"
+                      }`}
+                    />
+                  </div>
+                  <span className="block font-mono text-[11px] text-zinc-500">
+                    {factor.summary}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <div className="lg:col-span-5 min-w-0 overflow-hidden rounded-2xl bg-[#070707] border border-emerald-500/20 p-5 sm:p-6 flex flex-col justify-between gap-5">
           <div className="space-y-1">
@@ -205,7 +335,11 @@ export function AnalyticsCharts({
                 <span className="text-[11px] text-zinc-400">กำไรสุทธิ/ชิ้น</span>
                 <span
                   className={`mt-0.5 font-mono text-base sm:text-lg font-bold tabular-nums ${
-                    isLoss ? "text-rose-400" : "text-emerald-400"
+                    isIncomplete
+                      ? "text-zinc-400"
+                      : isLoss
+                        ? "text-rose-400"
+                        : "text-emerald-400"
                   }`}
                 >
                   {metrics.netProfitPerUnit >= 0 ? "+" : "-"}฿
@@ -550,125 +684,200 @@ export function AnalyticsCharts({
             </span>
             <div>
               <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-emerald-400">
-                SMART PRICING ADVISOR
+                ADVANCED SELLER METRICS & SMART ADVISOR
               </span>
               <h3 className="text-base sm:text-lg font-bold text-white">
-                ระบบวิเคราะห์และคำแนะนำการตั้งราคาอัจฉริยะ
+                ตัวชี้วัดเชิงลึกและคำแนะนำเชิงกลยุทธ์
               </h3>
             </div>
           </div>
-
-          <span
-            className={`rounded-full border px-3 py-1 text-xs font-semibold ${advisorBadge.className}`}
-          >
-            {advisorBadge.text}
-          </span>
         </div>
 
-        <div className="space-y-3">
-          <p className="text-xs sm:text-sm font-semibold text-zinc-200">
-            ราคาขายแนะนำ 3 ระดับ (คำนวณทบกลับค่า GP {inputs.platformFeePercent}% เรียบร้อยแล้ว)
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
-            {analysis.targetPrices.map((tier) => (
-              <div
-                key={tier.targetMarginPercent}
-                className={`rounded-xl border p-4 space-y-2 ${
-                  tier.recommended
-                    ? "border-emerald-400/50 bg-emerald-500/[0.08] shadow-[0_0_20px_-8px_rgba(16,185,129,0.3)]"
-                    : "border-zinc-800/90 bg-black/75"
-                }`}
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-sm font-semibold text-white">
-                    {tier.tierLabel}
-                  </span>
-                  <span
-                    className={`rounded-full px-2 py-0.5 font-mono text-[11px] font-semibold ${
-                      tier.recommended
-                        ? "bg-emerald-500/20 text-emerald-300"
-                        : "bg-zinc-900 text-zinc-400"
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div className="rounded-xl border border-zinc-800/90 bg-black/75 p-4 flex flex-col justify-between gap-3">
+            <div className="flex items-start gap-3">
+              <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-500/12 text-amber-400">
+                <PackageX className="h-4 w-4" />
+              </span>
+              <div className="space-y-1 min-w-0">
+                <span className="block text-xs text-zinc-400">
+                  ความเสี่ยงพัสดุตีกลับ / เสียหาย (Return Loss)
+                </span>
+                {analysis.returnLossMultiplier !== null ? (
+                  <p
+                    className={`font-mono text-2xl font-bold tabular-nums ${
+                      analysis.returnLossMultiplier >= 5
+                        ? "text-rose-400"
+                        : analysis.returnLossMultiplier >= 3
+                          ? "text-amber-300"
+                          : "text-emerald-400"
                     }`}
                   >
-                    Margin {tier.targetMarginPercent}%
-                  </span>
-                </div>
-
-                {tier.feasible &&
-                tier.suggestedPrice !== null &&
-                tier.estimatedProfitPerUnit !== null ? (
-                  <>
-                    <p
-                      className={`font-mono text-2xl font-bold tabular-nums ${
-                        tier.recommended ? "text-emerald-400" : "text-zinc-100"
-                      }`}
-                    >
-                      ฿{formatCurrency(tier.suggestedPrice)}
-                    </p>
-                    <p className="text-xs text-zinc-400">
-                      เหลือกำไรสุทธิ{" "}
-                      <span className="font-mono font-semibold text-emerald-400">
-                        +฿{formatCurrency(tier.estimatedProfitPerUnit)}/ชิ้น
-                      </span>
-                    </p>
-                  </>
-                ) : (
-                  <p className="text-xs text-rose-400 pt-1">
-                    ไม่สามารถตั้งราคาเป้าหมายนี้ได้ เนื่องจากค่า GP แพลตฟอร์มสูงเกินเกณฑ์
+                    {analysis.returnLossMultiplier > 0
+                      ? `${analysis.returnLossMultiplier} ชิ้น`
+                      : "0 ชิ้น"}
                   </p>
+                ) : (
+                  <p className="font-mono text-lg font-bold text-zinc-500">—</p>
                 )}
               </div>
-            ))}
+            </div>
+            <p className="text-xs text-zinc-400 leading-relaxed">
+              {isIncomplete
+                ? "กรุณาระบุราคาขายเพื่อประเมินความเสี่ยงพัสดุตีกลับ"
+                : analysis.returnLossMultiplier === null
+                  ? "ราคาปัจจุบันขาดทุนต่อชิ้น ไม่สามารถชดเชยต้นทุนพัสดุตีกลับได้"
+                  : analysis.returnLossMultiplier === 0
+                    ? "ไม่มีต้นทุนผันแปรที่สูญเสียต่อชิ้นเมื่อเกิดการตีกลับ"
+                    : `หากโดนตีกลับ 1 ชิ้น ต้องขายเพิ่ม ${analysis.returnLossMultiplier} ชิ้นถึงจะคืนทุน`}
+            </p>
           </div>
-        </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-          <div className="rounded-xl border border-zinc-800/90 bg-black/75 p-4 flex items-start gap-3.5">
-            <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-500/12 text-emerald-400">
-              <Megaphone className="h-4 w-4" />
-            </span>
-            <div className="space-y-1 min-w-0">
-              <span className="block text-xs text-zinc-400">
-                เพดานงบยิงแอดสูงสุดต่อออเดอร์ (Max Safe CPA)
+          <div className="rounded-xl border border-zinc-800/90 bg-black/75 p-4 flex flex-col justify-between gap-3">
+            <div className="flex items-start gap-3">
+              <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-500/12 text-emerald-400">
+                <Megaphone className="h-4 w-4" />
               </span>
-              <p className="font-mono text-xl font-bold tabular-nums text-white">
-                ฿{formatCurrency(analysis.maxSafeTotalAds)}
-                <span className="text-xs font-sans font-normal text-zinc-400">
-                  {" "}
-                  / ออเดอร์
+              <div className="space-y-1 min-w-0">
+                <span className="block text-xs text-zinc-400">
+                  ค่าโฆษณาสูงสุดที่รับได้ (Max Safe CPA)
                 </span>
-              </p>
-              <p className="text-xs text-zinc-500">
-                {analysis.maxSafeAdditionalAds > 0
-                  ? `สามารถเพิ่มงบแอดจากปัจจุบันได้อีกสูงสุด +฿${formatCurrency(analysis.maxSafeAdditionalAds)}/ชิ้น ก่อนเริ่มขาดทุน`
-                  : "ไม่สามารถเพิ่มงบแอดเพิ่มจากนี้ได้แล้ว (เกินจุดคุ้มทุนต่อชิ้น)"}
-              </p>
+                <div className="flex flex-wrap items-baseline gap-2">
+                  <p className="font-mono text-2xl font-bold tabular-nums text-white">
+                    {isIncomplete
+                      ? "—"
+                      : `฿${formatCurrency(analysis.maxSafeTotalAds)}`}
+                  </p>
+                  {analysis.breakEvenRoas !== null && (
+                    <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 font-mono text-[11px] font-semibold text-emerald-300">
+                      ROAS ขั้นต่ำ {formatCurrency(analysis.breakEvenRoas, 2)}x
+                    </span>
+                  )}
+                </div>
+              </div>
             </div>
+            <p className="text-xs text-zinc-400 leading-relaxed">
+              {isIncomplete
+                ? "กรุณาระบุราคาขายเพื่อคำนวณเพดานค่าแอดและ Break-Even ROAS"
+                : analysis.maxSafeAdditionalAds > 0
+                  ? `อัดค่าแอดเพิ่มจากปัจจุบันได้อีกสูงสุด +฿${formatCurrency(analysis.maxSafeAdditionalAds)}/ชิ้น ก่อนกำไรจะเป็น ฿0`
+                  : "ไม่สามารถเพิ่มงบโฆษณาจากระดับนี้ได้แล้ว เนื่องจากเกินจุดคุ้มทุนต่อชิ้น"}
+            </p>
           </div>
 
-          <div className="rounded-xl border border-zinc-800/90 bg-black/75 p-4 flex items-start gap-3.5">
-            <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-500/12 text-emerald-400">
-              <Percent className="h-4 w-4" />
-            </span>
-            <div className="space-y-1 min-w-0">
-              <span className="block text-xs text-zinc-400">
-                เพดานส่วนลดสูงสุดช่วงแคมเปญ (Max Safe Discount)
+          <div className="rounded-xl border border-zinc-800/90 bg-black/75 p-4 flex flex-col justify-between gap-3">
+            <div className="flex items-start gap-3">
+              <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-sky-500/12 text-sky-400">
+                <Wrench className="h-4 w-4" />
               </span>
-              <p className="font-mono text-xl font-bold tabular-nums text-white">
-                {formatCurrency(analysis.maxSafeDiscountPercent, 1)}%
-              </p>
-              <p className="text-xs text-zinc-500">
-                {analysis.maxSafeDiscountPercent > 0
-                  ? `ลดราคาได้สูงสุดไม่เกิน ${formatCurrency(analysis.maxSafeDiscountPercent, 1)}% ก่อนกำไรจะกลายเป็น ฿0`
-                  : "ราคาปัจจุบันไม่รองรับการจัดส่วนลดเพิ่มเติม"}
-              </p>
+              <div className="space-y-1 min-w-0">
+                <span className="block text-xs text-zinc-400">
+                  ทางออกปรับแก้แบบเจาะจง (Actionable Fix)
+                </span>
+                <p className="text-sm font-semibold text-zinc-100">
+                  {isIncomplete
+                    ? "รอการระบุราคาขาย"
+                    : analysis.actionableFix.needsImprovement
+                      ? "แนวทางดันกำไรสุทธิให้ถึง 25%"
+                      : "ผ่านเกณฑ์กำไรมาตรฐาน 25% แล้ว"}
+                </p>
+              </div>
             </div>
+
+            {isIncomplete ? (
+              <p className="text-xs text-zinc-500 leading-relaxed">
+                ระบุราคาขายต่อชิ้นเพื่อรับตัวเลขปรับราคาและลดต้นทุนอัตโนมัติ
+              </p>
+            ) : analysis.actionableFix.needsImprovement ? (
+              <div className="space-y-1.5 text-xs text-zinc-300 leading-relaxed">
+                <p>
+                  <strong className="text-emerald-400">ทางเลือก 1:</strong>{" "}
+                  {analysis.actionableFix.targetSellingPrice !== null &&
+                  analysis.actionableFix.priceIncreaseNeeded !== null
+                    ? `ปรับราคาขายจาก ฿${formatCurrency(analysis.actionableFix.currentSellingPrice)} เป็น ฿${formatCurrency(analysis.actionableFix.targetSellingPrice)} (+฿${formatCurrency(analysis.actionableFix.priceIncreaseNeeded)}) เพื่อให้ได้กำไรสุทธิ 25%`
+                    : "ค่า GP แพลตฟอร์มสูงเกินกว่าจะทำกำไร 25% ได้จากการขึ้นราคา"}
+                </p>
+                <p>
+                  <strong className="text-sky-400">ทางเลือก 2:</strong>{" "}
+                  {analysis.actionableFix.costReductionFeasible
+                    ? `หรือลดต้นทุน/ค่าแอดลง ฿${formatCurrency(analysis.actionableFix.costReductionNeeded)} ต่อชิ้น หากต้องการขายราคาเดิม`
+                    : `ต้องลดต้นทุน/ค่าแอดลง ฿${formatCurrency(analysis.actionableFix.costReductionNeeded)} ต่อชิ้น (เกินต้นทุนผันแปรปัจจุบัน แนะนำปรับราคาขายร่วมด้วย)`}
+                </p>
+              </div>
+            ) : (
+              <p className="text-xs text-emerald-300/90 leading-relaxed">
+                โครงสร้างปัจจุบันทำกำไรได้{" "}
+                <strong className="font-mono">
+                  {formatCurrency(metrics.netMarginPercent, 1)}%
+                </strong>{" "}
+                สูงกว่าเกณฑ์ปลอดภัย 25% พร้อมสำหรับการขยายงบโฆษณาหรือจัดโปรโมชัน
+              </p>
+            )}
           </div>
         </div>
+
+        {!isIncomplete && (
+          <div className="space-y-3">
+            <p className="text-xs sm:text-sm font-semibold text-zinc-200">
+              ราคาขายแนะนำ 3 ระดับ (คำนวณทบกลับค่า GP {inputs.platformFeePercent}% เรียบร้อยแล้ว)
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+              {analysis.targetPrices.map((tier) => (
+                <div
+                  key={tier.targetMarginPercent}
+                  className={`rounded-xl border p-4 space-y-2 ${
+                    tier.recommended
+                      ? "border-emerald-400/50 bg-emerald-500/[0.08] shadow-[0_0_20px_-8px_rgba(16,185,129,0.3)]"
+                      : "border-zinc-800/90 bg-black/75"
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-sm font-semibold text-white">
+                      {tier.tierLabel}
+                    </span>
+                    <span
+                      className={`rounded-full px-2 py-0.5 font-mono text-[11px] font-semibold ${
+                        tier.recommended
+                          ? "bg-emerald-500/20 text-emerald-300"
+                          : "bg-zinc-900 text-zinc-400"
+                      }`}
+                    >
+                      Margin {tier.targetMarginPercent}%
+                    </span>
+                  </div>
+
+                  {tier.feasible &&
+                  tier.suggestedPrice !== null &&
+                  tier.estimatedProfitPerUnit !== null ? (
+                    <>
+                      <p
+                        className={`font-mono text-2xl font-bold tabular-nums ${
+                          tier.recommended ? "text-emerald-400" : "text-zinc-100"
+                        }`}
+                      >
+                        ฿{formatCurrency(tier.suggestedPrice)}
+                      </p>
+                      <p className="text-xs text-zinc-400">
+                        เหลือกำไรสุทธิ{" "}
+                        <span className="font-mono font-semibold text-emerald-400">
+                          +฿{formatCurrency(tier.estimatedProfitPerUnit)}/ชิ้น
+                        </span>
+                      </p>
+                    </>
+                  ) : (
+                    <p className="text-xs text-rose-400 pt-1">
+                      ไม่สามารถตั้งราคาเป้าหมายนี้ได้ เนื่องจากค่า GP แพลตฟอร์มสูงเกินเกณฑ์
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="space-y-2.5">
           <p className="text-xs sm:text-sm font-semibold text-zinc-200">
-            ข้อสังเกตและคำแนะนำเฉพาะสำหรับรายการนี้
+            คำแนะนำเชิงกลยุทธ์เฉพาะสำหรับรายการนี้
           </p>
           <div className="space-y-2.5">
             {analysis.insights.map((insight) => (

@@ -165,14 +165,43 @@ export interface PricingAdvisorInsight {
   detail: string;
 }
 
+export type ProfitHealthGrade = "S" | "A" | "B" | "C" | "D" | "N/A";
+
+export interface HealthScoreFactor {
+  key: "margin" | "ads" | "discount" | "unit_risk";
+  label: string;
+  score: number;
+  maxScore: number;
+  summary: string;
+}
+
+export interface ActionableFixRecommendation {
+  needsImprovement: boolean;
+  targetMarginPercent: number;
+  currentSellingPrice: number;
+  targetSellingPrice: number | null;
+  priceIncreaseNeeded: number | null;
+  costReductionNeeded: number;
+  costReductionFeasible: boolean;
+}
+
 export interface FinancialAnalysisResult {
+  isIncompleteData: boolean;
+  hasZeroProductCostWarning: boolean;
+  healthScore: number;
+  healthGrade: ProfitHealthGrade;
+  healthGradeLabel: string;
+  healthBreakdown: HealthScoreFactor[];
   discountCurve: DiscountSensitivityPoint[];
   volumeProjections: VolumeProjectionPoint[];
   targetPrices: TargetPriceRecommendation[];
   minBreakEvenSellingPrice: number | null;
   maxSafeAdditionalAds: number;
   maxSafeTotalAds: number;
+  breakEvenRoas: number | null;
   maxSafeDiscountPercent: number;
-  healthLevel: "excellent" | "good" | "thin" | "loss";
+  returnLossMultiplier: number | null;
+  actionableFix: ActionableFixRecommendation;
+  healthLevel: "incomplete" | "excellent" | "good" | "thin" | "loss";
   insights: PricingAdvisorInsight[];
 }

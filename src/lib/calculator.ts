@@ -1,4 +1,5 @@
 import type {
+  ActionableFixRecommendation,
   CalculationMetrics,
   CalculatorInputValues,
   CsvExportColumnKey,
@@ -6,8 +7,10 @@ import type {
   DiscountSensitivityPoint,
   EcommerceCalculationRecord,
   FinancialAnalysisResult,
+  HealthScoreFactor,
   PlatformPreset,
   PricingAdvisorInsight,
+  ProfitHealthGrade,
   PromoSimulationResult,
   TargetPriceRecommendation,
   VolumeProjectionPoint,
@@ -342,6 +345,9 @@ export function buildFinancialAnalysis(
       ? input.fixedCost
       : 0;
 
+  const isIncompleteData = sellingPrice <= 0;
+  const hasZeroProductCostWarning = sellingPrice > 0 && costPrice <= 0;
+
   const feeRate = platformFeePercent / 100;
   const nonFeeUnitCost = costPrice + packagingCost + adsCost;
 
@@ -407,20 +413,246 @@ export function buildFinancialAnalysis(
     }
   );
 
-  const maxSafeAdditionalAds = Math.max(0, baseMetrics.netProfitPerUnit);
-  const maxSafeTotalAds = Math.max(
-    0,
-    sellingPrice - baseMetrics.platformFeeBaht - costPrice - packagingCost
-  );
+  const maxSafeAdditionalAds = isIncompleteData
+    ? 0
+    : Math.max(0, baseMetrics.netProfitPerUnit);
+  const maxSafeTotalAds = isIncompleteData
+    ? 0
+    : Math.max(
+        0,
+        sellingPrice - baseMetrics.platformFeeBaht - costPrice - packagingCost
+      );
+  const breakEvenRoas =
+    !isIncompleteData && maxSafeTotalAds > 0
+      ? sellingPrice / maxSafeTotalAds
+      : null;
 
   let maxSafeDiscountPercent = 0;
-  if (sellingPrice > 0 && feeRate < 1 && baseMetrics.netProfitPerUnit > 0) {
+  if (!isIncompleteData && feeRate < 1 && baseMetrics.netProfitPerUnit > 0) {
     const breakEvenRatio = nonFeeUnitCost / (sellingPrice * (1 - feeRate));
     const computedDiscount = (1 - breakEvenRatio) * 100;
     if (Number.isFinite(computedDiscount)) {
       maxSafeDiscountPercent = Math.max(0, Math.min(100, computedDiscount));
     }
   }
+
+  const returnLossMultiplier =
+    !isIncompleteData && baseMetrics.netProfitPerUnit > 0
+      ? baseMetrics.totalCostPerUnit > 0
+        ? Math.ceil(
+            baseMetrics.totalCostPerUnit / baseMetrics.netProfitPerUnit
+          )
+        : 0
+      : null;
+
+  const targetMarginForFix = 25;
+  const fixDenominator = 1 - feeRate - targetMarginForFix / 100;
+  const targetPriceForFix =
+    !isIncompleteData && fixDenominator > 0.0001
+      ? nonFeeUnitCost / fixDenominator
+      : null;
+  const priceIncreaseNeeded =
+    targetPriceForFix !== null
+      ? Math.max(0, targetPriceForFix - sellingPrice)
+      : null;
+  const targetProfitAtCurrentPrice =
+    sellingPrice * (targetMarginForFix / 100);
+  const costReductionNeeded = isIncompleteData
+    ? 0
+    : Math.max(0, targetProfitAtCurrentPrice - baseMetrics.netProfitPerUnit);
+  const costReductionFeasible =
+    !isIncompleteData && costReductionNeeded <= nonFeeUnitCost;
+
+  const actionableFix: ActionableFixRecommendation = {
+    needsImprovement:
+      !isIncompleteData && baseMetrics.netMarginPercent < targetMarginForFix,
+    targetMarginPercent: targetMarginForFix,
+    currentSellingPrice: sellingPrice,
+    targetSellingPrice: targetPriceForFix,
+    priceIncreaseNeeded,
+    costReductionNeeded,
+    costReductionFeasible,
+  };
+
+  if (isIncompleteData) {
+    const emptyBreakdown: HealthScoreFactor[] = [
+      {
+        key: "margin",
+        label: "อัตรากำไรสุทธิ (Net Margin)",
+        score: 0,
+        maxScore: 40,
+        summary: "ยังไม่มีราคาขาย",
+      },
+      {
+        key: "ads",
+        label: "ประสิทธิภาพค่าแอด (Ad Ratio)",
+        score: 0,
+        maxScore: 25,
+        summary: "ยังไม่มีราคาขาย",
+      },
+      {
+        key: "discount",
+        label: "กันชนส่วนลด (Discount Buffer)",
+        score: 0,
+        maxScore: 20,
+        summary: "ยังไม่มีราคาขาย",
+      },
+      {
+        key: "unit_risk",
+        label: "ผลตอบแทนต่อความเสี่ยง (Unit Risk)",
+        score: 0,
+        maxScore: 15,
+        summary: "ยังไม่มีราคาขาย",
+      },
+    ];
+
+    return {
+      isIncompleteData: true,
+      hasZeroProductCostWarning: false,
+      healthScore: 0,
+      healthGrade: "N/A",
+      healthGradeLabel: "ข้อมูลไม่สมบูรณ์ — ยังไม่ได้ตั้งราคาขาย",
+      healthBreakdown: emptyBreakdown,
+      discountCurve,
+      volumeProjections,
+      targetPrices,
+      minBreakEvenSellingPrice,
+      maxSafeAdditionalAds: 0,
+      maxSafeTotalAds: 0,
+      breakEvenRoas: null,
+      maxSafeDiscountPercent: 0,
+      returnLossMultiplier: null,
+      actionableFix,
+      healthLevel: "incomplete",
+      insights: [
+        {
+          severity: "warning",
+          title: "ยังไม่ได้ตั้งราคาขายต่อชิ้น",
+          detail:
+            "กรุณาย้อนกลับไประบุราคาขายต่อชิ้น เพื่อให้ระบบวิเคราะห์กำไรและจุดคุ้มทุนได้จริง",
+        },
+      ],
+    };
+  }
+
+  const marginScore =
+    baseMetrics.netMarginPercent >= 35
+      ? 40
+      : baseMetrics.netMarginPercent >= 25
+        ? 32
+        : baseMetrics.netMarginPercent >= 15
+          ? 22
+          : baseMetrics.netMarginPercent >= 5
+            ? 10
+            : 0;
+
+  const adCostRatioPercent =
+    sellingPrice > 0 ? (adsCost / sellingPrice) * 100 : 0;
+  const adCostScore =
+    adCostRatioPercent <= 15
+      ? 25
+      : adCostRatioPercent <= 25
+        ? 16
+        : adCostRatioPercent <= 35
+          ? 8
+          : 0;
+
+  const discountBufferScore =
+    maxSafeDiscountPercent >= 25
+      ? 20
+      : maxSafeDiscountPercent >= 15
+        ? 14
+        : maxSafeDiscountPercent >= 5
+          ? 7
+          : 0;
+
+  let unitRiskScore = 0;
+  if (baseMetrics.netProfitPerUnit > 0) {
+    if (baseMetrics.totalCostPerUnit <= 0) {
+      unitRiskScore = 15;
+    } else {
+      const unitRiskRatio =
+        baseMetrics.netProfitPerUnit / baseMetrics.totalCostPerUnit;
+      unitRiskScore =
+        unitRiskRatio >= 0.5
+          ? 15
+          : unitRiskRatio >= 0.3
+            ? 12
+            : unitRiskRatio >= 0.15
+              ? 8
+              : unitRiskRatio >= 0.05
+                ? 4
+                : 1;
+    }
+  }
+
+  const healthScore = Math.min(
+    100,
+    Math.max(
+      0,
+      marginScore + adCostScore + discountBufferScore + unitRiskScore
+    )
+  );
+
+  let healthGrade: ProfitHealthGrade;
+  let healthGradeLabel: string;
+  if (baseMetrics.netProfitPerUnit <= 0 || healthScore < 35) {
+    healthGrade = "D";
+    healthGradeLabel = "เกรด D — โครงสร้างอันตราย";
+  } else if (healthScore >= 85) {
+    healthGrade = "S";
+    healthGradeLabel = "เกรด S — โครงสร้างแกร่งมาก";
+  } else if (healthScore >= 70) {
+    healthGrade = "A";
+    healthGradeLabel = "เกรด A — น่าลงทุน";
+  } else if (healthScore >= 55) {
+    healthGrade = "B";
+    healthGradeLabel = "เกรด B — พอไปได้แต่ต้องคุมต้นทุน";
+  } else {
+    healthGrade = "C";
+    healthGradeLabel = "เกรด C — กำไรบางเสี่ยงเข้าเนื้อ";
+  }
+
+  const unitRiskRatioValue =
+    baseMetrics.totalCostPerUnit > 0
+      ? baseMetrics.netProfitPerUnit / baseMetrics.totalCostPerUnit
+      : baseMetrics.netProfitPerUnit > 0
+        ? 1
+        : 0;
+
+  const healthBreakdown: HealthScoreFactor[] = [
+    {
+      key: "margin",
+      label: "อัตรากำไรสุทธิ (Net Margin)",
+      score: marginScore,
+      maxScore: 40,
+      summary: `${formatCurrency(baseMetrics.netMarginPercent, 1)}%`,
+    },
+    {
+      key: "ads",
+      label: "ประสิทธิภาพค่าแอด (Ad Ratio)",
+      score: adCostScore,
+      maxScore: 25,
+      summary: `${formatCurrency(adCostRatioPercent, 1)}% ของราคาขาย`,
+    },
+    {
+      key: "discount",
+      label: "กันชนส่วนลด (Discount Buffer)",
+      score: discountBufferScore,
+      maxScore: 20,
+      summary: `ลดปลอดภัยสูงสุด ${formatCurrency(maxSafeDiscountPercent, 1)}%`,
+    },
+    {
+      key: "unit_risk",
+      label: "ความคุ้มทุนต่อความเสี่ยง (Unit Risk)",
+      score: unitRiskScore,
+      maxScore: 15,
+      summary:
+        baseMetrics.netProfitPerUnit > 0
+          ? `${formatCurrency(unitRiskRatioValue * 100, 0)}% ต่อทุนผันแปร`
+          : "ขาดทุนต่อชิ้น",
+    },
+  ];
 
   const healthLevel: FinancialAnalysisResult["healthLevel"] =
     baseMetrics.netProfitPerUnit < 0
@@ -440,23 +672,17 @@ export function buildFinancialAnalysis(
       title: `ราคาขายปัจจุบันขาดทุนชิ้นละ ฿${formatCurrency(shortfall)}`,
       detail:
         minBreakEvenSellingPrice !== null
-          ? `ควรปรับราคาขายขึ้นเป็นอย่างน้อย ฿${formatCurrency(minBreakEvenSellingPrice)} เพื่อไม่ให้เข้าเนื้อ (หรือตั้งราคาที่ ฿${formatCurrency(targetPrices[1]?.suggestedPrice ?? minBreakEvenSellingPrice)} เพื่อกำไรสุทธิ 30%)`
+          ? `ควรปรับราคาขายขึ้นเป็นอย่างน้อย ฿${formatCurrency(minBreakEvenSellingPrice)} เพื่อหยุดการขาดทุน หรือปรับเป็น ฿${formatCurrency(targetPriceForFix ?? minBreakEvenSellingPrice)} เพื่อสร้างกำไรสุทธิ 25%`
           : "ค่าธรรมเนียมแพลตฟอร์มสูงถึง 100% ทำให้ไม่สามารถทำกำไรได้ กรุณาตรวจสอบค่าธรรมเนียม (GP)",
     });
-  } else if (baseMetrics.netMarginPercent < 15) {
+  }
+
+  if (costPrice > 0 && adsCost > costPrice) {
     insights.push({
-      severity: "warning",
-      title: `อัตรากำไรสุทธิค่อนข้างบาง (${formatCurrency(baseMetrics.netMarginPercent, 1)}%)`,
+      severity: "danger",
+      title: `งบโฆษณาต่อชิ้น (฿${formatCurrency(adsCost)}) สูงกว่าต้นทุนสินค้า (฿${formatCurrency(costPrice)})`,
       detail:
-        targetPrices[1]?.suggestedPrice !== null
-          ? `หากมีส่วนลดแคมเปญหรือค่าแอดผันผวนอาจขาดทุนได้ทันที แนะนำปรับราคาขายใกล้เคียง ฿${formatCurrency(targetPrices[1].suggestedPrice)} เพื่อเพิ่มกันชนกำไรเป็น 30%`
-          : "ควรลดต้นทุนต่อชิ้นหรือลดค่าโฆษณาเพื่อสร้างกันชนกำไรให้ปลอดภัยขึ้น",
-    });
-  } else {
-    insights.push({
-      severity: "healthy",
-      title: `โครงสร้างกำไรแข็งแรง (Net Margin ${formatCurrency(baseMetrics.netMarginPercent, 1)}%)`,
-      detail: `หลังหักต้นทุนและ GP แพลตฟอร์มแล้วยังเหลือกำไรชิ้นละ +฿${formatCurrency(baseMetrics.netProfitPerUnit)} สามารถขยายงบการตลาดหรือจัดโปรโมชันได้อย่างมั่นใจ`,
+        "งบโฆษณาต่อชิ้นสูงกว่าต้นทุนตัวสินค้าแล้ว เสี่ยงกำไรหายทันทีหากค่าแอดผันผวน แนะนำจัดเซตขายพ่วง (Bundle) เพื่อเพิ่มยอดต่อบิลและกดค่าแอดเฉลี่ยต่อชิ้นลง",
     });
   }
 
@@ -467,62 +693,88 @@ export function buildFinancialAnalysis(
     insights.push({
       severity: "warning",
       title: `ค่า GP แพลตฟอร์ม (฿${formatCurrency(baseMetrics.platformFeeBaht)}) สูงกว่ากำไรสุทธิของคุณ`,
-      detail: `ช่องทาง ${input.platform} หักค่าธรรมเนียม ${formatCurrency(platformFeePercent, 1)}% ซึ่งกินสัดส่วนมากกว่ารายได้สุทธิ แนะนำบวกค่า GP ทบเข้าในราคาตั้งขายหรือดึงลูกค้ากลับมาซื้อซ้ำผ่านช่องทางขายตรง 0%`,
+      detail:
+        "แพลตฟอร์มได้ส่วนแบ่งต่อชิ้นมากกว่ากำไรที่คุณได้รับ ควรพิจารณาดันยอดขายช่องทางขายตรงหรือจัดเซตสินค้าเพื่อเพิ่มยอดต่อบิล",
     });
   }
 
-  if (costPrice > 0 && adsCost > costPrice) {
+  if (
+    baseMetrics.netMarginPercent > 0 &&
+    baseMetrics.netMarginPercent < 15
+  ) {
     insights.push({
       severity: "warning",
-      title: `ค่าโฆษณาต่อชิ้น (฿${formatCurrency(adsCost)}) สูงกว่าต้นทุนสินค้า (฿${formatCurrency(costPrice)})`,
+      title: `กำไรสุทธิบางเสี่ยงเข้าเนื้อ (${formatCurrency(baseMetrics.netMarginPercent, 1)}%)`,
       detail:
-        "สัดส่วนค่าแอดกินต้นทุนสูงเกินไป แนะนำทำโปรขายแบบ Bundle (ซื้อ 2–3 ชิ้น) เพื่อเพิ่มยอดต่อออเดอร์และดึงค่าแอดเฉลี่ยต่อชิ้นให้ลดลง",
+        "กำไรสุทธิต่ำกว่า 15% ถือว่าบางมาก หากลูกค้ากดใช้โค้ดส่วนลดร้านค้าหรือมีพัสดุตีกลับเพียงไม่กี่ออเดอร์ ภาพรวมทั้งเดือนอาจขาดทุนทันที",
     });
   }
 
-  if (baseMetrics.netProfitPerUnit > 0) {
-    if (maxSafeDiscountPercent < 15) {
-      insights.push({
-        severity: "warning",
-        title: `พื้นที่จัดโปร Flash Sale จำกัด (ลดได้สูงสุด ${formatCurrency(maxSafeDiscountPercent, 1)}%)`,
-        detail:
-          "หากต้องเข้าร่วมแคมเปญ Double Day ที่บังคับลด 15%–20% แนะนำตั้งราคาป้ายเผื่อส่วนลดไว้ล่วงหน้าเพื่อไม่ให้ขายดีแต่เข้าเนื้อ",
-      });
-    } else if (maxSafeDiscountPercent >= 25) {
-      insights.push({
-        severity: "healthy",
-        title: `พร้อมลุยแคมเปญส่วนลด (ลดได้สูงสุด ${formatCurrency(maxSafeDiscountPercent, 1)}% โดยไม่ขาดทุน)`,
-        detail:
-          "สินค้ามีระยะปลอดภัยเพียงพอสำหรับจัดคูปองส่วนลดหรือ Flash Sale 10%–20% เพื่อเร่งยอดขายโดยยังคงมีกำไรสุทธิเหลืออยู่",
-      });
-    }
+  if (returnLossMultiplier !== null && returnLossMultiplier >= 4) {
+    insights.push({
+      severity: "warning",
+      title: `ความเสี่ยงพัสดุตีกลับสูง (ต้องขายเพิ่ม ${returnLossMultiplier} ชิ้นต่อการตีกลับ 1 ชิ้น)`,
+      detail:
+        "อัตราต้นทุนที่สูญเสียต่อการตีกลับค่อนข้างสูง แนะนำเพิ่มความเข้มงวดในการคัดกรองออเดอร์เก็บเงินปลายทาง (COD) และมาตรฐานการแพ็กสินค้า",
+    });
   }
 
-  if (fixedCost > 0 && baseMetrics.breakEvenUnits !== null) {
+  if (baseMetrics.netMarginPercent >= 30 && maxSafeDiscountPercent >= 20) {
+    insights.push({
+      severity: "healthy",
+      title: `โครงสร้างกำไรแข็งแรงมาก (Net Margin ${formatCurrency(baseMetrics.netMarginPercent, 1)}%)`,
+      detail:
+        "โครงสร้างกำไรแข็งแรงมาก สามารถจัดโปรโมชันลดราคา 10%–15% ช่วงแคมเปญเลขเบิ้ลเพื่อดึงยอดขายได้โดยไม่เข้าเนื้อ",
+    });
+  } else if (
+    baseMetrics.netMarginPercent >= 15 &&
+    insights.length < 3
+  ) {
+    insights.push({
+      severity: "healthy",
+      title: `โครงสร้างกำไรอยู่ในเกณฑ์สมดุล (Net Margin ${formatCurrency(baseMetrics.netMarginPercent, 1)}%)`,
+      detail: `มีกันชนส่วนลดปลอดภัยสูงสุด ${formatCurrency(maxSafeDiscountPercent, 1)}% และสามารถเพิ่มงบโฆษณาได้อีก +฿${formatCurrency(maxSafeAdditionalAds)}/ชิ้นก่อนชนจุดคุ้มทุน`,
+    });
+  }
+
+  if (
+    fixedCost > 0 &&
+    baseMetrics.breakEvenUnits !== null &&
+    insights.length < 4
+  ) {
     if (baseMetrics.breakEvenUnits > 300) {
       insights.push({
         severity: "warning",
-        title: `จุดคุ้มทุนสูง (${baseMetrics.breakEvenUnits.toLocaleString("th-TH")} ชิ้น/เดือน)`,
-        detail: `ด้วยต้นทุนคงที่ ฿${formatCurrency(fixedCost, 0)} ต้องทำยอดขายเฉลี่ยราว ${Math.ceil(baseMetrics.breakEvenUnits / 30).toLocaleString("th-TH")} ชิ้น/วันจึงจะคุ้มทุน แนะนำเพิ่มกำไรต่อชิ้นหรือจัดเซตสินค้าเพื่อลดเป้าจำนวนออเดอร์`,
+        title: `จุดคุ้มทุนรายเดือนสูง (${baseMetrics.breakEvenUnits.toLocaleString("th-TH")} ชิ้น/เดือน)`,
+        detail: `ด้วยต้นทุนคงที่ ฿${formatCurrency(fixedCost, 0)} ต้องทำยอดขายเฉลี่ยวันละ ${Math.ceil(baseMetrics.breakEvenUnits / 30).toLocaleString("th-TH")} ชิ้นจึงจะคุ้มทุน ควรเพิ่มกำไรต่อชิ้นเพื่อลดแรงกดดันด้านยอดขาย`,
       });
     } else {
       insights.push({
         severity: "healthy",
-        title: `จุดคุ้มทุนอยู่ในเกณฑ์จัดการได้ (${baseMetrics.breakEvenUnits.toLocaleString("th-TH")} ชิ้น/เดือน)`,
-        detail: `ขายเฉลี่ยเพียงวันละ ${Math.max(1, Math.ceil(baseMetrics.breakEvenUnits / 30)).toLocaleString("th-TH")} ชิ้นก็ครอบคลุมต้นทุนคงที่ ฿${formatCurrency(fixedCost, 0)} แล้ว ที่เหลือคือกำไรสุทธิเต็มจำนวน`,
+        title: `จุดคุ้มทุนอยู่ในระดับจัดการได้ (${baseMetrics.breakEvenUnits.toLocaleString("th-TH")} ชิ้น/เดือน)`,
+        detail: `ขายเฉลี่ยเพียงวันละ ${Math.max(1, Math.ceil(baseMetrics.breakEvenUnits / 30)).toLocaleString("th-TH")} ชิ้นก็ครอบคลุมต้นทุนคงที่ ฿${formatCurrency(fixedCost, 0)} แล้ว`,
       });
     }
   }
 
   return {
+    isIncompleteData: false,
+    hasZeroProductCostWarning,
+    healthScore,
+    healthGrade,
+    healthGradeLabel,
+    healthBreakdown,
     discountCurve,
     volumeProjections,
     targetPrices,
     minBreakEvenSellingPrice,
     maxSafeAdditionalAds,
     maxSafeTotalAds,
+    breakEvenRoas,
     maxSafeDiscountPercent,
+    returnLossMultiplier,
+    actionableFix,
     healthLevel,
-    insights,
+    insights: insights.slice(0, 4),
   };
 }
