@@ -32,15 +32,7 @@ import { useAppLanguage } from "@/lib/language";
 import type { AuthTabMode } from "@/types";
 import { PasswordStrengthMeter } from "@/components/PasswordStrengthMeter";
 
-const AUTH_BACKGROUND_IMAGES: readonly string[] = [
-  "/images/auth/bg-1.jpg",
-  "/images/auth/bg-2.jpg",
-  "/images/auth/bg-3.jpg",
-  "/images/auth/bg-4.jpg",
-  "/images/auth/bg-5.jpg",
-];
-
-const LIGHT_AUTH_SCREENSHOTS: readonly string[] = [
+const AUTH_SCREENSHOT_BACKGROUNDS: readonly string[] = [
   "/screenshots/step-01-calculator.png",
   "/screenshots/step-02-analytics.png",
   "/screenshots/step-03-promo.png",
@@ -90,7 +82,9 @@ export function AuthForm() {
   useEffect(() => {
     formLoadedAtRef.current = Date.now();
     const intervalId = window.setInterval(() => {
-      setActiveBgIndex((prev) => (prev + 1) % AUTH_BACKGROUND_IMAGES.length);
+      setActiveBgIndex(
+        (prev) => (prev + 1) % AUTH_SCREENSHOT_BACKGROUNDS.length
+      );
     }, 5500);
 
     return () => {
@@ -481,48 +475,26 @@ export function AuthForm() {
         aria-hidden="true"
         className="pointer-events-none fixed inset-0 -z-10 overflow-hidden bg-black light:bg-[#f8fafc]"
       >
-        <div className="absolute inset-0 light:hidden">
-          {AUTH_BACKGROUND_IMAGES.map((src, idx) => {
-            const isActive = idx === activeBgIndex;
-            return (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                key={src}
-                src={src}
-                alt=""
-                loading={idx === 0 ? "eager" : "lazy"}
-                className={`absolute inset-0 h-full w-full object-cover object-center transition-all duration-1000 ease-in-out will-change-[opacity,transform] ${
-                  isActive ? "opacity-100 scale-105" : "opacity-0 scale-100"
-                }`}
-              />
-            );
-          })}
+        {AUTH_SCREENSHOT_BACKGROUNDS.map((src, idx) => {
+          const isActive = idx === activeBgIndex;
+          return (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              key={src}
+              src={src}
+              alt=""
+              loading={idx === 0 ? "eager" : "lazy"}
+              className={`absolute inset-0 h-full w-full object-cover object-top blur-[1.5px] transition-all duration-1000 ease-in-out will-change-[opacity,transform] ${
+                isActive
+                  ? "opacity-[0.20] light:opacity-[0.20] scale-[1.03]"
+                  : "opacity-0 scale-100"
+              }`}
+            />
+          );
+        })}
 
-          <div className="absolute inset-0 bg-black/75" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_10%,rgba(0,0,0,0.88)_100%)]" />
-        </div>
-
-        <div className="hidden light:block absolute inset-0">
-          {LIGHT_AUTH_SCREENSHOTS.map((src, idx) => {
-            const isActive =
-              idx === activeBgIndex % LIGHT_AUTH_SCREENSHOTS.length;
-            return (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                key={src}
-                src={src}
-                alt=""
-                loading={idx === 0 ? "eager" : "lazy"}
-                className={`absolute inset-0 h-full w-full object-cover object-top blur-[1.5px] transition-all duration-1000 ease-in-out will-change-[opacity,transform] ${
-                  isActive ? "opacity-[0.20] scale-[1.03]" : "opacity-0 scale-100"
-                }`}
-              />
-            );
-          })}
-
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_85%_85%_at_50%_50%,rgba(248,250,252,0.18)_15%,rgba(248,250,252,0.78)_100%)]" />
-        </div>
-
+        <div className="absolute inset-0 bg-black/40 light:hidden" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_85%_85%_at_50%_50%,transparent_15%,rgba(0,0,0,0.84)_100%)] light:bg-[radial-gradient(ellipse_85%_85%_at_50%_50%,rgba(248,250,252,0.18)_15%,rgba(248,250,252,0.78)_100%)]" />
         <div className="khumlab-dashboard-dots absolute inset-0 opacity-45 light:opacity-65" />
       </div>
 

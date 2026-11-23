@@ -13,6 +13,7 @@ import type { ThemeMode } from "@/types";
 
 export const THEME_STORAGE_KEY = "khumlab_theme";
 const THEME_CHANGE_EVENT = "khumlab-theme-change";
+const DEFAULT_THEME: ThemeMode = "light";
 
 interface ThemeContextValue {
   theme: ThemeMode;
@@ -24,18 +25,18 @@ interface ThemeContextValue {
 
 function readStoredTheme(): ThemeMode {
   if (typeof window === "undefined") {
-    return "dark";
+    return DEFAULT_THEME;
   }
   try {
     const raw = window.localStorage.getItem(THEME_STORAGE_KEY);
-    return raw === "light" ? "light" : "dark";
+    return raw === "dark" ? "dark" : DEFAULT_THEME;
   } catch {
-    return "dark";
+    return DEFAULT_THEME;
   }
 }
 
 function getServerThemeSnapshot(): ThemeMode {
-  return "dark";
+  return DEFAULT_THEME;
 }
 
 function subscribeTheme(onStoreChange: () => void): () => void {
@@ -80,9 +81,9 @@ export function setAppTheme(next: ThemeMode): void {
 }
 
 const ThemeContext = createContext<ThemeContextValue>({
-  theme: "dark",
-  isDark: true,
-  isLight: false,
+  theme: DEFAULT_THEME,
+  isDark: false,
+  isLight: true,
   setTheme: () => {},
   toggleTheme: () => {},
 });

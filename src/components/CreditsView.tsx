@@ -203,8 +203,8 @@ export function CreditsView({ isAuthenticated }: CreditsViewProps) {
             <Sparkles className="h-3.5 w-3.5" />
             <span>
               {isEn
-                ? "v1.3.0 (Updated Nov 23, 2026)"
-                : "v1.3.0 (อัปเดต 23 พ.ย. 2569)"}
+                ? "v1.3.1 (Updated Nov 23, 2026)"
+                : "v1.3.1 (อัปเดต 23 พ.ย. 2569)"}
             </span>
           </span>
         </div>
@@ -433,8 +433,8 @@ export function CreditsView({ isAuthenticated }: CreditsViewProps) {
 
             <span className="rounded-full border border-emerald-500/30 bg-black/60 px-3 py-1 font-mono text-xs font-medium text-emerald-300 light:border-emerald-200 light:bg-white light:text-emerald-700">
               {isEn
-                ? "v1.3.0 (Updated Nov 23, 2026)"
-                : "v1.3.0 (อัปเดต 23 พ.ย. 2569)"}
+                ? "v1.3.1 (Updated Nov 23, 2026)"
+                : "v1.3.1 (อัปเดต 23 พ.ย. 2569)"}
             </span>
           </div>
 

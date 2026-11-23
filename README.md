@@ -1,4 +1,4 @@
-# KhumLab `v1.3.0`
+# KhumLab `v1.3.1`
 
 **Live App:** https://khumlab.vercel.app
 
@@ -6,8 +6,8 @@ A real-cost pricing calculator, profit diagnostics engine, and break-even analyt
 
 ## Key Features
 
-- **Real App Showcase & Crossfade Login Backdrop:** Landing page 4-step walkthrough and Executive Light Mode sign-in screen feature real high-resolution captures of KhumLab's Calculator, Financial Diagnostics, Promo Simulator, and Cloud Workspace.
-- **Dual-Theme Design System (Obsidian Dark Mode & Executive Light Mode):** Switch seamlessly between KhumLab's signature Obsidian Black & Emerald Green glassmorphism dark theme and a high-contrast Executive Clean Light Mode crafted for daylight readability — persisted automatically in `localStorage` without flash-of-wrong-theme.
+- **Real App Showcase & Unified Login Backdrop:** Landing page 4-step walkthrough and the `/login` sign-in screen (in both Executive Light Mode and Obsidian Dark Mode) feature real high-resolution captures of KhumLab's Calculator, Financial Diagnostics, Promo Simulator, and Cloud Workspace with zero stock photography.
+- **Dual-Theme Design System (Executive Light Mode Default & Obsidian Dark Mode):** Opens in a high-contrast Executive Clean Light Mode by default for first-time visitors, with instant switching to KhumLab's signature Obsidian Black & Emerald Green glassmorphism Dark Mode — persisted automatically in `localStorage` without flash-of-wrong-theme.
 - **Smooth Sliding Emerald Navigation Pill:** Tactile magnetic hover and active-route indicator on the primary left navigation controls (`Home` and `Workspace`), dynamically recalculating dimensions across viewport resizes and `TH | EN` language switches.
 - **Enter-Key Field Progression & Randomized Diagnostic Loader:** Press `Enter` to advance sequentially through every calculator field with automatic numeric selection and clean blur-to-submit scroll on the final field, followed by a realistic randomized stepped progress modal (`0%–100%`) with live bilingual diagnostic status phases.
 - **Smart Product-Based CSV Filenames:** Exported spreadsheets automatically adopt clean, date-free filenames — `KhumLab-<ProductName>.csv` for single products (preserving both Thai and English names while stripping forbidden filesystem characters) and `KhumLab-Summary-Products.csv` for multi-product batch exports.
