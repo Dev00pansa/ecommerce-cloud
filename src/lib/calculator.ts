@@ -974,3 +974,27 @@ export function buildFinancialAnalysis(
     insights: insights.slice(0, 4),
   };
 }
+
+export function sanitizeCsvFilenamePart(rawName: string): string {
+  const cleaned = rawName
+    .replace(/[\u0000-\u001F\u007F]/g, "")
+    .replace(/[/\\:*?"<>|]/g, " ")
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^[.-]+|[.-]+$/g, "")
+    .slice(0, 80);
+
+  return cleaned || "Product";
+}
+
+export function buildCsvDownloadFilename(
+  productNames: readonly string[]
+): string {
+  if (productNames.length > 1) {
+    return "KhumLab-Summary-Products.csv";
+  }
+
+  const singleName = sanitizeCsvFilenamePart(productNames[0] ?? "");
+  return `KhumLab-${singleName}.csv`;
+}

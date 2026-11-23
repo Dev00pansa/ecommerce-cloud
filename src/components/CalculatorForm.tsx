@@ -6,6 +6,7 @@ import {
   type ChangeEvent,
   type DragEvent,
   type FormEvent,
+  type KeyboardEvent as ReactKeyboardEvent,
 } from "react";
 import {
   AlertCircle,
@@ -122,7 +123,8 @@ export function CalculatorForm({
   const isEn = language === "en";
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const productNameInputRef = useRef<HTMLInputElement | null>(null);
+  const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
+  const submitButtonRef = useRef<HTMLButtonElement | null>(null);
 
   const [attemptedEmptyName, setAttemptedEmptyName] = useState(false);
   const [clampedFields, setClampedFields] = useState<
@@ -145,8 +147,36 @@ export function CalculatorForm({
     ? "Maximum allowed value is 299,999 THB."
     : "กรอกได้สูงสุดไม่เกิน 299,999 บาท";
 
+  function handleFieldKeyDown(
+    index: number,
+    event: ReactKeyboardEvent<HTMLInputElement>
+  ) {
+    if (event.key !== "Enter" || event.nativeEvent.isComposing) return;
+    event.preventDefault();
+
+    const lastFieldIndex = 6;
+    if (index < lastFieldIndex) {
+      const nextInput = inputRefs.current[index + 1];
+      if (!nextInput) return;
+      nextInput.focus();
+      nextInput.scrollIntoView({ behavior: "smooth", block: "center" });
+      if (nextInput.type === "number") {
+        try {
+          nextInput.select();
+        } catch {}
+      }
+      return;
+    }
+
+    event.currentTarget.blur();
+    submitButtonRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
+  }
+
   function focusProductNameField() {
-    const el = productNameInputRef.current;
+    const el = inputRefs.current[1];
     if (!el) return;
     el.scrollIntoView({ behavior: "smooth", block: "center" });
     window.setTimeout(() => {
@@ -329,6 +359,9 @@ export function CalculatorForm({
             </div>
             <div className="w-full sm:w-44">
               <input
+                ref={(el) => {
+                  inputRefs.current[0] = el;
+                }}
                 id="calc-platform-fee"
                 type="number"
                 min="0"
@@ -337,6 +370,7 @@ export function CalculatorForm({
                 inputMode="decimal"
                 value={values.platformFeePercent}
                 onChange={(e) => handleFeePercentChange(e.target.value)}
+                onKeyDown={(e) => handleFieldKeyDown(0, e)}
                 placeholder="0"
                 className={`${INPUT_SURFACE_CLASS} px-3.5 py-2.5 text-base font-mono tabular-nums text-zinc-100`}
               />
@@ -385,7 +419,9 @@ export function CalculatorForm({
               </span>
             </label>
             <input
-              ref={productNameInputRef}
+              ref={(el) => {
+                inputRefs.current[1] = el;
+              }}
               id="calc-product-name"
               type="text"
               required
@@ -397,6 +433,7 @@ export function CalculatorForm({
                   setAttemptedEmptyName(false);
                 }
               }}
+              onKeyDown={(e) => handleFieldKeyDown(1, e)}
               placeholder={
                 isEn
                   ? "e.g. Premium Black Crewneck T-Shirt"
@@ -588,6 +625,9 @@ export function CalculatorForm({
               </div>
               <div className="sm:col-span-5 space-y-1.5">
                 <input
+                  ref={(el) => {
+                    inputRefs.current[2] = el;
+                  }}
                   id="calc-cost-price"
                   type="number"
                   min="0"
@@ -598,6 +638,7 @@ export function CalculatorForm({
                   onChange={(e) =>
                     handleMonetaryChange("costPrice", e.target.value)
                   }
+                  onKeyDown={(e) => handleFieldKeyDown(2, e)}
                   placeholder="0"
                   className={`${INPUT_SURFACE_CLASS} px-4 py-3 text-lg font-mono tabular-nums text-zinc-100`}
                 />
@@ -627,6 +668,9 @@ export function CalculatorForm({
               </div>
               <div className="sm:col-span-5 space-y-1.5">
                 <input
+                  ref={(el) => {
+                    inputRefs.current[3] = el;
+                  }}
                   id="calc-packaging-cost"
                   type="number"
                   min="0"
@@ -637,6 +681,7 @@ export function CalculatorForm({
                   onChange={(e) =>
                     handleMonetaryChange("packagingCost", e.target.value)
                   }
+                  onKeyDown={(e) => handleFieldKeyDown(3, e)}
                   placeholder="0"
                   className={`${INPUT_SURFACE_CLASS} px-4 py-3 text-lg font-mono tabular-nums text-zinc-100`}
                 />
@@ -666,6 +711,9 @@ export function CalculatorForm({
               </div>
               <div className="sm:col-span-5 space-y-1.5">
                 <input
+                  ref={(el) => {
+                    inputRefs.current[4] = el;
+                  }}
                   id="calc-ads-cost"
                   type="number"
                   min="0"
@@ -676,6 +724,7 @@ export function CalculatorForm({
                   onChange={(e) =>
                     handleMonetaryChange("adsCost", e.target.value)
                   }
+                  onKeyDown={(e) => handleFieldKeyDown(4, e)}
                   placeholder="0"
                   className={`${INPUT_SURFACE_CLASS} px-4 py-3 text-lg font-mono tabular-nums text-zinc-100`}
                 />
@@ -705,6 +754,9 @@ export function CalculatorForm({
               </div>
               <div className="sm:col-span-5 space-y-1.5">
                 <input
+                  ref={(el) => {
+                    inputRefs.current[5] = el;
+                  }}
                   id="calc-selling-price"
                   type="number"
                   min="0"
@@ -715,6 +767,7 @@ export function CalculatorForm({
                   onChange={(e) =>
                     handleMonetaryChange("sellingPrice", e.target.value)
                   }
+                  onKeyDown={(e) => handleFieldKeyDown(5, e)}
                   placeholder="0"
                   className="w-full rounded-xl bg-black/85 border-2 border-emerald-500/65 px-4 py-3 text-lg font-mono font-bold tabular-nums text-emerald-400 shadow-[0_0_24px_-6px_rgba(16,185,129,0.28)] transition-all duration-200 hover:border-emerald-400 focus:border-emerald-400 focus:shadow-[0_0_28px_-4px_rgba(16,185,129,0.42)] focus:outline-none light:bg-emerald-50/40 light:border-emerald-600 light:text-emerald-800 light:shadow-xs light:hover:border-emerald-700 light:focus:border-emerald-700 light:focus:ring-2 light:focus:ring-emerald-600/20 light:focus:shadow-none"
                 />
@@ -744,6 +797,9 @@ export function CalculatorForm({
               </div>
               <div className="sm:col-span-5 space-y-1.5">
                 <input
+                  ref={(el) => {
+                    inputRefs.current[6] = el;
+                  }}
                   id="calc-fixed-cost"
                   type="number"
                   min="0"
@@ -754,6 +810,7 @@ export function CalculatorForm({
                   onChange={(e) =>
                     handleMonetaryChange("fixedCost", e.target.value)
                   }
+                  onKeyDown={(e) => handleFieldKeyDown(6, e)}
                   placeholder="0"
                   className={`${INPUT_SURFACE_CLASS} px-4 py-3 text-lg font-mono tabular-nums text-zinc-100`}
                 />
@@ -777,6 +834,7 @@ export function CalculatorForm({
             </button>
 
             <button
+              ref={submitButtonRef}
               type="submit"
               className="inline-flex items-center justify-center gap-2.5 rounded-xl bg-emerald-500 px-7 py-3.5 text-base font-semibold text-slate-950 shadow-[0_0_24px_-4px_rgba(16,185,129,0.45)] transition-all duration-200 hover:bg-emerald-400 light:bg-emerald-600 light:text-white light:shadow-sm light:hover:bg-emerald-700"
             >

@@ -6,6 +6,7 @@ import {
   Cloud,
   Code2,
   Cpu,
+  Crown,
   ExternalLink,
   GraduationCap,
   Layers,
@@ -13,6 +14,7 @@ import {
   Rocket,
   Sparkles,
   UserCheck,
+  Users,
 } from "lucide-react";
 import { useAppLanguage } from "@/lib/language";
 import { FloatingBackgroundDocs } from "@/components/FloatingBackgroundDocs";
@@ -38,6 +40,42 @@ function GitHubLogoSvg({ className = "h-4 w-4" }: { className?: string }) {
     </svg>
   );
 }
+
+interface TeamMemberItem {
+  index: string;
+  nameTh: string;
+  nameEn: string;
+  isLead?: boolean;
+}
+
+const KATUM_TEAM_MEMBERS: readonly TeamMemberItem[] = [
+  {
+    index: "01",
+    nameTh: "นายพีรพัฒน์ ลำลา",
+    nameEn: "Mr. Peerapat Lamla",
+  },
+  {
+    index: "02",
+    nameTh: "นายพรรษา รวมทรัพย์",
+    nameEn: "Mr. Pansa Ruamsap",
+    isLead: true,
+  },
+  {
+    index: "03",
+    nameTh: "นายพัชรพล พูลสวัสดิ์",
+    nameEn: "Mr. Patcharapol Poonsawat",
+  },
+  {
+    index: "04",
+    nameTh: "นายวิวัฒน์ชัย ธีระพาณิชย์",
+    nameEn: "Mr. Wiwatthachai Thiraphanit",
+  },
+  {
+    index: "05",
+    nameTh: "นายศิริชัย ตอแก้ว",
+    nameEn: "Mr. Sirichai Tokaeo",
+  },
+];
 
 interface TechStackItem {
   name: string;
@@ -165,8 +203,8 @@ export function CreditsView({ isAuthenticated }: CreditsViewProps) {
             <Sparkles className="h-3.5 w-3.5" />
             <span>
               {isEn
-                ? "v1.2.0 (Updated Nov 23, 2026)"
-                : "v1.2.0 (อัปเดต 23 พ.ย. 2569)"}
+                ? "v1.3.0 (Updated Nov 23, 2026)"
+                : "v1.3.0 (อัปเดต 23 พ.ย. 2569)"}
             </span>
           </span>
         </div>
@@ -300,6 +338,78 @@ export function CreditsView({ isAuthenticated }: CreditsViewProps) {
                 <ExternalLink className="h-3.5 w-3.5 shrink-0 opacity-70" />
               </a>
             </div>
+
+            <div className="border-t border-zinc-800/80 light:border-slate-200 pt-6 space-y-4">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5">
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-emerald-500/30 bg-emerald-500/12 text-emerald-400 light:border-emerald-200 light:bg-emerald-50 light:text-emerald-700">
+                    <Users className="h-4 w-4" />
+                  </span>
+                  <div>
+                    <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-emerald-400 light:text-emerald-700 block">
+                      PROJECT TEAM
+                    </span>
+                    <h3 className="text-sm sm:text-base font-bold text-white light:text-slate-900">
+                      {isEn
+                        ? "Project Development Team — Katum Group"
+                        : "ทีมพัฒนาโครงงาน — กลุ่มคาทุม"}
+                    </h3>
+                  </div>
+                </div>
+
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 font-mono text-xs font-semibold text-emerald-300 light:border-emerald-200 light:bg-emerald-50 light:text-emerald-700">
+                  <span>{isEn ? "5 Members" : "5 สมาชิก"}</span>
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {KATUM_TEAM_MEMBERS.map((member) => (
+                  <div
+                    key={member.index}
+                    className={`rounded-xl border px-4 py-3.5 transition-colors ${
+                      member.isLead
+                        ? "border-emerald-500/45 bg-gradient-to-br from-emerald-950/45 via-black/75 to-black/80 shadow-[0_0_24px_-10px_rgba(16,185,129,0.35)] light:border-emerald-300 light:from-emerald-50 light:via-white light:to-emerald-50/40 light:shadow-xs"
+                        : "border-zinc-800/85 bg-black/55 hover:border-emerald-500/30 light:border-slate-200 light:bg-slate-50/80 light:hover:border-emerald-300"
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <span
+                          className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg font-mono text-xs font-bold ${
+                            member.isLead
+                              ? "border border-emerald-400/45 bg-emerald-500/20 text-emerald-300 light:border-emerald-300 light:bg-emerald-100 light:text-emerald-800"
+                              : "border border-zinc-800 bg-zinc-950 text-zinc-400 light:border-slate-200 light:bg-white light:text-slate-500"
+                          }`}
+                        >
+                          {member.index}
+                        </span>
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold text-zinc-100 light:text-slate-900 truncate">
+                            {isEn ? member.nameEn : member.nameTh}
+                          </p>
+                          <p className="text-[11px] text-zinc-500 light:text-slate-500 truncate">
+                            {isEn ? member.nameTh : member.nameEn}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {member.isLead && (
+                      <div className="mt-2.5 pt-2 border-t border-emerald-500/20 light:border-emerald-200/80">
+                        <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/40 bg-emerald-500/15 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-300 light:border-emerald-300 light:bg-emerald-100 light:text-emerald-800">
+                          <Crown className="h-3 w-3 shrink-0" />
+                          <span>
+                            {isEn
+                              ? "Team Lead / Lead Developer"
+                              : "หัวหน้ากลุ่ม / Lead Developer"}
+                          </span>
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </section>
 
@@ -323,8 +433,8 @@ export function CreditsView({ isAuthenticated }: CreditsViewProps) {
 
             <span className="rounded-full border border-emerald-500/30 bg-black/60 px-3 py-1 font-mono text-xs font-medium text-emerald-300 light:border-emerald-200 light:bg-white light:text-emerald-700">
               {isEn
-                ? "v1.2.0 (Updated Nov 23, 2026)"
-                : "v1.2.0 (อัปเดต 23 พ.ย. 2569)"}
+                ? "v1.3.0 (Updated Nov 23, 2026)"
+                : "v1.3.0 (อัปเดต 23 พ.ย. 2569)"}
             </span>
           </div>
 

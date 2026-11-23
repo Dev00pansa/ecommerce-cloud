@@ -243,9 +243,16 @@ export function Navbar({
   const { isLight, toggleTheme } = useTheme();
   const isEn = language === "en";
 
+  const navContainerRef = useRef<HTMLElement | null>(null);
+  const navPillRef = useRef<HTMLSpanElement | null>(null);
+  const homeNavRef = useRef<HTMLAnchorElement | null>(null);
+  const workspaceNavRef = useRef<HTMLButtonElement | null>(null);
   const toolsDropdownRef = useRef<HTMLDivElement | null>(null);
   const profileDropdownRef = useRef<HTMLDivElement | null>(null);
 
+  const [hoveredNavKey, setHoveredNavKey] = useState<
+    "home" | "workspace" | null
+  >(null);
   const [overrideUsername, setOverrideUsername] = useState<string | null>(null);
   const [overrideAvatarUrl, setOverrideAvatarUrl] = useState<string | null>(
     null
@@ -259,6 +266,73 @@ export function Navbar({
   const displayUsername = overrideUsername ?? username ?? "";
   const displayAvatarUrl = overrideAvatarUrl ?? avatarUrl ?? null;
   const joinedLabel = formatJoinedDate(createdAt, isEn);
+
+  const activeNavKey: "home" | "workspace" | null =
+    toolsDropdownOpen || pathname.startsWith("/dashboard")
+      ? "workspace"
+      : pathname === "/"
+        ? "home"
+        : null;
+  const targetNavKey = hoveredNavKey ?? activeNavKey;
+
+  useEffect(() => {
+    const updateNavPill = () => {
+      const pill = navPillRef.current;
+      if (!pill) return;
+
+      const targetEl =
+        targetNavKey === "home"
+          ? homeNavRef.current
+          : targetNavKey === "workspace"
+            ? workspaceNavRef.current
+            : null;
+
+      if (!targetEl) {
+        pill.style.opacity = "0";
+        return;
+      }
+
+      const left =
+        targetNavKey === "home"
+          ? targetEl.offsetLeft
+          : (toolsDropdownRef.current?.offsetLeft ?? 0) + targetEl.offsetLeft;
+      const width = targetEl.offsetWidth;
+
+      if (width <= 0) {
+        pill.style.opacity = "0";
+        return;
+      }
+
+      pill.style.width = `${width}px`;
+      pill.style.transform = `translateX(${left}px)`;
+      pill.style.opacity = "1";
+    };
+
+    const rafId = window.requestAnimationFrame(updateNavPill);
+    const resizeObserver =
+      typeof ResizeObserver !== "undefined"
+        ? new ResizeObserver(() => updateNavPill())
+        : null;
+
+    if (resizeObserver) {
+      if (navContainerRef.current) {
+        resizeObserver.observe(navContainerRef.current);
+      }
+      if (homeNavRef.current) {
+        resizeObserver.observe(homeNavRef.current);
+      }
+      if (workspaceNavRef.current) {
+        resizeObserver.observe(workspaceNavRef.current);
+      }
+    }
+
+    window.addEventListener("resize", updateNavPill);
+    return () => {
+      window.cancelAnimationFrame(rafId);
+      resizeObserver?.disconnect();
+      window.removeEventListener("resize", updateNavPill);
+    };
+  }, [targetNavKey, language, pathname, toolsDropdownOpen]);
 
   useEffect(() => {
     if (!toolsDropdownOpen && !profileDropdownOpen) return;
@@ -393,33 +467,51 @@ export function Navbar({
               className="hidden md:block h-5 w-px bg-zinc-800 light:bg-slate-200 mx-4"
             />
 
-            <nav className="hidden sm:flex items-center gap-1 ml-3 md:ml-0">
+            <nav
+              ref={navContainerRef}
+              onMouseLeave={() => setHoveredNavKey(null)}
+              className="relative hidden sm:flex items-center gap-1 ml-3 md:ml-0"
+            >
+              <span
+                ref={navPillRef}
+                aria-hidden="true"
+                style={{ opacity: 0, width: 0, transform: "translateX(0px)" }}
+                className="pointer-events-none absolute top-0 bottom-0 left-0 z-0 rounded-xl border border-emerald-400/55 bg-emerald-500/14 shadow-[0_0_20px_-4px_rgba(16,185,129,0.45)] light:border-emerald-500/45 light:bg-emerald-50 light:shadow-[0_2px_12px_rgba(16,185,129,0.18)] transition-all duration-300 ease-out"
+              />
+
               <Link
+                ref={homeNavRef}
                 href={homeHref}
                 scroll={true}
-                onClick={handleLogoClick}
-                className={`rounded-lg px-3.5 py-1.5 text-sm font-medium transition-colors ${
-                  pathname === "/"
-                    ? "bg-zinc-900 text-emerald-400 light:bg-emerald-50 light:text-emerald-700"
-                    : "text-zinc-400 hover:bg-zinc-900 hover:text-zinc-100 light:text-slate-600 light:hover:bg-slate-100 light:hover:text-slate-900"
+                onMouseEnter={() => setHoveredNavKey("home")}
+                onClick={(event) => {
+                  setHoveredNavKey(null);
+                  handleLogoClick(event);
+                }}
+                className={`relative z-10 rounded-xl px-3.5 py-1.5 text-sm font-medium transition-colors duration-200 ${
+                  targetNavKey === "home"
+                    ? "text-emerald-400 light:text-emerald-700"
+                    : "text-zinc-400 hover:text-zinc-100 light:text-slate-600 light:hover:text-slate-900"
                 }`}
               >
                 {isEn ? "Home" : "หน้าหลัก"}
               </Link>
 
-              <div ref={toolsDropdownRef} className="relative">
+              <div ref={toolsDropdownRef} className="relative z-10">
                 <button
+                  ref={workspaceNavRef}
                   type="button"
+                  onMouseEnter={() => setHoveredNavKey("workspace")}
                   onClick={() => {
                     setProfileDropdownOpen(false);
                     setToolsDropdownOpen((prev) => !prev);
                   }}
                   aria-expanded={toolsDropdownOpen}
                   aria-haspopup="menu"
-                  className={`inline-flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-sm font-medium transition-colors focus:outline-none ${
-                    pathname.startsWith("/dashboard") || toolsDropdownOpen
-                      ? "bg-zinc-900 text-emerald-400 light:bg-emerald-50 light:text-emerald-700"
-                      : "text-zinc-400 hover:bg-zinc-900 hover:text-zinc-100 light:text-slate-600 light:hover:bg-slate-100 light:hover:text-slate-900"
+                  className={`inline-flex items-center gap-1.5 rounded-xl px-3.5 py-1.5 text-sm font-medium transition-colors duration-200 focus:outline-none ${
+                    targetNavKey === "workspace"
+                      ? "text-emerald-400 light:text-emerald-700"
+                      : "text-zinc-400 hover:text-zinc-100 light:text-slate-600 light:hover:text-slate-900"
                   }`}
                 >
                   <span>{isEn ? "Workspace" : "จัดการข้อมูล"}</span>
@@ -451,7 +543,10 @@ export function Navbar({
                       isEn={isEn}
                       calculatorTabHref={calculatorTabHref}
                       cloudTabHref={cloudTabHref}
-                      onSelect={() => setToolsDropdownOpen(false)}
+                      onSelect={() => {
+                        setToolsDropdownOpen(false);
+                        setHoveredNavKey(null);
+                      }}
                     />
                   </Suspense>
                 </div>

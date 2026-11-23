@@ -9,6 +9,7 @@ import { useAppLanguage } from "@/lib/language";
 import {
   MAX_CLOUD_RECORDS,
   MAX_MONETARY_VALUE,
+  buildCsvDownloadFilename,
   buildFinancialAnalysis,
   calculateEcommerceMetrics,
   exportCalculationsToCsv,
@@ -35,6 +36,7 @@ import {
   DashboardToast,
   type DashboardToastData,
 } from "@/components/DashboardToast";
+import { ProcessingModal } from "@/components/ProcessingModal";
 
 interface DashboardClientProps {
   userId: string;
@@ -95,6 +97,8 @@ export function DashboardClient({
     useState<CalculatorFormStrings>(EMPTY_FORM_VALUES);
   const [discountPercent, setDiscountPercent] = useState<number>(15);
   const [hasCalculated, setHasCalculated] = useState<boolean>(false);
+  const [isProcessingCalculation, setIsProcessingCalculation] =
+    useState<boolean>(false);
   const [pendingExitTab, setPendingExitTab] = useState<
     "history" | "calculator" | null
   >(null);
@@ -394,12 +398,19 @@ export function DashboardClient({
 
   function handleCalculate() {
     if (!numericInputs.productName.trim() || isDuplicateProductName) return;
+    if (isProcessingCalculation) return;
     summaryEnteredRef.current = false;
     setPendingExitTab(null);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    setIsProcessingCalculation(true);
+  }
+
+  const handleProcessingComplete = useCallback(() => {
+    setIsProcessingCalculation(false);
     setHasCalculated(true);
     handleSwitchTab("summary");
     window.scrollTo({ top: 0, behavior: "smooth" });
-  }
+  }, [handleSwitchTab]);
 
   function handleBackToCalculator() {
     summaryEnteredRef.current = false;
@@ -768,14 +779,14 @@ export function DashboardClient({
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  function triggerCsvDownload(csvContent: string) {
+  function triggerCsvDownload(csvContent: string, filename: string) {
     const blob = new Blob([csvContent], {
       type: "text/csv;charset=utf-8;",
     });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `khumlab-${new Date().toISOString().slice(0, 10)}.csv`;
+    link.download = filename;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -789,7 +800,8 @@ export function DashboardClient({
       numericInputs,
       language
     );
-    triggerCsvDownload(csvContent);
+    const filename = buildCsvDownloadFilename([numericInputs.productName]);
+    triggerCsvDownload(csvContent, filename);
   }
 
   function handleExportCloudCsv(
@@ -803,7 +815,10 @@ export function DashboardClient({
       undefined,
       language
     );
-    triggerCsvDownload(csvContent);
+    const filename = buildCsvDownloadFilename(
+      orderedRecords.map((record) => record.product_name)
+    );
+    triggerCsvDownload(csvContent, filename);
   }
 
   const activePreviewUrl = compressedImage?.previewUrl ?? existingImageUrl;
@@ -968,6 +983,13 @@ export function DashboardClient({
           />
         )}
       </main>
+
+      {isProcessingCalculation && (
+        <ProcessingModal
+          productName={numericInputs.productName}
+          onComplete={handleProcessingComplete}
+        />
+      )}
 
       <DashboardToast toast={toast} onDismiss={dismissToast} />
     </div>

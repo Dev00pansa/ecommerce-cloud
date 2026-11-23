@@ -26,7 +26,7 @@ const WORKFLOW_STEPS: WorkflowStepItem[] = [
   {
     step: "01",
     textSide: "right",
-    image: "/images/workflow/step-1.jpg",
+    image: "/screenshots/step-01-calculator.png",
     tag: "Platform & Cost Structure",
     titleTh: "เลือกแพลตฟอร์ม & กรอกต้นทุน",
     titleEn: "Select Platform & Enter Costs",
@@ -41,7 +41,7 @@ const WORKFLOW_STEPS: WorkflowStepItem[] = [
   {
     step: "02",
     textSide: "left",
-    image: "/images/workflow/step-2.jpg",
+    image: "/screenshots/step-02-analytics.png",
     tag: "Net Margin & Break-Even Analysis",
     titleTh: "ตรวจกำไรสุทธิ & จุดคุ้มทุน",
     titleEn: "Inspect Net Margin & Break-Even",
@@ -57,7 +57,7 @@ const WORKFLOW_STEPS: WorkflowStepItem[] = [
   {
     step: "03",
     textSide: "right",
-    image: "/images/workflow/step-3.jpg",
+    image: "/screenshots/step-03-promo.png",
     tag: "Flash Sale & Promo Simulation",
     titleTh: "จำลองส่วนลดโปรโมชัน",
     titleEn: "Simulate Flash Sale Discounts",
@@ -72,7 +72,7 @@ const WORKFLOW_STEPS: WorkflowStepItem[] = [
   {
     step: "04",
     textSide: "left",
-    image: "/images/workflow/step-4.jpg",
+    image: "/screenshots/step-04-cloud.png",
     tag: "Cloud Storage & CSV Report",
     titleTh: "บันทึก Cloud & Export CSV",
     titleEn: "Save to Cloud & Export CSV",
@@ -228,7 +228,7 @@ export function WorkflowShowcase({
                   style={getRadialFeatherMask(isImageLeft)}
                   className={`h-full w-full transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] will-change-[opacity,transform] ${
                     isVisible
-                      ? "opacity-55 light:opacity-35 scale-100"
+                      ? "opacity-55 light:opacity-45 scale-100"
                       : "opacity-10 scale-[1.03]"
                   }`}
                 >
@@ -237,7 +237,7 @@ export function WorkflowShowcase({
                     src={item.image}
                     alt={title}
                     loading={idx === 0 ? "eager" : "lazy"}
-                    className="h-full w-full object-cover object-center saturate-[0.95] contrast-[1.05]"
+                    className="h-full w-full object-cover object-top saturate-[0.95] contrast-[1.05]"
                   />
                 </div>
               </div>

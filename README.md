@@ -1,4 +1,4 @@
-# KhumLab `v1.2.0`
+# KhumLab `v1.3.0`
 
 **Live App:** https://khumlab.vercel.app
 
@@ -6,13 +6,15 @@ A real-cost pricing calculator, profit diagnostics engine, and break-even analyt
 
 ## Key Features
 
+- **Real App Showcase & Crossfade Login Backdrop:** Landing page 4-step walkthrough and Executive Light Mode sign-in screen feature real high-resolution captures of KhumLab's Calculator, Financial Diagnostics, Promo Simulator, and Cloud Workspace.
 - **Dual-Theme Design System (Obsidian Dark Mode & Executive Light Mode):** Switch seamlessly between KhumLab's signature Obsidian Black & Emerald Green glassmorphism dark theme and a high-contrast Executive Clean Light Mode crafted for daylight readability — persisted automatically in `localStorage` without flash-of-wrong-theme.
-- **Public Navbar Theme & Language Controls:** Instant Light/Dark toggle (`Sun` / `Moon`) and bilingual `TH | EN` switcher accessible directly from the Navbar across the Landing page, Login page, Creator Credits page, and Authenticated Dashboard.
+- **Smooth Sliding Emerald Navigation Pill:** Tactile magnetic hover and active-route indicator on the primary left navigation controls (`Home` and `Workspace`), dynamically recalculating dimensions across viewport resizes and `TH | EN` language switches.
+- **Enter-Key Field Progression & Randomized Diagnostic Loader:** Press `Enter` to advance sequentially through every calculator field with automatic numeric selection and clean blur-to-submit scroll on the final field, followed by a realistic randomized stepped progress modal (`0%–100%`) with live bilingual diagnostic status phases.
+- **Smart Product-Based CSV Filenames:** Exported spreadsheets automatically adopt clean, date-free filenames — `KhumLab-<ProductName>.csv` for single products (preserving both Thai and English names while stripping forbidden filesystem characters) and `KhumLab-Summary-Products.csv` for multi-product batch exports.
 - **Full-Site Bilingual Support (TH / EN):** 100% localized Thai and English experience covering every form, diagnostic engine insight, interactive SVG chart, modal, toast notification, footer, credits page, and exported CSV column header.
-- **Marketplace GP & True Unit Cost Calculator:** Built-in presets for Shopee (13%), TikTok Shop (12%), Lazada (12%), and Direct Sales (0%) with customizable fee overrides, per-unit product cost, packaging materials, average ad spend (CPA), and monthly fixed overhead.
 - **E-Commerce Financial Diagnostic Engine:** Composite Profit Health Score (`0–100`, Grades `S–D`), multi-color Cost Structure Donut Chart, Discount Sensitivity Simulator (`0%–50%`), paired Revenue vs. Cumulative Net Profit Volume Projection Chart, Return Loss risk multiplier, Max Safe CPA / Break-Even ROAS, 3-tier suggested retail prices, and actionable optimization steps.
 - **Private Cloud Storage (Up to 20 Plans / Account):** Save, edit, single-delete, or bulk-delete pricing plans with Realtime Supabase synchronization, automatic product photo compression (under 120 KB), custom-column CSV export, and duplicate product name protection.
-- **Creator Credits & Architecture Page (`/credits`):** Dedicated bilingual showcase detailing the project origin, developer profile (`@Dev00pansa`), open-source repository links, and full technology architecture.
+- **Creator & Katum Group Team Credits (`/credits`):** Dedicated bilingual showcase featuring the project origin, Katum Group development team roster, developer profile (`@Dev00pansa`), open-source repository links, and full technology architecture.
 - **Backend-First Account Security:** Server-side SSR route protection via `@supabase/ssr`, case-sensitive username authentication, anti-bot registration guard, rate-limit cooldowns, and strict PostgreSQL Row-Level Security (RLS) isolating every user's data and storage objects.
 
 ## Tech Stack & Architecture
@@ -28,9 +30,9 @@ A real-cost pricing calculator, profit diagnostics engine, and break-even analyt
 ```text
 src/
 ├── app/                # Next.js App Router pages (/, /login, /dashboard, /credits), API guard, OpenGraph
-├── components/         # Modular UI components (Navbar, Footer, CreditsView, CalculatorForm, AnalyticsCharts, HistoryPanel)
+├── components/         # Modular UI components (Navbar, Footer, CreditsView, ProcessingModal, CalculatorForm, AnalyticsCharts, HistoryPanel)
 ├── context/            # ThemeContext (Obsidian Dark & Executive Light persistence)
-├── lib/                # Pure calculation engine, auth validators, i18n language store, Supabase SSR clients
+├── lib/                # Pure calculation engine, CSV filename helpers, auth validators, i18n language store, Supabase SSR clients
 └── types/              # Strict shared TypeScript interfaces and types
 ```
 

@@ -40,6 +40,13 @@ const AUTH_BACKGROUND_IMAGES: readonly string[] = [
   "/images/auth/bg-5.jpg",
 ];
 
+const LIGHT_AUTH_SCREENSHOTS: readonly string[] = [
+  "/screenshots/step-01-calculator.png",
+  "/screenshots/step-02-analytics.png",
+  "/screenshots/step-03-promo.png",
+  "/screenshots/step-04-cloud.png",
+];
+
 const MAX_CLIENT_ATTEMPTS = 5;
 const CLIENT_WINDOW_MS = 60_000;
 const MIN_HUMAN_DURATION_MS = 1_500;
@@ -474,27 +481,49 @@ export function AuthForm() {
         aria-hidden="true"
         className="pointer-events-none fixed inset-0 -z-10 overflow-hidden bg-black light:bg-[#f8fafc]"
       >
-        {AUTH_BACKGROUND_IMAGES.map((src, idx) => {
-          const isActive = idx === activeBgIndex;
-          return (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              key={src}
-              src={src}
-              alt=""
-              loading={idx === 0 ? "eager" : "lazy"}
-              className={`absolute inset-0 h-full w-full object-cover object-center transition-all duration-1000 ease-in-out will-change-[opacity,transform] ${
-                isActive
-                  ? "opacity-100 light:opacity-20 scale-105"
-                  : "opacity-0 scale-100"
-              }`}
-            />
-          );
-        })}
+        <div className="absolute inset-0 light:hidden">
+          {AUTH_BACKGROUND_IMAGES.map((src, idx) => {
+            const isActive = idx === activeBgIndex;
+            return (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                key={src}
+                src={src}
+                alt=""
+                loading={idx === 0 ? "eager" : "lazy"}
+                className={`absolute inset-0 h-full w-full object-cover object-center transition-all duration-1000 ease-in-out will-change-[opacity,transform] ${
+                  isActive ? "opacity-100 scale-105" : "opacity-0 scale-100"
+                }`}
+              />
+            );
+          })}
 
-        <div className="absolute inset-0 bg-black/75 light:bg-slate-50/85" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_10%,rgba(0,0,0,0.88)_100%)] light:bg-[radial-gradient(circle_at_center,rgba(248,250,252,0.55)_10%,rgba(241,245,249,0.92)_100%)]" />
-        <div className="khumlab-dashboard-dots absolute inset-0 opacity-45 light:opacity-100" />
+          <div className="absolute inset-0 bg-black/75" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_10%,rgba(0,0,0,0.88)_100%)]" />
+        </div>
+
+        <div className="hidden light:block absolute inset-0">
+          {LIGHT_AUTH_SCREENSHOTS.map((src, idx) => {
+            const isActive =
+              idx === activeBgIndex % LIGHT_AUTH_SCREENSHOTS.length;
+            return (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                key={src}
+                src={src}
+                alt=""
+                loading={idx === 0 ? "eager" : "lazy"}
+                className={`absolute inset-0 h-full w-full object-cover object-top blur-[1.5px] transition-all duration-1000 ease-in-out will-change-[opacity,transform] ${
+                  isActive ? "opacity-[0.20] scale-[1.03]" : "opacity-0 scale-100"
+                }`}
+              />
+            );
+          })}
+
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_85%_85%_at_50%_50%,rgba(248,250,252,0.18)_15%,rgba(248,250,252,0.78)_100%)]" />
+        </div>
+
+        <div className="khumlab-dashboard-dots absolute inset-0 opacity-45 light:opacity-65" />
       </div>
 
       <div className="relative z-10 mx-auto w-full max-w-md overflow-hidden rounded-xl border border-emerald-500/45 bg-black/85 backdrop-blur-xl p-6 sm:p-8 shadow-[0_0_40px_-8px_rgba(16,185,129,0.35),inset_0_1px_0_0_rgba(52,211,153,0.25)] light:border-slate-200 light:bg-white/95 light:shadow-[0_16px_44px_rgba(15,23,42,0.1)]">

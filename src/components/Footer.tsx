@@ -153,8 +153,8 @@ export function Footer({ isAuthenticated = false }: FooterProps) {
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 light:bg-emerald-600" />
               <span>
                 {isEn
-                  ? "v1.2.0 • Updated Nov 23, 2026"
-                  : "v1.2.0 • อัปเดต 23 พ.ย. 2569"}
+                  ? "v1.3.0 • Updated Nov 23, 2026"
+                  : "v1.3.0 • อัปเดต 23 พ.ย. 2569"}
               </span>
             </span>
 
