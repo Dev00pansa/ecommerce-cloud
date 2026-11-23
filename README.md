@@ -43,4 +43,4 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
 npm run dev
 ```
 
-เปิดเบราว์เซอร์ไปที่ http://localhost:3000 เพื่อเริ่มใช้งาน
+เปิดเบราว์เซอร์ไปที่ https://khumlab.vercel.app/ เพื่อเริ่มใช้งาน
