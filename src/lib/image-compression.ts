@@ -1,4 +1,4 @@
-import type { CompressedProductImage } from "@/types";
+import type { AppLanguage, CompressedProductImage } from "@/types";
 
 const MAX_RAW_FILE_BYTES = 5 * 1024 * 1024;
 const MAX_COMPRESSED_BYTES = 120 * 1024;
@@ -57,16 +57,26 @@ function canvasToBlob(
   });
 }
 
-function loadImageElement(objectUrl: string): Promise<HTMLImageElement> {
+function loadImageElement(
+  objectUrl: string,
+  isEn: boolean
+): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.onload = () => resolve(img);
-    img.onerror = () => reject(new Error("ไม่สามารถอ่านไฟล์รูปภาพนี้ได้"));
+    img.onerror = () =>
+      reject(
+        new Error(
+          isEn
+            ? "Unable to read this image file."
+            : "ไม่สามารถอ่านไฟล์รูปภาพนี้ได้"
+        )
+      );
     img.src = objectUrl;
   });
 }
 
-async function validateRawImageFile(file: File): Promise<void> {
+async function validateRawImageFile(file: File, isEn: boolean): Promise<void> {
   const extension = file.name.split(".").pop()?.trim().toLowerCase() ?? "";
 
   if (
@@ -74,29 +84,41 @@ async function validateRawImageFile(file: File): Promise<void> {
     !ALLOWED_EXTENSIONS.has(extension)
   ) {
     throw new Error(
-      "รองรับเฉพาะไฟล์รูปภาพ .jpg, .jpeg, .png และ .webp เท่านั้น"
+      isEn
+        ? "Only .jpg, .jpeg, .png, and .webp image files are supported."
+        : "รองรับเฉพาะไฟล์รูปภาพ .jpg, .jpeg, .png และ .webp เท่านั้น"
     );
   }
 
   if (file.size <= 0 || file.size > MAX_RAW_FILE_BYTES) {
-    throw new Error("ขนาดไฟล์รูปภาพต้นฉบับต้องไม่เกิน 5 MB");
+    throw new Error(
+      isEn
+        ? "Original image size must not exceed 5 MB."
+        : "ขนาดไฟล์รูปภาพต้นฉบับต้องไม่เกิน 5 MB"
+    );
   }
 
   const validHeader = await hasValidImageMagicBytes(file);
   if (!validHeader) {
-    throw new Error("ไฟล์ที่เลือกไม่ใช่ไฟล์รูปภาพที่ถูกต้อง");
+    throw new Error(
+      isEn
+        ? "Selected file is not a valid image."
+        : "ไฟล์ที่เลือกไม่ใช่ไฟล์รูปภาพที่ถูกต้อง"
+    );
   }
 }
 
 export async function compressProductImageFile(
-  file: File
+  file: File,
+  language: AppLanguage = "th"
 ): Promise<CompressedProductImage> {
-  await validateRawImageFile(file);
+  const isEn = language === "en";
+  await validateRawImageFile(file, isEn);
 
   const tempUrl = URL.createObjectURL(file);
 
   try {
-    const img = await loadImageElement(tempUrl);
+    const img = await loadImageElement(tempUrl, isEn);
     const sourceWidth = Math.max(1, img.naturalWidth || img.width);
     const sourceHeight = Math.max(1, img.naturalHeight || img.height);
 
@@ -113,7 +135,11 @@ export async function compressProductImageFile(
 
     const ctx = canvas.getContext("2d");
     if (!ctx) {
-      throw new Error("เบราว์เซอร์ไม่รองรับการย่อขนาดรูปภาพ");
+      throw new Error(
+        isEn
+          ? "Your browser does not support image resizing."
+          : "เบราว์เซอร์ไม่รองรับการย่อขนาดรูปภาพ"
+      );
     }
 
     ctx.fillStyle = "#09090B";
@@ -145,11 +171,19 @@ export async function compressProductImageFile(
     }
 
     if (!selectedBlob) {
-      throw new Error("ไม่สามารถบีบอัดรูปภาพได้ กรุณาลองใช้รูปอื่น");
+      throw new Error(
+        isEn
+          ? "Failed to compress image. Please try another file."
+          : "ไม่สามารถบีบอัดรูปภาพได้ กรุณาลองใช้รูปอื่น"
+      );
     }
 
     if (selectedBlob.size > 150 * 1024) {
-      throw new Error("รูปภาพหลังบีบอัดยังมีขนาดใหญ่เกิน 150 KB กรุณาเลือกรูปอื่น");
+      throw new Error(
+        isEn
+          ? "Compressed image still exceeds 150 KB. Please choose a smaller image."
+          : "รูปภาพหลังบีบอัดยังมีขนาดใหญ่เกิน 150 KB กรุณาเลือกรูปอื่น"
+      );
     }
 
     const previewUrl = URL.createObjectURL(selectedBlob);
@@ -167,14 +201,16 @@ export async function compressProductImageFile(
 }
 
 export async function compressAvatarImageFile(
-  file: File
+  file: File,
+  language: AppLanguage = "th"
 ): Promise<CompressedProductImage> {
-  await validateRawImageFile(file);
+  const isEn = language === "en";
+  await validateRawImageFile(file, isEn);
 
   const tempUrl = URL.createObjectURL(file);
 
   try {
-    const img = await loadImageElement(tempUrl);
+    const img = await loadImageElement(tempUrl, isEn);
     const sourceWidth = Math.max(1, img.naturalWidth || img.width);
     const sourceHeight = Math.max(1, img.naturalHeight || img.height);
     const cropSize = Math.min(sourceWidth, sourceHeight);
@@ -187,7 +223,11 @@ export async function compressAvatarImageFile(
 
     const ctx = canvas.getContext("2d");
     if (!ctx) {
-      throw new Error("เบราว์เซอร์ไม่รองรับการย่อขนาดรูปภาพ");
+      throw new Error(
+        isEn
+          ? "Your browser does not support image resizing."
+          : "เบราว์เซอร์ไม่รองรับการย่อขนาดรูปภาพ"
+      );
     }
 
     ctx.fillStyle = "#09090B";
@@ -229,11 +269,19 @@ export async function compressAvatarImageFile(
     }
 
     if (!selectedBlob) {
-      throw new Error("ไม่สามารถบีบอัดรูปโปรไฟล์ได้ กรุณาลองใช้รูปอื่น");
+      throw new Error(
+        isEn
+          ? "Failed to compress profile photo. Please try another file."
+          : "ไม่สามารถบีบอัดรูปโปรไฟล์ได้ กรุณาลองใช้รูปอื่น"
+      );
     }
 
     if (selectedBlob.size > 50 * 1024) {
-      throw new Error("รูปโปรไฟล์หลังบีบอัดยังมีขนาดเกิน 50 KB กรุณาเลือกรูปอื่น");
+      throw new Error(
+        isEn
+          ? "Compressed profile photo still exceeds 50 KB. Please choose another image."
+          : "รูปโปรไฟล์หลังบีบอัดยังมีขนาดเกิน 50 KB กรุณาเลือกรูปอื่น"
+      );
     }
 
     const previewUrl = URL.createObjectURL(selectedBlob);

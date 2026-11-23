@@ -3,6 +3,7 @@
 import Link from "next/link";
 import type { MouseEvent } from "react";
 import { ArrowDown, ArrowRight, Calculator } from "lucide-react";
+import { useAppLanguage } from "@/lib/language";
 import { KhumLabLogo } from "@/components/KhumLabLogo";
 import { PainPointMarquee } from "@/components/PainPointMarquee";
 import { WorkflowShowcase } from "@/components/WorkflowShowcase";
@@ -13,6 +14,8 @@ interface LandingViewProps {
 }
 
 export function LandingView({ isAuthenticated }: LandingViewProps) {
+  const [language] = useAppLanguage();
+  const isEn = language === "en";
   const startHref = isAuthenticated ? "/dashboard" : "/login";
 
   function handleScrollToWorkflow(event: MouseEvent<HTMLAnchorElement>) {
@@ -41,19 +44,45 @@ export function LandingView({ isAuthenticated }: LandingViewProps) {
             <div className="w-full grid grid-cols-1 lg:grid-cols-12 items-center gap-10 lg:gap-12">
               <div className="animate-enter lg:col-span-7 text-left space-y-6">
                 <h1 className="py-1 text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-zinc-100 leading-[1.15]">
-                  คิดราคาขายให้มีกำไรจริง หยุดปัญหา{" "}
-                  <span className="text-emerald-400">“ขายดีแต่ขาดทุน”</span>
+                  {isEn ? (
+                    <>
+                      Price for Real Profit, End{" "}
+                      <span className="text-emerald-400">
+                        &ldquo;High Sales, Zero Profit&rdquo;
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      คิดราคาขายให้มีกำไรจริง หยุดปัญหา{" "}
+                      <span className="text-emerald-400">“ขายดีแต่ขาดทุน”</span>
+                    </>
+                  )}
                 </h1>
 
                 <p className="text-lg md:text-xl leading-relaxed text-zinc-400">
-                  ผู้ขายออนไลน์จำนวนมากตั้งราคาจาก{" "}
-                  <span className="text-zinc-100 font-medium">
-                    ราคาขายลบต้นทุนสินค้าเพียงอย่างเดียว
-                  </span>{" "}
-                  แต่ลืมหักค่า GP แพลตฟอร์ม (12%–13%), ค่าโฆษณาต่อชิ้น,
-                  ค่ากล่องและบับเบิลกันกระแทก รวมถึงส่วนลดช่วงจัดแคมเปญ
-                  KhumLab ช่วยให้คุณเห็นกำไรสุทธิ จุดคุ้มทุน
-                  และผลกระทบจากโปรโมชันก่อนเปิดขายจริงในไม่กี่วินาที
+                  {isEn ? (
+                    <>
+                      Many online sellers set prices using{" "}
+                      <span className="text-zinc-100 font-medium">
+                        selling price minus product cost alone
+                      </span>
+                      , forgetting marketplace GP fees (12%–13%), ad spend per
+                      order, boxes & bubble wrap, and flash sale discounts.
+                      KhumLab reveals your true net profit, break-even volume,
+                      and promo impact in seconds before you launch.
+                    </>
+                  ) : (
+                    <>
+                      ผู้ขายออนไลน์จำนวนมากตั้งราคาจาก{" "}
+                      <span className="text-zinc-100 font-medium">
+                        ราคาขายลบต้นทุนสินค้าเพียงอย่างเดียว
+                      </span>{" "}
+                      แต่ลืมหักค่า GP แพลตฟอร์ม (12%–13%), ค่าโฆษณาต่อชิ้น,
+                      ค่ากล่องและบับเบิลกันกระแทก รวมถึงส่วนลดช่วงจัดแคมเปญ
+                      KhumLab ช่วยให้คุณเห็นกำไรสุทธิ จุดคุ้มทุน
+                      และผลกระทบจากโปรโมชันก่อนเปิดขายจริงในไม่กี่วินาที
+                    </>
+                  )}
                 </p>
 
                 <div className="flex flex-wrap items-center gap-3.5 pt-2">
@@ -62,7 +91,11 @@ export function LandingView({ isAuthenticated }: LandingViewProps) {
                     onClick={handleScrollToWorkflow}
                     className="inline-flex items-center gap-2 rounded-lg border border-zinc-800 bg-zinc-950/90 px-5 py-3.5 text-sm sm:text-base font-medium text-zinc-200 transition-all hover:border-emerald-500/50 hover:text-emerald-400"
                   >
-                    <span>ดูวิธีใช้งาน (4 ขั้นตอน)</span>
+                    <span>
+                      {isEn
+                        ? "See How It Works (4 Steps)"
+                        : "ดูวิธีใช้งาน (4 ขั้นตอน)"}
+                    </span>
                     <ArrowDown className="h-4 w-4 text-emerald-400" />
                   </a>
 
@@ -73,8 +106,12 @@ export function LandingView({ isAuthenticated }: LandingViewProps) {
                     <Calculator className="h-5 w-5" />
                     <span>
                       {isAuthenticated
-                        ? "เข้าสู่เครื่องมือคำนวณ (Dashboard)"
-                        : "เข้าสู่ระบบ / เริ่มใช้งาน"}
+                        ? isEn
+                          ? "Open Calculator (Dashboard)"
+                          : "เข้าสู่เครื่องมือคำนวณ (Dashboard)"
+                        : isEn
+                          ? "Sign In / Get Started"
+                          : "เข้าสู่ระบบ / เริ่มใช้งาน"}
                     </span>
                     <ArrowRight className="h-5 w-5" />
                   </Link>

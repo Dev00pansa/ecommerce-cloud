@@ -28,6 +28,7 @@ import {
   validateEmail,
   validateUsername,
 } from "@/lib/auth";
+import { useAppLanguage } from "@/lib/language";
 import type { AuthTabMode } from "@/types";
 import { PasswordStrengthMeter } from "@/components/PasswordStrengthMeter";
 
@@ -45,6 +46,8 @@ const MIN_HUMAN_DURATION_MS = 1_500;
 
 export function AuthForm() {
   const router = useRouter();
+  const [language] = useAppLanguage();
+  const isEn = language === "en";
   const envStatus = getSupabaseEnvStatus();
 
   const [activeTab, setActiveTab] = useState<AuthTabMode>("login");
@@ -145,25 +148,39 @@ export function AuthForm() {
 
   async function verifySecurityGuard(action: AuthTabMode): Promise<boolean> {
     if (honeypotValue.trim().length > 0) {
-      setErrorMessage("ระบบตรวจพบพฤติกรรมอัตโนมัติที่ผิดปกติ คำขอถูกปฏิเสธ");
+      setErrorMessage(
+        isEn
+          ? "Suspicious automated behavior detected. Request rejected."
+          : "ระบบตรวจพบพฤติกรรมอัตโนมัติที่ผิดปกติ คำขอถูกปฏิเสธ"
+      );
       return false;
     }
 
     if (lockoutSeconds > 0) {
       setErrorMessage(
-        `ทำรายการเกินกำหนด กรุณารออีก ${lockoutSeconds} วินาทีก่อนลองใหม่อีกครั้ง`
+        isEn
+          ? `Too many attempts. Please wait ${lockoutSeconds} seconds before trying again.`
+          : `ทำรายการเกินกำหนด กรุณารออีก ${lockoutSeconds} วินาทีก่อนลองใหม่อีกครั้ง`
       );
       return false;
     }
 
     const elapsedMs = Date.now() - formLoadedAtRef.current;
     if (elapsedMs < MIN_HUMAN_DURATION_MS) {
-      setErrorMessage("ส่งข้อมูลเร็วผิดปกติ กรุณารอสักครู่แล้วลองใหม่อีกครั้ง");
+      setErrorMessage(
+        isEn
+          ? "Submitted too quickly. Please wait a moment and try again."
+          : "ส่งข้อมูลเร็วผิดปกติ กรุณารอสักครู่แล้วลองใหม่อีกครั้ง"
+      );
       return false;
     }
 
     if (action === "register" && !humanVerified) {
-      setErrorMessage("กรุณาเลื่อนแถบยืนยันตัวตนไปทางขวาสุดเพื่อยืนยันว่าไม่ใช่บอท");
+      setErrorMessage(
+        isEn
+          ? "Please slide the verification bar all the way to the right."
+          : "กรุณาเลื่อนแถบยืนยันตัวตนไปทางขวาสุดเพื่อยืนยันว่าไม่ใช่บอท"
+      );
       return false;
     }
 
@@ -176,7 +193,9 @@ export function AuthForm() {
       attemptTimestampsRef.current = recent;
       setLockoutSeconds(60);
       setErrorMessage(
-        "พยายามทำรายการเกิน 5 ครั้งภายใน 1 นาที ระบบล็อกชั่วคราว กรุณารอ 60 วินาที"
+        isEn
+          ? "Exceeded 5 attempts within 1 minute. Temporarily locked for 60 seconds."
+          : "พยายามทำรายการเกิน 5 ครั้งภายใน 1 นาที ระบบล็อกชั่วคราว กรุณารอ 60 วินาที"
       );
       return false;
     }
@@ -210,7 +229,10 @@ export function AuthForm() {
           setLockoutSeconds(payload.retryAfterSeconds);
         }
         setErrorMessage(
-          payload.error ?? "ไม่สามารถทำรายการได้ในขณะนี้ กรุณารอสักครู่"
+          isEn
+            ? "Request temporarily blocked due to rate limits. Please wait a moment."
+            : (payload.error ??
+                "ไม่สามารถทำรายการได้ในขณะนี้ กรุณารอสักครู่")
         );
         return false;
       }
@@ -222,7 +244,7 @@ export function AuthForm() {
   }
 
   async function verifyUsernameAvailability(rawUsername: string): Promise<boolean> {
-    const check = validateUsername(rawUsername);
+    const check = validateUsername(rawUsername, language);
     if (!check.valid) {
       setUsernameStatus("invalid");
       setUsernameFeedback(check.error);
@@ -235,7 +257,9 @@ export function AuthForm() {
     }
 
     setUsernameStatus("checking");
-    setUsernameFeedback("กำลังตรวจสอบชื่อผู้ใช้...");
+    setUsernameFeedback(
+      isEn ? "Checking username availability..." : "กำลังตรวจสอบชื่อผู้ใช้..."
+    );
 
     const { data, error } = await supabase.rpc("check_username_available", {
       p_username: check.normalized,
@@ -249,12 +273,18 @@ export function AuthForm() {
 
     if (data === true) {
       setUsernameStatus("available");
-      setUsernameFeedback("ชื่อผู้ใช้นี้สามารถใช้งานได้");
+      setUsernameFeedback(
+        isEn ? "Username is available" : "ชื่อผู้ใช้นี้สามารถใช้งานได้"
+      );
       return true;
     }
 
     setUsernameStatus("taken");
-    setUsernameFeedback("ชื่อผู้ใช้นี้ถูกใช้งานแล้ว กรุณาเลือกชื่ออื่น");
+    setUsernameFeedback(
+      isEn
+        ? "This username is already taken. Please choose another."
+        : "ชื่อผู้ใช้นี้ถูกใช้งานแล้ว กรุณาเลือกชื่ออื่น"
+    );
     return false;
   }
 
@@ -266,11 +296,17 @@ export function AuthForm() {
     const identifier = loginIdentifier.trim();
 
     if (!identifier) {
-      setErrorMessage("กรุณากรอกชื่อผู้ใช้ (Username) หรืออีเมล");
+      setErrorMessage(
+        isEn
+          ? "Please enter your username or email."
+          : "กรุณากรอกชื่อผู้ใช้ (Username) หรืออีเมล"
+      );
       return;
     }
     if (!loginPassword) {
-      setErrorMessage("กรุณากรอกรหัสผ่าน");
+      setErrorMessage(
+        isEn ? "Please enter your password." : "กรุณากรอกรหัสผ่าน"
+      );
       return;
     }
 
@@ -279,11 +315,18 @@ export function AuthForm() {
 
     const supabase = createClient();
     if (!supabase) {
-      setErrorMessage(envStatus.errorMessage ?? "ยังไม่ได้ตั้งค่าระบบ Cloud");
+      setErrorMessage(
+        envStatus.errorMessage ??
+          (isEn ? "Cloud service is not configured." : "ยังไม่ได้ตั้งค่าระบบ Cloud")
+      );
       return;
     }
 
     setSubmitting(true);
+
+    const invalidLoginMsg = isEn
+      ? "Invalid username or password."
+      : "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง";
 
     try {
       const { data: resolvedEmail, error: rpcError } = await supabase.rpc(
@@ -292,7 +335,7 @@ export function AuthForm() {
       );
 
       if (rpcError || !resolvedEmail || typeof resolvedEmail !== "string") {
-        setErrorMessage("ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง");
+        setErrorMessage(invalidLoginMsg);
         return;
       }
 
@@ -302,7 +345,7 @@ export function AuthForm() {
       });
 
       if (signInError) {
-        setErrorMessage("ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง");
+        setErrorMessage(invalidLoginMsg);
         return;
       }
 
@@ -310,7 +353,7 @@ export function AuthForm() {
       router.push("/dashboard");
       router.refresh();
     } catch {
-      setErrorMessage("ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง");
+      setErrorMessage(invalidLoginMsg);
     } finally {
       setSubmitting(false);
     }
@@ -322,25 +365,33 @@ export function AuthForm() {
 
     setErrorMessage(null);
 
-    const usernameCheck = validateUsername(username);
+    const usernameCheck = validateUsername(username, language);
     if (!usernameCheck.valid) {
       setErrorMessage(usernameCheck.error);
       return;
     }
 
-    const emailCheck = validateEmail(email);
+    const emailCheck = validateEmail(email, language);
     if (!emailCheck.valid) {
       setErrorMessage(emailCheck.error);
       return;
     }
 
     if (registerPassword.length < 6) {
-      setErrorMessage("รหัสผ่านต้องมีความยาวอย่างน้อย 6 ตัวอักษร");
+      setErrorMessage(
+        isEn
+          ? "Password must be at least 6 characters."
+          : "รหัสผ่านต้องมีความยาวอย่างน้อย 6 ตัวอักษร"
+      );
       return;
     }
 
     if (registerPassword !== confirmPassword) {
-      setErrorMessage("รหัสผ่านและยืนยันรหัสผ่านไม่ตรงกัน");
+      setErrorMessage(
+        isEn
+          ? "Passwords do not match."
+          : "รหัสผ่านและยืนยันรหัสผ่านไม่ตรงกัน"
+      );
       return;
     }
 
@@ -349,7 +400,10 @@ export function AuthForm() {
 
     const supabase = createClient();
     if (!supabase) {
-      setErrorMessage(envStatus.errorMessage ?? "ยังไม่ได้ตั้งค่าระบบ Cloud");
+      setErrorMessage(
+        envStatus.errorMessage ??
+          (isEn ? "Cloud service is not configured." : "ยังไม่ได้ตั้งค่าระบบ Cloud")
+      );
       return;
     }
 
@@ -358,7 +412,11 @@ export function AuthForm() {
     try {
       const available = await verifyUsernameAvailability(usernameCheck.normalized);
       if (!available) {
-        setErrorMessage("ชื่อผู้ใช้ (Username) นี้มีคนใช้แล้ว กรุณาเปลี่ยนชื่อใหม่");
+        setErrorMessage(
+          isEn
+            ? "This username is already taken. Please choose another."
+            : "ชื่อผู้ใช้ (Username) นี้มีคนใช้แล้ว กรุณาเปลี่ยนชื่อใหม่"
+        );
         return;
       }
 
@@ -373,12 +431,16 @@ export function AuthForm() {
       });
 
       if (signUpError) {
-        setErrorMessage(translateSupabaseError(signUpError));
+        setErrorMessage(translateSupabaseError(signUpError, language));
         return;
       }
 
       if (data.user && data.user.identities?.length === 0) {
-        setErrorMessage("อีเมลนี้ถูกสมัครใช้งานแล้ว กรุณาเข้าสู่ระบบแทน");
+        setErrorMessage(
+          isEn
+            ? "This email is already registered. Please sign in instead."
+            : "อีเมลนี้ถูกสมัครใช้งานแล้ว กรุณาเข้าสู่ระบบแทน"
+        );
         return;
       }
 
@@ -389,12 +451,14 @@ export function AuthForm() {
         router.refresh();
       } else {
         setErrorMessage(
-          "สร้างบัญชีสำเร็จ กรุณาเข้าสู่ระบบด้วยชื่อผู้ใช้หรืออีเมลที่สมัครไว้"
+          isEn
+            ? "Account created. Please sign in with your username or email."
+            : "สร้างบัญชีสำเร็จ กรุณาเข้าสู่ระบบด้วยชื่อผู้ใช้หรืออีเมลที่สมัครไว้"
         );
         setActiveTab("login");
       }
     } catch (err) {
-      setErrorMessage(translateSupabaseError(err));
+      setErrorMessage(translateSupabaseError(err, language));
     } finally {
       setSubmitting(false);
     }
@@ -455,13 +519,21 @@ export function AuthForm() {
           </span>
           <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-zinc-100">
             {activeTab === "login"
-              ? "เข้าสู่ระบบ KhumLab"
-              : "สร้างบัญชีผู้ใช้งานใหม่"}
+              ? isEn
+                ? "Sign In to KhumLab"
+                : "เข้าสู่ระบบ KhumLab"
+              : isEn
+                ? "Create New Account"
+                : "สร้างบัญชีผู้ใช้งานใหม่"}
           </h1>
           <p className={`mt-1 text-xs sm:text-sm ${mutedText}`}>
             {activeTab === "login"
-              ? "ใช้ Username (ตรงตัวพิมพ์เล็ก-ใหญ่) หรือ Email เพื่อเข้าสู่ Dashboard"
-              : "สมัครสมาชิกแล้วเข้าใช้งานเครื่องมือคำนวณและบันทึก Cloud ได้ทันที"}
+              ? isEn
+                ? "Sign in with your Username (case-sensitive) or Email to access your Dashboard."
+                : "ใช้ Username (ตรงตัวพิมพ์เล็ก-ใหญ่) หรือ Email เพื่อเข้าสู่ Dashboard"
+              : isEn
+                ? "Sign up to unlock the pricing calculator and private Cloud storage right away."
+                : "สมัครสมาชิกแล้วเข้าใช้งานเครื่องมือคำนวณและบันทึก Cloud ได้ทันที"}
           </p>
         </div>
 
@@ -476,7 +548,7 @@ export function AuthForm() {
             }`}
           >
             <LogIn className="h-3.5 w-3.5" />
-            <span>เข้าสู่ระบบ</span>
+            <span>{isEn ? "Sign In" : "เข้าสู่ระบบ"}</span>
           </button>
           <button
             type="button"
@@ -488,7 +560,7 @@ export function AuthForm() {
             }`}
           >
             <UserPlus className="h-3.5 w-3.5" />
-            <span>สมัครสมาชิก</span>
+            <span>{isEn ? "Register" : "สมัครสมาชิก"}</span>
           </button>
         </div>
 
@@ -509,9 +581,23 @@ export function AuthForm() {
           >
             <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
             <span>
-              ระบบล็อกชั่วคราวเนื่องจากส่งคำขอถี่เกินไป กรุณารออีก{" "}
-              <strong className="font-mono tabular-nums">{lockoutSeconds}</strong>{" "}
-              วินาที
+              {isEn ? (
+                <>
+                  Temporarily locked due to too many requests. Please wait{" "}
+                  <strong className="font-mono tabular-nums">
+                    {lockoutSeconds}
+                  </strong>{" "}
+                  seconds.
+                </>
+              ) : (
+                <>
+                  ระบบล็อกชั่วคราวเนื่องจากส่งคำขอถี่เกินไป กรุณารออีก{" "}
+                  <strong className="font-mono tabular-nums">
+                    {lockoutSeconds}
+                  </strong>{" "}
+                  วินาที
+                </>
+              )}
             </span>
           </div>
         )}
@@ -549,7 +635,9 @@ export function AuthForm() {
                 htmlFor="login-identifier"
                 className="block text-xs sm:text-sm font-medium mb-1.5"
               >
-                ชื่อผู้ใช้ หรือ อีเมล (Username / Email)
+                {isEn
+                  ? "Username or Email"
+                  : "ชื่อผู้ใช้ หรือ อีเมล (Username / Email)"}
               </label>
               <div className="relative">
                 <UserIcon
@@ -563,7 +651,11 @@ export function AuthForm() {
                   maxLength={120}
                   value={loginIdentifier}
                   onChange={(e) => setLoginIdentifier(e.target.value)}
-                  placeholder="เช่น user_01 หรือ you@example.com"
+                  placeholder={
+                    isEn
+                      ? "e.g. user_01 or you@example.com"
+                      : "เช่น user_01 หรือ you@example.com"
+                  }
                   disabled={submitting || lockoutSeconds > 0}
                   className={`w-full rounded-lg border pl-9 pr-3.5 py-2.5 text-sm focus:outline-none disabled:opacity-60 ${inputClass}`}
                 />
@@ -575,7 +667,7 @@ export function AuthForm() {
                 htmlFor="login-password"
                 className="block text-xs sm:text-sm font-medium mb-1.5"
               >
-                รหัสผ่าน
+                {isEn ? "Password" : "รหัสผ่าน"}
               </label>
               <div className="relative">
                 <Lock
@@ -589,14 +681,24 @@ export function AuthForm() {
                   maxLength={128}
                   value={loginPassword}
                   onChange={(e) => setLoginPassword(e.target.value)}
-                  placeholder="กรอกรหัสผ่านของคุณ"
+                  placeholder={
+                    isEn ? "Enter your password" : "กรอกรหัสผ่านของคุณ"
+                  }
                   disabled={submitting || lockoutSeconds > 0}
                   className={`w-full rounded-lg border pl-9 pr-10 py-2.5 text-sm focus:outline-none disabled:opacity-60 ${inputClass}`}
                 />
                 <button
                   type="button"
                   onClick={() => setShowLoginPassword((prev) => !prev)}
-                  aria-label={showLoginPassword ? "ซ่อนรหัสผ่าน" : "แสดงรหัสผ่าน"}
+                  aria-label={
+                    showLoginPassword
+                      ? isEn
+                        ? "Hide password"
+                        : "ซ่อนรหัสผ่าน"
+                      : isEn
+                        ? "Show password"
+                        : "แสดงรหัสผ่าน"
+                  }
                   className={`absolute right-2.5 top-1/2 -translate-y-1/2 p-1 rounded ${mutedText}`}
                 >
                   {showLoginPassword ? (
@@ -620,10 +722,16 @@ export function AuthForm() {
               )}
               <span>
                 {lockoutSeconds > 0
-                  ? `รออีก ${lockoutSeconds} วินาที`
+                  ? isEn
+                    ? `Wait ${lockoutSeconds}s`
+                    : `รออีก ${lockoutSeconds} วินาที`
                   : submitting
-                    ? "กำลังเข้าสู่ระบบ..."
-                    : "เข้าสู่ระบบ"}
+                    ? isEn
+                      ? "Signing in..."
+                      : "กำลังเข้าสู่ระบบ..."
+                    : isEn
+                      ? "Sign In"
+                      : "เข้าสู่ระบบ"}
               </span>
             </button>
           </form>
@@ -650,7 +758,7 @@ export function AuthForm() {
                 htmlFor="register-username"
                 className="block text-xs sm:text-sm font-medium mb-1.5"
               >
-                ชื่อผู้ใช้ (Username)
+                {isEn ? "Username" : "ชื่อผู้ใช้ (Username)"}
               </label>
               <div className="relative">
                 <UserIcon
@@ -673,7 +781,11 @@ export function AuthForm() {
                       void verifyUsernameAvailability(username);
                     }
                   }}
-                  placeholder="เช่น seller_01 (a-z, 0-9, _)"
+                  placeholder={
+                    isEn
+                      ? "e.g. seller_01 (A-Z, a-z, 0-9, _)"
+                      : "เช่น seller_01 (a-z, 0-9, _)"
+                  }
                   disabled={submitting || lockoutSeconds > 0}
                   className={`w-full rounded-lg border pl-9 pr-3.5 py-2.5 text-sm font-mono focus:outline-none disabled:opacity-60 ${inputClass}`}
                 />
@@ -707,7 +819,9 @@ export function AuthForm() {
                 htmlFor="register-email"
                 className="block text-xs sm:text-sm font-medium mb-1.5"
               >
-                อีเมล (สำหรับติดต่อและอ้างอิงบัญชี)
+                {isEn
+                  ? "Email Address (for account reference)"
+                  : "อีเมล (สำหรับติดต่อและอ้างอิงบัญชี)"}
               </label>
               <div className="relative">
                 <Mail
@@ -721,7 +835,9 @@ export function AuthForm() {
                   maxLength={254}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="เช่น you@example.com"
+                  placeholder={
+                    isEn ? "e.g. you@example.com" : "เช่น you@example.com"
+                  }
                   disabled={submitting || lockoutSeconds > 0}
                   className={`w-full rounded-lg border pl-9 pr-3.5 py-2.5 text-sm focus:outline-none disabled:opacity-60 ${inputClass}`}
                 />
@@ -733,7 +849,9 @@ export function AuthForm() {
                 htmlFor="register-password"
                 className="block text-xs sm:text-sm font-medium mb-1.5"
               >
-                รหัสผ่าน (อย่างน้อย 6 ตัวอักษร)
+                {isEn
+                  ? "Password (at least 6 characters)"
+                  : "รหัสผ่าน (อย่างน้อย 6 ตัวอักษร)"}
               </label>
               <div className="relative">
                 <Lock
@@ -748,7 +866,9 @@ export function AuthForm() {
                   maxLength={128}
                   value={registerPassword}
                   onChange={(e) => setRegisterPassword(e.target.value)}
-                  placeholder="ตั้งรหัสผ่านของคุณ"
+                  placeholder={
+                    isEn ? "Create a password" : "ตั้งรหัสผ่านของคุณ"
+                  }
                   disabled={submitting || lockoutSeconds > 0}
                   className={`w-full rounded-lg border pl-9 pr-10 py-2.5 text-sm focus:outline-none disabled:opacity-60 ${inputClass}`}
                 />
@@ -756,7 +876,13 @@ export function AuthForm() {
                   type="button"
                   onClick={() => setShowRegisterPassword((prev) => !prev)}
                   aria-label={
-                    showRegisterPassword ? "ซ่อนรหัสผ่าน" : "แสดงรหัสผ่าน"
+                    showRegisterPassword
+                      ? isEn
+                        ? "Hide password"
+                        : "ซ่อนรหัสผ่าน"
+                      : isEn
+                        ? "Show password"
+                        : "แสดงรหัสผ่าน"
                   }
                   className={`absolute right-2.5 top-1/2 -translate-y-1/2 p-1 rounded ${mutedText}`}
                 >
@@ -767,7 +893,10 @@ export function AuthForm() {
                   )}
                 </button>
               </div>
-              <PasswordStrengthMeter password={registerPassword} />
+              <PasswordStrengthMeter
+                password={registerPassword}
+                language={language}
+              />
             </div>
 
             <div>
@@ -775,7 +904,7 @@ export function AuthForm() {
                 htmlFor="register-confirm-password"
                 className="block text-xs sm:text-sm font-medium mb-1.5"
               >
-                ยืนยันรหัสผ่าน
+                {isEn ? "Confirm Password" : "ยืนยันรหัสผ่าน"}
               </label>
               <div className="relative">
                 <Lock
@@ -789,14 +918,18 @@ export function AuthForm() {
                   maxLength={128}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="พิมพ์รหัสผ่านอีกครั้งให้ตรงกัน"
+                  placeholder={
+                    isEn
+                      ? "Re-enter your password"
+                      : "พิมพ์รหัสผ่านอีกครั้งให้ตรงกัน"
+                  }
                   disabled={submitting || lockoutSeconds > 0}
                   className={`w-full rounded-lg border pl-9 pr-3.5 py-2.5 text-sm focus:outline-none disabled:opacity-60 ${inputClass}`}
                 />
               </div>
               {confirmPassword && confirmPassword !== registerPassword && (
                 <p className="mt-1.5 text-[11px] font-medium text-rose-500">
-                  รหัสผ่านยังไม่ตรงกัน
+                  {isEn ? "Passwords do not match" : "รหัสผ่านยังไม่ตรงกัน"}
                 </p>
               )}
             </div>
@@ -810,7 +943,11 @@ export function AuthForm() {
                 onPointerCancel={handleSliderPointerUp}
                 role="slider"
                 tabIndex={0}
-                aria-label="เลื่อนไปทางขวาเพื่อยืนยันว่าไม่ใช่บอท"
+                aria-label={
+                  isEn
+                    ? "Slide right to verify you are human"
+                    : "เลื่อนไปทางขวาเพื่อยืนยันว่าไม่ใช่บอท"
+                }
                 aria-valuemin={0}
                 aria-valuemax={100}
                 aria-valuenow={Math.round(sliderPercent)}
@@ -835,11 +972,15 @@ export function AuthForm() {
                   {humanVerified ? (
                     <span className="flex items-center gap-1.5 text-emerald-400 font-semibold">
                       <ShieldCheck className="h-4 w-4" />
-                      <span>ยืนยันตัวตนเรียบร้อยแล้ว</span>
+                      <span>
+                        {isEn ? "Verification complete" : "ยืนยันตัวตนเรียบร้อยแล้ว"}
+                      </span>
                     </span>
                   ) : (
                     <span className="text-zinc-400">
-                      เลื่อนไปทางขวาเพื่อยืนยันว่าไม่ใช่บอท
+                      {isEn
+                        ? "Slide right to verify you are human"
+                        : "เลื่อนไปทางขวาเพื่อยืนยันว่าไม่ใช่บอท"}
                     </span>
                   )}
                 </div>
@@ -874,10 +1015,16 @@ export function AuthForm() {
               )}
               <span>
                 {lockoutSeconds > 0
-                  ? `รออีก ${lockoutSeconds} วินาที`
+                  ? isEn
+                    ? `Wait ${lockoutSeconds}s`
+                    : `รออีก ${lockoutSeconds} วินาที`
                   : submitting
-                    ? "กำลังสร้างบัญชี..."
-                    : "สมัครสมาชิกและเริ่มใช้งาน"}
+                    ? isEn
+                      ? "Creating account..."
+                      : "กำลังสร้างบัญชี..."
+                    : isEn
+                      ? "Create Account & Start"
+                      : "สมัครสมาชิกและเริ่มใช้งาน"}
               </span>
             </button>
           </form>

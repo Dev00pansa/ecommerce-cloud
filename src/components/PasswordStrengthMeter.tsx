@@ -1,27 +1,36 @@
 "use client";
 
 import { evaluatePasswordStrength } from "@/lib/auth";
+import { useAppLanguage } from "@/lib/language";
 import { useTheme } from "@/components/ThemeProvider";
+import type { AppLanguage } from "@/types";
 
 interface PasswordStrengthMeterProps {
   password: string;
+  language?: AppLanguage;
 }
 
-export function PasswordStrengthMeter({ password }: PasswordStrengthMeterProps) {
+export function PasswordStrengthMeter({
+  password,
+  language,
+}: PasswordStrengthMeterProps) {
   const { isDark } = useTheme();
+  const [appLanguage] = useAppLanguage();
+  const activeLanguage = language ?? appLanguage;
+  const isEn = activeLanguage === "en";
 
   if (!password) {
     return null;
   }
 
-  const result = evaluatePasswordStrength(password);
+  const result = evaluatePasswordStrength(password, activeLanguage);
   const trackBg = isDark ? "bg-zinc-800" : "bg-slate-200";
 
   return (
     <div className="mt-2 space-y-1.5">
       <div className="flex items-center justify-between text-xs">
         <span className={isDark ? "text-zinc-400" : "text-slate-600"}>
-          ความปลอดภัยรหัสผ่าน:
+          {isEn ? "Password Strength:" : "ความปลอดภัยรหัสผ่าน:"}
         </span>
         <span
           className="font-semibold"

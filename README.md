@@ -1,28 +1,40 @@
-# KhumLab `v1.0.0`
+# KhumLab `v1.1.0`
 
 **Live App:** https://khumlab.vercel.app
 
-เว็บแอปพลิเคชันสำหรับผู้ขายออนไลน์และเจ้าของแบรนด์ E-Commerce ช่วยคำนวณต้นทุนจริง ตั้งราคาขาย หาจุดคุ้มทุน และวิเคราะห์ความเสี่ยงก่อนจัดโปรโมชันหรือยิงโฆษณา
+A real-cost pricing calculator, profit diagnostics engine, and break-even analytics web application built for e-commerce sellers and online store owners. KhumLab helps merchants calculate true unit margins, factor in marketplace GP fees, packaging, ad spend, and fixed overhead, and simulate flash sale discounts before launching campaigns.
 
-## ความสามารถหลัก
+## Key Features
 
-- **คำนวณต้นทุนและค่าธรรมเนียมแพลตฟอร์ม (GP):** รองรับค่าเริ่มต้นของ Shopee (13%), TikTok Shop (12%), Lazada (12%), ขายตรง (0%) และปรับเปอร์เซ็นต์เองได้ตามจริง พร้อมหักค่าแพ็ก ค่าโฆษณา และต้นทุนคงที่ครบถ้วน
-- **กราฟวิเคราะห์และระบบวินิจฉัยกำไรเชิงลึก:** ประเมินคะแนนสุขภาพกำไร (`0–100` / เกรด `S–D`), กราฟวงแหวนสัดส่วนต้นทุน, กราฟจำลองส่วนลด `0%–50%`, กราฟคาดการณ์กำไรตามยอดขาย, คำนวณความเสี่ยงพัสดุตีกลับ, Max Safe CPA / Break-Even ROAS และราคาขายแนะนำ 3 ระดับ
-- **คลาวด์เก็บข้อมูลส่วนตัว (สูงสุด 20 รายการ/บัญชี):** บันทึก แก้ไข ลบแบบเดี่ยวหรือหลายรายการพร้อมกันได้แบบ Realtime พร้อมบีบอัดรูปสินค้าอัตโนมัติ (ไม่เกิน 120 KB) และระบบป้องกันชื่อซ้ำ
-- **ส่งออกตาราง CSV แบบเลือกคอลัมน์ได้:** เลือกรายการสินค้าและหัวข้อข้อมูลที่ต้องการส่งออกลงไฟล์เดียว เปิดใช้งานใน Excel และ Google Sheets ได้ทันที
-- **ความปลอดภัยบัญชีผู้ใช้:** ปกป้องเส้นทางฝั่ง Server ด้วย Supabase SSR, ล็อกอินด้วย Username แบบตรงตัวพิมพ์เล็ก-ใหญ่, คูลดาวน์ป้องกันสแปม และ Row-Level Security (RLS) แยกข้อมูลตามบัญชี 100%
+- **Full-Site Bilingual Support (TH / EN):** Switch seamlessly between Thai and English across every page, form, diagnostic chart, modal, notification toast, and CSV export header, persisted automatically across sessions.
+- **Marketplace GP & True Unit Cost Calculator:** Built-in presets for Shopee (13%), TikTok Shop (12%), Lazada (12%), and Direct Sales (0%) with customizable fee overrides, per-unit product cost, packaging materials, average ad spend (CPA), and monthly fixed overhead.
+- **E-Commerce Financial Diagnostic Engine:** Evaluates a composite Profit Health Score (`0–100`, Grades `S–D`), Cost Structure Donut Chart, Discount Sensitivity Simulator (`0%–50%`), Volume & Break-Even Projection Chart (Revenue vs. Cumulative Net Profit), Return Loss risk multiplier, Max Safe CPA / Break-Even ROAS, 3-tier suggested retail prices, and actionable optimization recommendations.
+- **Layered Emerald Glass UI & Semantic Analytics:** Obsidian Black & Emerald Green compartmentalized glassmorphism cards paired with a semantic multi-color data palette for instant readability across desktop and mobile viewports.
+- **Private Cloud Storage (Up to 20 Plans / Account):** Save, edit, single-delete, or bulk-delete pricing plans with Realtime Supabase synchronization, automatic product photo compression (under 120 KB), and duplicate product name protection.
+- **Custom-Column CSV Export:** Choose exactly which products and data columns to export into a UTF-8 BOM CSV spreadsheet ready for Microsoft Excel and Google Sheets.
+- **Backend-First Account Security:** Server-side SSR route protection via `@supabase/ssr`, case-sensitive username authentication, anti-bot registration guard, rate-limit cooldowns, and strict PostgreSQL Row-Level Security (RLS) isolating every user's data and storage objects.
 
-## เทคโนโลยีที่ใช้ (Tech Stack)
+## Tech Stack & Architecture
 
 - **Framework:** Next.js 16 (App Router, Turbopack)
-- **Language:** TypeScript
-- **Styling:** Tailwind CSS v4
+- **Language:** TypeScript (Strict Mode)
+- **Styling:** Tailwind CSS v4 & Lucide Icons
 - **Backend & Cloud:** Supabase (Auth, PostgreSQL, Storage, Realtime, RLS)
 - **Hosting:** Vercel (Function Region `sin1` Singapore)
 
-## การติดตั้งเพื่อรันบนเครื่อง (Local Development)
+### Project Structure
 
-1. โคลนโปรเจกต์และติดตั้ง Dependencies:
+```text
+src/
+├── app/                # Next.js App Router pages, API guard, OpenGraph image
+├── components/         # Modular UI components (Navbar, AuthForm, CalculatorForm, AnalyticsCharts, HistoryPanel)
+├── lib/                # Pure calculation engine, auth validators, i18n language store, Supabase SSR clients
+└── types/              # Strict shared TypeScript interfaces and types
+```
+
+## Local Development
+
+1. Clone the repository and install dependencies:
 
 ```bash
 git clone https://github.com/Dev00pansa/ecommerce-cloud.git
@@ -30,17 +42,17 @@ cd ecommerce-cloud
 npm install
 ```
 
-2. สร้างไฟล์ `.env.local` ที่โฟลเดอร์หลักของโปรเจกต์และใส่ค่าจาก Supabase:
+2. Create a `.env.local` file in the project root with your Supabase credentials:
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
 ```
 
-3. รันเซิร์ฟเวอร์พัฒนา:
+3. Start the development server:
 
 ```bash
 npm run dev
 ```
 
-เปิดเบราว์เซอร์ไปที่ https://khumlab.vercel.app/ เพื่อเริ่มใช้งาน
+Open http://localhost:3000 in your browser to start developing locally, or visit the live production app at https://khumlab.vercel.app.

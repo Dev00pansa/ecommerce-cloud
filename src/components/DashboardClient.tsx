@@ -269,8 +269,8 @@ export function DashboardClient({
   );
 
   const analysis = useMemo(
-    () => buildFinancialAnalysis(numericInputs, metrics),
-    [numericInputs, metrics]
+    () => buildFinancialAnalysis(numericInputs, metrics, language),
+    [numericInputs, metrics, language]
   );
 
   const fetchHistory = useCallback(async () => {
@@ -286,12 +286,12 @@ export function DashboardClient({
       .order("created_at", { ascending: false });
 
     if (error) {
-      showToast(translateSupabaseError(error), "error");
+      showToast(translateSupabaseError(error, language), "error");
     } else if (data) {
       setRecords(data as EcommerceCalculationRecord[]);
     }
     setRefreshing(false);
-  }, [userId, showToast]);
+  }, [userId, showToast, language]);
 
   useEffect(() => {
     const supabase = createClient();
@@ -360,7 +360,7 @@ export function DashboardClient({
     setCompressingImage(true);
 
     try {
-      const result = await compressProductImageFile(file);
+      const result = await compressProductImageFile(file, language);
       setCompressedImage((prev) => {
         if (prev?.previewUrl) {
           URL.revokeObjectURL(prev.previewUrl);
@@ -372,7 +372,9 @@ export function DashboardClient({
       const msg =
         err instanceof Error
           ? err.message
-          : "ไม่สามารถประมวลผลรูปภาพนี้ได้ กรุณาเลือกรูปอื่น";
+          : isEn
+            ? "Unable to process this image. Please choose another file."
+            : "ไม่สามารถประมวลผลรูปภาพนี้ได้ กรุณาเลือกรูปอื่น";
       setImageError(msg);
     } finally {
       setCompressingImage(false);
@@ -435,7 +437,10 @@ export function DashboardClient({
     setDiscountPercent(15);
     setHasCalculated(false);
     handleRemoveImage();
-    showToast("ยกเลิกการแก้ไขรายการเดิมแล้ว", "success");
+    showToast(
+      isEn ? "Editing cancelled." : "ยกเลิกการแก้ไขรายการเดิมแล้ว",
+      "success"
+    );
   }
 
   async function handleSaveToCloud() {
@@ -446,13 +451,20 @@ export function DashboardClient({
     const safeProductName = sanitizePlainText(numericInputs.productName, 120);
 
     if (!safeProductName) {
-      showToast("กรุณาระบุชื่อสินค้าก่อนบันทึกข้อมูล", "error");
+      showToast(
+        isEn
+          ? "Please enter a product name before saving."
+          : "กรุณาระบุชื่อสินค้าก่อนบันทึกข้อมูล",
+        "error"
+      );
       return;
     }
 
     if (isDuplicateProductName) {
       showToast(
-        "ชื่อสินค้านี้มีอยู่ในคลาวด์แล้ว กรุณาตั้งชื่อใหม่ไม่ให้ซ้ำกัน",
+        isEn
+          ? "This product name already exists in Cloud. Please choose a unique name."
+          : "ชื่อสินค้านี้มีอยู่ในคลาวด์แล้ว กรุณาตั้งชื่อใหม่ไม่ให้ซ้ำกัน",
         "error"
       );
       return;
@@ -463,7 +475,9 @@ export function DashboardClient({
       if (activeCooldown > 0) {
         setSaveCooldownSeconds(activeCooldown);
         showToast(
-          `กรุณารอสักครู่ (${activeCooldown} วินาที) ก่อนบันทึกรายการใหม่`,
+          isEn
+            ? `Please wait (${activeCooldown}s) before saving another record.`
+            : `กรุณารอสักครู่ (${activeCooldown} วินาที) ก่อนบันทึกรายการใหม่`,
           "error"
         );
         return;
@@ -471,7 +485,9 @@ export function DashboardClient({
 
       if (records.length >= MAX_CLOUD_RECORDS) {
         showToast(
-          `พื้นที่คลาวด์เต็ม (${MAX_CLOUD_RECORDS}/${MAX_CLOUD_RECORDS} รายการ) กรุณาลบรายการเก่าออกก่อนบันทึกเพิ่ม`,
+          isEn
+            ? `Cloud storage full (${MAX_CLOUD_RECORDS}/${MAX_CLOUD_RECORDS} items). Delete older records before saving more.`
+            : `พื้นที่คลาวด์เต็ม (${MAX_CLOUD_RECORDS}/${MAX_CLOUD_RECORDS} รายการ) กรุณาลบรายการเก่าออกก่อนบันทึกเพิ่ม`,
           "error"
         );
         return;
@@ -481,7 +497,7 @@ export function DashboardClient({
     setSaving(true);
 
     const safePlatform =
-      sanitizePlainText(numericInputs.platform, 60) || "ทั่วไป";
+      sanitizePlainText(numericInputs.platform, 60) || "ขายตรง";
 
     let finalImageUrl: string | null = existingImageUrl;
     let uploadedStoragePath: string | null = null;
@@ -501,7 +517,9 @@ export function DashboardClient({
 
         if (uploadError) {
           showToast(
-            `อัปโหลดรูปสินค้าไม่สำเร็จ: ${translateSupabaseError(uploadError)}`,
+            isEn
+              ? `Failed to upload product image: ${translateSupabaseError(uploadError, language)}`
+              : `อัปโหลดรูปสินค้าไม่สำเร็จ: ${translateSupabaseError(uploadError, language)}`,
             "error"
           );
           setSaving(false);
@@ -543,7 +561,7 @@ export function DashboardClient({
               .from("product-images")
               .remove([uploadedStoragePath]);
           }
-          showToast(translateSupabaseError(error), "error");
+          showToast(translateSupabaseError(error, language), "error");
         } else if (data) {
           const updated = data as EcommerceCalculationRecord;
 
@@ -569,7 +587,10 @@ export function DashboardClient({
           setPendingExitTab("history");
           handleSwitchTab("history");
           window.scrollTo({ top: 0, behavior: "smooth" });
-          showToast("บันทึกการแก้ไขเรียบร้อยแล้ว", "success");
+          showToast(
+            isEn ? "Changes saved to Cloud." : "บันทึกการแก้ไขเรียบร้อยแล้ว",
+            "success"
+          );
         }
       } else {
         const { data, error } = await supabase
@@ -595,7 +616,7 @@ export function DashboardClient({
               .from("product-images")
               .remove([uploadedStoragePath]);
           }
-          showToast(translateSupabaseError(error), "error");
+          showToast(translateSupabaseError(error, language), "error");
         } else if (data) {
           const created = data as EcommerceCalculationRecord;
           setRecords((prev) =>
@@ -619,13 +640,15 @@ export function DashboardClient({
           handleSwitchTab("history");
           window.scrollTo({ top: 0, behavior: "smooth" });
           showToast(
-            `บันทึก "${created.product_name}" ลง Cloud เรียบร้อยแล้ว`,
+            isEn
+              ? `Saved "${created.product_name}" to Cloud.`
+              : `บันทึก "${created.product_name}" ลง Cloud เรียบร้อยแล้ว`,
             "success"
           );
         }
       }
     } catch (err) {
-      showToast(translateSupabaseError(err), "error");
+      showToast(translateSupabaseError(err, language), "error");
     } finally {
       setSaving(false);
     }
@@ -652,7 +675,7 @@ export function DashboardClient({
         .eq("user_id", userId);
 
       if (error) {
-        showToast(translateSupabaseError(error), "error");
+        showToast(translateSupabaseError(error, language), "error");
         return false;
       }
 
@@ -664,7 +687,12 @@ export function DashboardClient({
       if (editingRecord?.id === record.id) {
         setEditingRecord(null);
       }
-      showToast(`ลบรายการ "${record.product_name}" เรียบร้อยแล้ว`, "success");
+      showToast(
+        isEn
+          ? `Deleted "${record.product_name}".`
+          : `ลบรายการ "${record.product_name}" เรียบร้อยแล้ว`,
+        "success"
+      );
       return true;
     } finally {
       setDeleting(false);
@@ -695,7 +723,7 @@ export function DashboardClient({
         .eq("user_id", userId);
 
       if (error) {
-        showToast(translateSupabaseError(error), "error");
+        showToast(translateSupabaseError(error, language), "error");
         return false;
       }
 
@@ -708,7 +736,9 @@ export function DashboardClient({
         setEditingRecord(null);
       }
       showToast(
-        `ลบข้อมูลที่เลือกทั้งหมด ${idsToDelete.length} รายการเรียบร้อยแล้ว`,
+        isEn
+          ? `Deleted ${idsToDelete.length} selected records.`
+          : `ลบข้อมูลที่เลือกทั้งหมด ${idsToDelete.length} รายการเรียบร้อยแล้ว`,
         "success"
       );
       return true;
@@ -753,7 +783,12 @@ export function DashboardClient({
   }
 
   function handleExportReportCsv() {
-    const csvContent = exportCalculationsToCsv([], undefined, numericInputs);
+    const csvContent = exportCalculationsToCsv(
+      [],
+      undefined,
+      numericInputs,
+      language
+    );
     triggerCsvDownload(csvContent);
   }
 
@@ -762,7 +797,12 @@ export function DashboardClient({
     selectedKeys: CsvExportColumnKey[]
   ) {
     if (selectedKeys.length === 0 || orderedRecords.length === 0) return;
-    const csvContent = exportCalculationsToCsv(orderedRecords, selectedKeys);
+    const csvContent = exportCalculationsToCsv(
+      orderedRecords,
+      selectedKeys,
+      undefined,
+      language
+    );
     triggerCsvDownload(csvContent);
   }
 

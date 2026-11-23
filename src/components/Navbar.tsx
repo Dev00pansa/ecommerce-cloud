@@ -158,7 +158,7 @@ function ToolsDropdownItems({
           <div className="min-w-0 flex-1">
             <div className="flex items-center justify-between gap-2">
               <span className="block text-sm font-semibold text-emerald-400">
-                {isEn ? "Profit Summary & Analytics" : "สรุปผลและวิเคราะห์กำไร"}
+                {isEn ? "Profit Analytics" : "สรุปผลและวิเคราะห์กำไร"}
               </span>
               <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-semibold text-emerald-300">
                 <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]" />
@@ -167,7 +167,7 @@ function ToolsDropdownItems({
             </div>
             <span className="mt-0.5 block text-xs text-zinc-400 leading-snug">
               {isEn
-                ? "Charts, sensitivity breakdown, and smart pricing advice"
+                ? "Charts, diagnostics, and smart pricing advice"
                 : "กราฟวิเคราะห์เชิงลึกและคำแนะนำการตั้งราคา"}
             </span>
           </div>
@@ -182,17 +182,19 @@ function ToolsDropdownItems({
           </span>
           <div className="min-w-0 flex-1">
             <div className="flex items-center justify-between gap-2">
-              <span className="block text-sm font-semibold text-zinc-400 truncate">
+              <span className="block text-sm font-semibold text-zinc-400 whitespace-nowrap">
                 {isEn ? "Profit Analytics" : "สรุปผลและวิเคราะห์กำไร"}
               </span>
-              <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-zinc-800 bg-zinc-900/90 px-2 py-0.5 text-[10px] font-medium text-zinc-400">
+              <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-zinc-800 bg-zinc-900/90 px-2 py-0.5 text-[10px] font-medium text-zinc-400 whitespace-nowrap">
                 <Lock className="h-2.5 w-2.5 shrink-0" />
-                <span>{isEn ? "Calculate first" : "ต้องกดประมวลผลก่อน"}</span>
+                <span>
+                  {isEn ? "Run calculation first" : "ต้องกดประมวลผลก่อน"}
+                </span>
               </span>
             </div>
             <span className="mt-0.5 block text-xs text-zinc-500 leading-snug">
               {isEn
-                ? "Charts, sensitivity breakdown, and smart pricing advice"
+                ? "Charts, diagnostics, and smart pricing advice"
                 : "กราฟวิเคราะห์เชิงลึกและคำแนะนำการตั้งราคา"}
             </span>
           </div>
@@ -408,7 +410,7 @@ export function Navbar({
 
                 <div
                   role="menu"
-                  className={`absolute left-0 mt-3 w-[355px] origin-top-left z-50 overflow-hidden rounded-2xl bg-[#050505] border border-emerald-500/30 shadow-[0_12px_40px_-8px_rgba(0,0,0,0.85),0_0_24px_-6px_rgba(16,185,129,0.2)] transition-all duration-200 ease-out ${
+                  className={`absolute left-0 mt-3 w-[360px] sm:w-[385px] origin-top-left z-50 overflow-hidden rounded-2xl bg-[#050505] border border-emerald-500/30 shadow-[0_12px_40px_-8px_rgba(0,0,0,0.85),0_0_24px_-6px_rgba(16,185,129,0.2)] transition-all duration-200 ease-out ${
                     toolsDropdownOpen
                       ? "opacity-100 translate-y-0 scale-100 pointer-events-auto"
                       : "opacity-0 -translate-y-2 scale-95 pointer-events-none"

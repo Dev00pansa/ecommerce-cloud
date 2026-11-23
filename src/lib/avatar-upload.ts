@@ -4,17 +4,22 @@ import {
   compressAvatarImageFile,
   extractAvatarStoragePath,
 } from "@/lib/image-compression";
+import type { AppLanguage } from "@/types";
 
 export async function uploadUserAvatar(
   file: File,
-  previousAvatarUrl: string | null | undefined
+  previousAvatarUrl: string | null | undefined,
+  language: AppLanguage = "th"
 ): Promise<{ avatarUrl: string; sizeBytes: number }> {
-  const compressed = await compressAvatarImageFile(file);
+  const isEn = language === "en";
+  const compressed = await compressAvatarImageFile(file, language);
 
   try {
     const supabase = createClient();
     if (!supabase) {
-      throw new Error("ยังไม่ได้ตั้งค่าระบบ Cloud");
+      throw new Error(
+        isEn ? "Cloud service is not configured." : "ยังไม่ได้ตั้งค่าระบบ Cloud"
+      );
     }
 
     const {
@@ -22,7 +27,11 @@ export async function uploadUserAvatar(
     } = await supabase.auth.getUser();
 
     if (!user) {
-      throw new Error("เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่อีกครั้ง");
+      throw new Error(
+        isEn
+          ? "Session expired. Please sign in again."
+          : "เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่อีกครั้ง"
+      );
     }
 
     const randomSuffix = Math.random().toString(36).slice(2, 9);
@@ -37,7 +46,7 @@ export async function uploadUserAvatar(
       });
 
     if (uploadError) {
-      throw new Error(translateSupabaseError(uploadError));
+      throw new Error(translateSupabaseError(uploadError, language));
     }
 
     const { data: publicUrlData } = supabase.storage
@@ -53,7 +62,7 @@ export async function uploadUserAvatar(
 
     if (profileError) {
       await supabase.storage.from("avatars").remove([storagePath]);
-      throw new Error(translateSupabaseError(profileError));
+      throw new Error(translateSupabaseError(profileError, language));
     }
 
     await supabase.auth.updateUser({

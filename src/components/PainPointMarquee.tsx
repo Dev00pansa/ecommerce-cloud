@@ -1,6 +1,8 @@
 "use client";
 
-const PAIN_POINTS: readonly string[] = [
+import { useAppLanguage } from "@/lib/language";
+
+const PAIN_POINTS_TH: readonly string[] = [
   "ขายดีแต่เงินหายไม่รู้ตัว",
   "ลืมหักค่า GP แพลตฟอร์ม 12%–15%",
   "จัด Flash Sale แล้วเข้าเนื้อ",
@@ -27,14 +29,49 @@ const PAIN_POINTS: readonly string[] = [
   "วางแผนราคาหลายแพลตฟอร์มไม่เคยตรงกัน",
 ];
 
+const PAIN_POINTS_EN: readonly string[] = [
+  "High sales volume but cash keeps disappearing",
+  "Forgot to deduct 12%–15% marketplace GP fees",
+  "Running Flash Sales at a silent loss",
+  "Overspending on ads until net profit turns negative",
+  "Unsure how many units are needed to break even",
+  "Missing boxes, bubble wrap & packing costs",
+  "Copying competitor prices into a loss",
+  "20% discount requiring nearly double the orders",
+  "Six-figure revenue with almost zero real profit",
+  "Shopee & TikTok fees rising every year",
+  "Dead stock from miscalculated break-even points",
+  "Razor-thin margins without realizing it",
+  "Caught off guard during campaign discount wars",
+  "Hidden costs silently eating every single order",
+  "Free shipping promos paid out of pocket",
+  "Orders surging while cash flow runs dry",
+  "Confused by layered transaction & payment fees",
+  "Freebie bundles wiping out unit margins",
+  "Mental math pricing mistakes every launch",
+  "Rising ad costs with no safe pricing buffer",
+  "Price wars against big stores hurting margins",
+  "Mixing monthly fixed costs with unit costs",
+  "Thinking selling price minus COGS equals profit",
+  "Inconsistent pricing plans across channels",
+];
+
 const WAVE_OFFSETS_PX: readonly number[] = [
   0, 10, -10, 6, -11, 8, -5, 10, -8, 4, -10, 7,
 ];
 
 export function PainPointMarquee() {
+  const [language] = useAppLanguage();
+  const isEn = language === "en";
+  const painPoints = isEn ? PAIN_POINTS_EN : PAIN_POINTS_TH;
+
   return (
     <div
-      aria-label="ปัญหาที่ผู้ขายออนไลน์พบบ่อยซึ่ง KhumLab ช่วยแก้ไขได้"
+      aria-label={
+        isEn
+          ? "Common e-commerce seller pain points that KhumLab solves"
+          : "ปัญหาที่ผู้ขายออนไลน์พบบ่อยซึ่ง KhumLab ช่วยแก้ไขได้"
+      }
       className="relative w-full shrink-0 h-[86px] md:h-[98px] flex items-center overflow-hidden bg-black/65 backdrop-blur-sm border-y border-zinc-800/90"
     >
       <div
@@ -67,7 +104,7 @@ export function PainPointMarquee() {
             aria-hidden={copyIndex === 1 ? "true" : undefined}
             className="flex shrink-0 items-center gap-6 md:gap-8 pr-6 md:pr-8"
           >
-            {PAIN_POINTS.map((text, itemIndex) => {
+            {painPoints.map((text, itemIndex) => {
               const offsetY =
                 WAVE_OFFSETS_PX[itemIndex % WAVE_OFFSETS_PX.length];
 

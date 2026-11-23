@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { AlertCircle, CheckCircle2, X } from "lucide-react";
+import { useAppLanguage } from "@/lib/language";
 
 export interface DashboardToastData {
   id: number;
@@ -18,6 +19,8 @@ const TOAST_DURATION_MS = 4500;
 const FADE_OUT_MS = 280;
 
 export function DashboardToast({ toast, onDismiss }: DashboardToastProps) {
+  const [language] = useAppLanguage();
+  const isEn = language === "en";
   const [fadingOutId, setFadingOutId] = useState<number | null>(null);
 
   useEffect(() => {
@@ -85,7 +88,7 @@ export function DashboardToast({ toast, onDismiss }: DashboardToastProps) {
         <button
           type="button"
           onClick={onDismiss}
-          aria-label="ปิดการแจ้งเตือน"
+          aria-label={isEn ? "Close notification" : "ปิดการแจ้งเตือน"}
           className="absolute top-3 right-3 rounded-lg p-1 text-zinc-500 transition-colors hover:bg-white/[0.06] hover:text-zinc-200 focus:outline-none"
         >
           <X className="h-4 w-4" />

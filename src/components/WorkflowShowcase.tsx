@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { ArrowDown, ArrowRight, Calculator } from "lucide-react";
+import { useAppLanguage } from "@/lib/language";
 
 interface WorkflowShowcaseProps {
   isAuthenticated?: boolean;
@@ -13,9 +14,12 @@ interface WorkflowStepItem {
   textSide: "left" | "right";
   image: string;
   tag: string;
-  title: string;
-  desc: string;
-  highlight: string;
+  titleTh: string;
+  titleEn: string;
+  descTh: string;
+  descEn: string;
+  highlightTh: string;
+  highlightEn: string;
 }
 
 const WORKFLOW_STEPS: WorkflowStepItem[] = [
@@ -24,36 +28,61 @@ const WORKFLOW_STEPS: WorkflowStepItem[] = [
     textSide: "right",
     image: "/images/workflow/step-1.jpg",
     tag: "Platform & Cost Structure",
-    title: "เลือกแพลตฟอร์ม & กรอกต้นทุน",
-    desc: "เริ่มต้นด้วยการเลือก Preset ค่าธรรมเนียมของแพลตฟอร์มที่คุณขายจริง (Shopee 13%, TikTok Shop 12%, Lazada 12% หรือขายตรง 0%) แล้วกรอกต้นทุนสินค้า ค่ากล่องกันกระแทก ค่าโฆษณาต่อชิ้น และราคาขายที่ตั้งไว้",
-    highlight: "รองรับการปรับแก้ % ค่าธรรมเนียมและต้นทุนแฝงได้ทุกช่องแบบอิสระ",
+    titleTh: "เลือกแพลตฟอร์ม & กรอกต้นทุน",
+    titleEn: "Select Platform & Enter Costs",
+    descTh:
+      "เริ่มต้นด้วยการเลือก Preset ค่าธรรมเนียมของแพลตฟอร์มที่คุณขายจริง (Shopee 13%, TikTok Shop 12%, Lazada 12% หรือขายตรง 0%) แล้วกรอกต้นทุนสินค้า ค่ากล่องกันกระแทก ค่าโฆษณาต่อชิ้น และราคาขายที่ตั้งไว้",
+    descEn:
+      "Start by choosing your sales channel preset (Shopee 13%, TikTok Shop 12%, Lazada 12%, or Direct 0%), then input product cost, packaging materials, ad spend per unit, and your planned selling price.",
+    highlightTh: "รองรับการปรับแก้ % ค่าธรรมเนียมและต้นทุนแฝงได้ทุกช่องแบบอิสระ",
+    highlightEn:
+      "Fully customize platform fee percentages and hidden per-unit costs anytime.",
   },
   {
     step: "02",
     textSide: "left",
     image: "/images/workflow/step-2.jpg",
     tag: "Net Margin & Break-Even Analysis",
-    title: "ตรวจกำไรสุทธิ & จุดคุ้มทุน",
-    desc: "ระบบคำนวณกำไรสุทธิต่อชิ้น อัตรากำไรสุทธิ (Net Margin %) และจุดคุ้มทุน (Break-Even Point) เป็นจำนวนชิ้นขั้นต่ำที่ต้องขายเพื่อคืนทุนคงที่แบบ Real-time พร้อมแจ้งเตือนทันทีหากราคาที่ตั้งไว้ทำให้ร้านขาดทุน",
-    highlight: "แสดงกราฟสัดส่วนโครงสร้างราคาแยกสีชัดเจนระหว่างทุน ค่าธรรมเนียม และกำไร",
+    titleTh: "ตรวจกำไรสุทธิ & จุดคุ้มทุน",
+    titleEn: "Inspect Net Margin & Break-Even",
+    descTh:
+      "ระบบคำนวณกำไรสุทธิต่อชิ้น อัตรากำไรสุทธิ (Net Margin %) และจุดคุ้มทุน (Break-Even Point) เป็นจำนวนชิ้นขั้นต่ำที่ต้องขายเพื่อคืนทุนคงที่แบบ Real-time พร้อมแจ้งเตือนทันทีหากราคาที่ตั้งไว้ทำให้ร้านขาดทุน",
+    descEn:
+      "Instantly calculate net profit per unit, net margin %, and minimum monthly break-even volume to cover fixed costs — with immediate diagnostic alerts if your selling price loses money.",
+    highlightTh:
+      "แสดงกราฟสัดส่วนโครงสร้างราคาแยกสีชัดเจนระหว่างทุน ค่าธรรมเนียม และกำไร",
+    highlightEn:
+      "Color-coded visual charts clearly separate cost, fees, ad spend, and real profit.",
   },
   {
     step: "03",
     textSide: "right",
     image: "/images/workflow/step-3.jpg",
     tag: "Flash Sale & Promo Simulation",
-    title: "จำลองส่วนลดโปรโมชัน",
-    desc: "ทดลองเลื่อนแถบส่วนลดตั้งแต่ 0% ถึง 50% เพื่อดูผลกระทบก่อนเข้าร่วมแคมเปญลดราคา ระบบจะคำนวณให้ทันทีว่าหลังหักส่วนลดและค่า GP แล้วต้องขายให้ได้กี่ชิ้นจึงจะได้กำไรรวมเท่ากับการขายราคาปกติ",
-    highlight: "ป้องกันการเผลอลดราคาแรงเกินจุดคุ้มทุนในช่วงจัดแคมเปญ",
+    titleTh: "จำลองส่วนลดโปรโมชัน",
+    titleEn: "Simulate Flash Sale Discounts",
+    descTh:
+      "ทดลองเลื่อนแถบส่วนลดตั้งแต่ 0% ถึง 50% เพื่อดูผลกระทบก่อนเข้าร่วมแคมเปญลดราคา ระบบจะคำนวณให้ทันทีว่าหลังหักส่วนลดและค่า GP แล้วต้องขายให้ได้กี่ชิ้นจึงจะได้กำไรรวมเท่ากับการขายราคาปกติ",
+    descEn:
+      "Slide discounts from 0% to 50% to preview campaign impact before joining a Flash Sale. See immediately how many extra units you must sell to earn the same total profit as regular pricing.",
+    highlightTh: "ป้องกันการเผลอลดราคาแรงเกินจุดคุ้มทุนในช่วงจัดแคมเปญ",
+    highlightEn:
+      "Protect your store from accidentally discounting past your break-even margin.",
   },
   {
     step: "04",
     textSide: "left",
     image: "/images/workflow/step-4.jpg",
     tag: "Cloud Storage & CSV Report",
-    title: "บันทึก Cloud & Export CSV",
-    desc: "บันทึกโครงสร้างราคาของสินค้าแต่ละรายการเก็บไว้บนระบบ Cloud ส่วนตัว สามารถกดดึงตัวเลขเดิมกลับมาปรับแก้ หรือส่งออกเป็นไฟล์ CSV เพื่อเปิดทำรายงานใน Excel ได้ทุกเมื่อ",
-    highlight: "บันทึกข้อมูลส่วนตัวบน Cloud ปลอดภัย เข้าถึงได้จากทุกอุปกรณ์",
+    titleTh: "บันทึก Cloud & Export CSV",
+    titleEn: "Save to Cloud & Export CSV",
+    descTh:
+      "บันทึกโครงสร้างราคาของสินค้าแต่ละรายการเก็บไว้บนระบบ Cloud ส่วนตัว สามารถกดดึงตัวเลขเดิมกลับมาปรับแก้ หรือส่งออกเป็นไฟล์ CSV เพื่อเปิดทำรายงานใน Excel ได้ทุกเมื่อ",
+    descEn:
+      "Store every product pricing plan securely in your private Cloud workspace. Reopen any record to update figures or export custom-column CSV reports ready for Excel and Google Sheets.",
+    highlightTh: "บันทึกข้อมูลส่วนตัวบน Cloud ปลอดภัย เข้าถึงได้จากทุกอุปกรณ์",
+    highlightEn:
+      "Private cloud persistence synced in real time across all your devices.",
   },
 ];
 
@@ -78,6 +107,9 @@ function getRadialFeatherMask(imageOnLeft: boolean): CSSProperties {
 export function WorkflowShowcase({
   isAuthenticated = false,
 }: WorkflowShowcaseProps) {
+  const [language] = useAppLanguage();
+  const isEn = language === "en";
+
   const stepRefs = useRef<Array<HTMLElement | null>>([]);
   const [visibleSteps, setVisibleSteps] = useState<boolean[]>([
     false,
@@ -150,10 +182,14 @@ export function WorkflowShowcase({
             Step-by-Step Vertical Walkthrough
           </span>
           <h2 className="py-1 text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-zinc-100 leading-[1.2]">
-            เริ่มต้นใช้งานได้ใน 4 ขั้นตอน
+            {isEn ? "Get Started in 4 Simple Steps" : "เริ่มต้นใช้งานได้ใน 4 ขั้นตอน"}
           </h2>
           <p className="flex items-center gap-2 text-base sm:text-lg text-zinc-400">
-            <span>เลื่อนหน้าจอลงเพื่อดูขั้นตอนการทำงานทีละขั้น</span>
+            <span>
+              {isEn
+                ? "Scroll down to explore each step of the workflow"
+                : "เลื่อนหน้าจอลงเพื่อดูขั้นตอนการทำงานทีละขั้น"}
+            </span>
             <ArrowDown className="h-4 w-4 text-emerald-400" />
           </p>
         </div>
@@ -164,6 +200,9 @@ export function WorkflowShowcase({
           const isTextRight = item.textSide === "right";
           const isImageLeft = isTextRight;
           const isVisible = visibleSteps[idx];
+          const title = isEn ? item.titleEn : item.titleTh;
+          const desc = isEn ? item.descEn : item.descTh;
+          const highlight = isEn ? item.highlightEn : item.highlightTh;
 
           const hiddenSlideClass = isTextRight
             ? "translate-x-12 opacity-0"
@@ -196,7 +235,7 @@ export function WorkflowShowcase({
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={item.image}
-                    alt={item.title}
+                    alt={title}
                     loading={idx === 0 ? "eager" : "lazy"}
                     className="h-full w-full object-cover object-center saturate-[0.95] contrast-[1.05]"
                   />
@@ -228,15 +267,15 @@ export function WorkflowShowcase({
                   </div>
 
                   <h3 className="py-1 text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-white leading-[1.2] mt-4">
-                    {item.title}
+                    {title}
                   </h3>
 
                   <p className="text-base sm:text-lg text-zinc-300 leading-relaxed mt-5 max-w-xl">
-                    {item.desc}
+                    {desc}
                   </p>
 
                   <p className="border-l-2 border-emerald-500/80 pl-4 mt-6 text-sm sm:text-base text-zinc-400">
-                    {item.highlight}
+                    {highlight}
                   </p>
 
                   {idx === WORKFLOW_STEPS.length - 1 && (
@@ -248,8 +287,12 @@ export function WorkflowShowcase({
                         <Calculator className="h-4 w-4" />
                         <span>
                           {isAuthenticated
-                            ? "เปิดเครื่องมือคำนวณทันที"
-                            : "เข้าสู่ระบบเพื่อเริ่มใช้งานจริง"}
+                            ? isEn
+                              ? "Launch Calculator Now"
+                              : "เปิดเครื่องมือคำนวณทันที"
+                            : isEn
+                              ? "Sign In to Start Calculating"
+                              : "เข้าสู่ระบบเพื่อเริ่มใช้งานจริง"}
                         </span>
                         <ArrowRight className="h-4 w-4" />
                       </Link>

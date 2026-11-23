@@ -1,5 +1,6 @@
 import type {
   ActionableFixRecommendation,
+  AppLanguage,
   CalculationMetrics,
   CalculatorInputValues,
   CsvExportColumnKey,
@@ -20,27 +21,132 @@ export const MAX_CLOUD_RECORDS = 20;
 export const MAX_MONETARY_VALUE = 299_999;
 
 export const PLATFORM_PRESETS: PlatformPreset[] = [
-  { id: "Shopee", label: "Shopee 13%", badge: "Marketplace", feePercent: 13 },
-  { id: "TikTok Shop", label: "TikTok Shop 12%", badge: "Social Commerce", feePercent: 12 },
-  { id: "Lazada", label: "Lazada 12%", badge: "Marketplace", feePercent: 12 },
-  { id: "ขายตรง", label: "ขายตรง 0%", badge: "Direct / Chat", feePercent: 0 },
+  {
+    id: "Shopee",
+    label: "Shopee 13%",
+    labelEn: "Shopee 13%",
+    badge: "Marketplace",
+    feePercent: 13,
+  },
+  {
+    id: "TikTok Shop",
+    label: "TikTok Shop 12%",
+    labelEn: "TikTok Shop 12%",
+    badge: "Social Commerce",
+    feePercent: 12,
+  },
+  {
+    id: "Lazada",
+    label: "Lazada 12%",
+    labelEn: "Lazada 12%",
+    badge: "Marketplace",
+    feePercent: 12,
+  },
+  {
+    id: "ขายตรง",
+    label: "ขายตรง 0%",
+    labelEn: "Direct Sale 0%",
+    badge: "Direct / Chat",
+    feePercent: 0,
+  },
 ];
 
+export function formatPlatformDisplayName(
+  platform: string,
+  language: AppLanguage = "th"
+): string {
+  if (language === "en") {
+    if (platform === "ขายตรง") return "Direct Sale";
+    if (platform === "ทั่วไป") return "General";
+  }
+  return platform;
+}
+
 export const CSV_EXPORT_COLUMNS: readonly CsvExportColumnOption[] = [
-  { key: "product_name", label: "ชื่อสินค้า", defaultSelected: true },
-  { key: "platform", label: "แพลตฟอร์ม", defaultSelected: true },
-  { key: "total_cost_per_unit", label: "ต้นทุนรวมต่อชิ้น (บาท)", defaultSelected: true },
-  { key: "selling_price", label: "ราคาขาย (บาท)", defaultSelected: true },
-  { key: "net_profit_per_unit", label: "กำไรสุทธิต่อชิ้น (บาท)", defaultSelected: true },
-  { key: "net_margin_percent", label: "Net Margin (%)", defaultSelected: true },
-  { key: "created_at", label: "วันที่บันทึก", defaultSelected: true },
-  { key: "cost_price", label: "ต้นทุนสินค้า (บาท)", defaultSelected: false },
-  { key: "packaging_cost", label: "ค่าแพ็ก (บาท)", defaultSelected: false },
-  { key: "ads_cost", label: "ค่าแอด (บาท)", defaultSelected: false },
-  { key: "platform_fee_percent", label: "ค่าธรรมเนียม (%)", defaultSelected: false },
-  { key: "platform_fee_baht", label: "ค่าธรรมเนียม (บาท)", defaultSelected: false },
-  { key: "fixed_cost", label: "ต้นทุนคงที่รวม (บาท)", defaultSelected: false },
-  { key: "break_even_units", label: "จุดคุ้มทุน (ชิ้น)", defaultSelected: false },
+  {
+    key: "product_name",
+    label: "ชื่อสินค้า",
+    labelEn: "Product Name",
+    defaultSelected: true,
+  },
+  {
+    key: "platform",
+    label: "แพลตฟอร์ม",
+    labelEn: "Platform",
+    defaultSelected: true,
+  },
+  {
+    key: "total_cost_per_unit",
+    label: "ต้นทุนรวมต่อชิ้น (บาท)",
+    labelEn: "Total Unit Cost (THB)",
+    defaultSelected: true,
+  },
+  {
+    key: "selling_price",
+    label: "ราคาขาย (บาท)",
+    labelEn: "Selling Price (THB)",
+    defaultSelected: true,
+  },
+  {
+    key: "net_profit_per_unit",
+    label: "กำไรสุทธิต่อชิ้น (บาท)",
+    labelEn: "Net Profit / Unit (THB)",
+    defaultSelected: true,
+  },
+  {
+    key: "net_margin_percent",
+    label: "Net Margin (%)",
+    labelEn: "Net Margin (%)",
+    defaultSelected: true,
+  },
+  {
+    key: "created_at",
+    label: "วันที่บันทึก",
+    labelEn: "Saved Date",
+    defaultSelected: true,
+  },
+  {
+    key: "cost_price",
+    label: "ต้นทุนสินค้า (บาท)",
+    labelEn: "Product Cost (THB)",
+    defaultSelected: false,
+  },
+  {
+    key: "packaging_cost",
+    label: "ค่าแพ็ก (บาท)",
+    labelEn: "Packaging Cost (THB)",
+    defaultSelected: false,
+  },
+  {
+    key: "ads_cost",
+    label: "ค่าแอด (บาท)",
+    labelEn: "Ad Cost (THB)",
+    defaultSelected: false,
+  },
+  {
+    key: "platform_fee_percent",
+    label: "ค่าธรรมเนียม (%)",
+    labelEn: "Platform GP (%)",
+    defaultSelected: false,
+  },
+  {
+    key: "platform_fee_baht",
+    label: "ค่าธรรมเนียม (บาท)",
+    labelEn: "Platform GP (THB)",
+    defaultSelected: false,
+  },
+  {
+    key: "fixed_cost",
+    label: "ต้นทุนคงที่รวม (บาท)",
+    labelEn: "Monthly Fixed Cost (THB)",
+    defaultSelected: false,
+  },
+  {
+    key: "break_even_units",
+    label: "จุดคุ้มทุน (ชิ้น)",
+    labelEn: "Break-Even (Units)",
+    defaultSelected: false,
+  },
 ];
 
 export const DEFAULT_CSV_EXPORT_KEYS: CsvExportColumnKey[] = CSV_EXPORT_COLUMNS
@@ -192,8 +298,12 @@ export function simulatePromoDiscount(
 export function exportCalculationsToCsv(
   items: EcommerceCalculationRecord[],
   selectedKeys?: readonly CsvExportColumnKey[],
-  fallbackInput?: CalculatorInputValues
+  fallbackInput?: CalculatorInputValues,
+  language: AppLanguage = "th"
 ): string {
+  const isEn = language === "en";
+  const locale = isEn ? "en-US" : "th-TH";
+
   const keySet =
     selectedKeys !== undefined
       ? new Set(selectedKeys)
@@ -215,12 +325,14 @@ export function exportCalculationsToCsv(
           platformFeePercent: Number(r.platform_fee_percent) || 0,
           sellingPrice: Number(r.selling_price) || 0,
           fixedCost: Number(r.fixed_cost) || 0,
-          createdAt: new Date(r.created_at).toLocaleString("th-TH"),
+          createdAt: new Date(r.created_at).toLocaleString(locale),
         }))
       : fallbackInput
         ? [
             {
-              productName: fallbackInput.productName.trim() || "สินค้าปัจจุบัน",
+              productName:
+                fallbackInput.productName.trim() ||
+                (isEn ? "Current Product" : "สินค้าปัจจุบัน"),
               platform: fallbackInput.platform,
               costPrice: fallbackInput.costPrice,
               packagingCost: fallbackInput.packagingCost,
@@ -228,7 +340,7 @@ export function exportCalculationsToCsv(
               platformFeePercent: fallbackInput.platformFeePercent,
               sellingPrice: fallbackInput.sellingPrice,
               fixedCost: fallbackInput.fixedCost,
-              createdAt: new Date().toLocaleString("th-TH"),
+              createdAt: new Date().toLocaleString(locale),
             },
           ]
         : [];
@@ -236,7 +348,9 @@ export function exportCalculationsToCsv(
   const escapeCell = (val: string | number) =>
     `"${String(val).replace(/"/g, '""')}"`;
 
-  const headers = activeColumns.map((col) => escapeCell(col.label));
+  const headers = activeColumns.map((col) =>
+    escapeCell(isEn ? col.labelEn : col.label)
+  );
 
   const lines = [
     headers.join(","),
@@ -254,7 +368,7 @@ export function exportCalculationsToCsv(
 
       const cellMap: Record<CsvExportColumnKey, string> = {
         product_name: escapeCell(row.productName),
-        platform: escapeCell(row.platform),
+        platform: escapeCell(formatPlatformDisplayName(row.platform, language)),
         cost_price: row.costPrice.toFixed(2),
         packaging_cost: row.packagingCost.toFixed(2),
         ads_cost: row.adsCost.toFixed(2),
@@ -266,7 +380,11 @@ export function exportCalculationsToCsv(
         net_margin_percent: m.netMarginPercent.toFixed(2),
         fixed_cost: row.fixedCost.toFixed(2),
         break_even_units: escapeCell(
-          m.breakEvenUnits !== null ? m.breakEvenUnits : "ไม่สามารถคืนทุนได้"
+          m.breakEvenUnits !== null
+            ? m.breakEvenUnits
+            : isEn
+              ? "Cannot break even"
+              : "ไม่สามารถคืนทุนได้"
         ),
         created_at: escapeCell(row.createdAt),
       };
@@ -281,9 +399,10 @@ export function exportCalculationsToCsv(
 export function buildCsvExportContent(
   records: EcommerceCalculationRecord[],
   fallbackInput: CalculatorInputValues,
-  selectedKeys?: readonly CsvExportColumnKey[]
+  selectedKeys?: readonly CsvExportColumnKey[],
+  language: AppLanguage = "th"
 ): string {
-  return exportCalculationsToCsv(records, selectedKeys, fallbackInput);
+  return exportCalculationsToCsv(records, selectedKeys, fallbackInput, language);
 }
 
 const DISCOUNT_SENSITIVITY_STEPS: readonly number[] = [
@@ -294,34 +413,46 @@ const VOLUME_PROJECTION_UNITS: readonly number[] = [10, 50, 100, 500];
 
 const TARGET_MARGIN_TIERS: readonly {
   targetMarginPercent: number;
-  tierLabel: string;
-  tierSubtitle: string;
+  tierLabelTh: string;
+  tierLabelEn: string;
+  tierSubtitleTh: string;
+  tierSubtitleEn: string;
   recommended: boolean;
 }[] = [
   {
     targetMarginPercent: 20,
-    tierLabel: "ราคาแข่งขัน",
-    tierSubtitle: "อัตรากำไรเป้าหมาย 20%",
+    tierLabelTh: "ราคาแข่งขัน",
+    tierLabelEn: "Competitive Price",
+    tierSubtitleTh: "อัตรากำไรเป้าหมาย 20%",
+    tierSubtitleEn: "Target Margin 20%",
     recommended: false,
   },
   {
     targetMarginPercent: 30,
-    tierLabel: "ราคามาตรฐานแนะนำ",
-    tierSubtitle: "อัตรากำไรเป้าหมาย 30%",
+    tierLabelTh: "ราคามาตรฐานแนะนำ",
+    tierLabelEn: "Recommended Price",
+    tierSubtitleTh: "อัตรากำไรเป้าหมาย 30%",
+    tierSubtitleEn: "Target Margin 30%",
     recommended: true,
   },
   {
     targetMarginPercent: 40,
-    tierLabel: "ราคาทำกำไรสูง",
-    tierSubtitle: "อัตรากำไรเป้าหมาย 40%",
+    tierLabelTh: "ราคาทำกำไรสูง",
+    tierLabelEn: "High Margin Price",
+    tierSubtitleTh: "อัตรากำไรเป้าหมาย 40%",
+    tierSubtitleEn: "Target Margin 40%",
     recommended: false,
   },
 ];
 
 export function buildFinancialAnalysis(
   input: CalculatorInputValues,
-  baseMetrics: CalculationMetrics
+  baseMetrics: CalculationMetrics,
+  language: AppLanguage = "th"
 ): FinancialAnalysisResult {
+  const isEn = language === "en";
+  const locale = isEn ? "en-US" : "th-TH";
+
   const costPrice =
     Number.isFinite(input.costPrice) && input.costPrice > 0
       ? input.costPrice
@@ -388,11 +519,16 @@ export function buildFinancialAnalysis(
 
   const targetPrices: TargetPriceRecommendation[] = TARGET_MARGIN_TIERS.map(
     (tier) => {
+      const tierLabel = isEn ? tier.tierLabelEn : tier.tierLabelTh;
+      const tierSubtitle = isEn ? tier.tierSubtitleEn : tier.tierSubtitleTh;
       const targetRate = tier.targetMarginPercent / 100;
       const denominator = 1 - feeRate - targetRate;
       if (denominator <= 0.0001) {
         return {
-          ...tier,
+          targetMarginPercent: tier.targetMarginPercent,
+          tierLabel,
+          tierSubtitle,
+          recommended: tier.recommended,
           suggestedPrice: null,
           estimatedProfitPerUnit: null,
           feasible: false,
@@ -405,7 +541,10 @@ export function buildFinancialAnalysis(
       const estimatedProfitPerUnit = suggestedPrice * targetRate;
 
       return {
-        ...tier,
+        targetMarginPercent: tier.targetMarginPercent,
+        tierLabel,
+        tierSubtitle,
+        recommended: tier.recommended,
         suggestedPrice,
         estimatedProfitPerUnit,
         feasible: true,
@@ -475,34 +614,35 @@ export function buildFinancialAnalysis(
   };
 
   if (isIncompleteData) {
+    const noPriceText = isEn ? "No selling price set" : "ยังไม่มีราคาขาย";
     const emptyBreakdown: HealthScoreFactor[] = [
       {
         key: "margin",
-        label: "อัตรากำไรสุทธิ (Net Margin)",
+        label: isEn ? "Net Margin" : "อัตรากำไรสุทธิ (Net Margin)",
         score: 0,
         maxScore: 40,
-        summary: "ยังไม่มีราคาขาย",
+        summary: noPriceText,
       },
       {
         key: "ads",
-        label: "ประสิทธิภาพค่าแอด (Ad Ratio)",
+        label: isEn ? "Ad Efficiency (Ad Ratio)" : "ประสิทธิภาพค่าแอด (Ad Ratio)",
         score: 0,
         maxScore: 25,
-        summary: "ยังไม่มีราคาขาย",
+        summary: noPriceText,
       },
       {
         key: "discount",
-        label: "กันชนส่วนลด (Discount Buffer)",
+        label: isEn ? "Discount Buffer" : "กันชนส่วนลด (Discount Buffer)",
         score: 0,
         maxScore: 20,
-        summary: "ยังไม่มีราคาขาย",
+        summary: noPriceText,
       },
       {
         key: "unit_risk",
-        label: "ผลตอบแทนต่อความเสี่ยง (Unit Risk)",
+        label: isEn ? "Unit Risk Return" : "ผลตอบแทนต่อความเสี่ยง (Unit Risk)",
         score: 0,
         maxScore: 15,
-        summary: "ยังไม่มีราคาขาย",
+        summary: noPriceText,
       },
     ];
 
@@ -511,7 +651,9 @@ export function buildFinancialAnalysis(
       hasZeroProductCostWarning: false,
       healthScore: 0,
       healthGrade: "N/A",
-      healthGradeLabel: "ข้อมูลไม่สมบูรณ์ — ยังไม่ได้ตั้งราคาขาย",
+      healthGradeLabel: isEn
+        ? "Incomplete Data — No Selling Price Set"
+        : "ข้อมูลไม่สมบูรณ์ — ยังไม่ได้ตั้งราคาขาย",
       healthBreakdown: emptyBreakdown,
       discountCurve,
       volumeProjections,
@@ -527,9 +669,12 @@ export function buildFinancialAnalysis(
       insights: [
         {
           severity: "warning",
-          title: "ยังไม่ได้ตั้งราคาขายต่อชิ้น",
-          detail:
-            "กรุณาย้อนกลับไประบุราคาขายต่อชิ้น เพื่อให้ระบบวิเคราะห์กำไรและจุดคุ้มทุนได้จริง",
+          title: isEn
+            ? "Selling price per unit has not been set"
+            : "ยังไม่ได้ตั้งราคาขายต่อชิ้น",
+          detail: isEn
+            ? "Go back and enter a selling price per unit so the engine can diagnose your real profit and break-even point."
+            : "กรุณาย้อนกลับไประบุราคาขายต่อชิ้น เพื่อให้ระบบวิเคราะห์กำไรและจุดคุ้มทุนได้จริง",
         },
       ],
     };
@@ -598,19 +743,29 @@ export function buildFinancialAnalysis(
   let healthGradeLabel: string;
   if (baseMetrics.netProfitPerUnit <= 0 || healthScore < 35) {
     healthGrade = "D";
-    healthGradeLabel = "เกรด D — โครงสร้างอันตราย";
+    healthGradeLabel = isEn
+      ? "Grade D — High-Risk Structure"
+      : "เกรด D — โครงสร้างอันตราย";
   } else if (healthScore >= 85) {
     healthGrade = "S";
-    healthGradeLabel = "เกรด S — โครงสร้างแกร่งมาก";
+    healthGradeLabel = isEn
+      ? "Grade S — Rock-Solid Margins"
+      : "เกรด S — โครงสร้างแกร่งมาก";
   } else if (healthScore >= 70) {
     healthGrade = "A";
-    healthGradeLabel = "เกรด A — น่าลงทุน";
+    healthGradeLabel = isEn
+      ? "Grade A — Great Potential"
+      : "เกรด A — น่าลงทุน";
   } else if (healthScore >= 55) {
     healthGrade = "B";
-    healthGradeLabel = "เกรด B — พอไปได้แต่ต้องคุมต้นทุน";
+    healthGradeLabel = isEn
+      ? "Grade B — Viable, Watch Costs"
+      : "เกรด B — พอไปได้แต่ต้องคุมต้นทุน";
   } else {
     healthGrade = "C";
-    healthGradeLabel = "เกรด C — กำไรบางเสี่ยงเข้าเนื้อ";
+    healthGradeLabel = isEn
+      ? "Grade C — Thin Margins, Risky"
+      : "เกรด C — กำไรบางเสี่ยงเข้าเนื้อ";
   }
 
   const unitRiskRatioValue =
@@ -623,34 +778,42 @@ export function buildFinancialAnalysis(
   const healthBreakdown: HealthScoreFactor[] = [
     {
       key: "margin",
-      label: "อัตรากำไรสุทธิ (Net Margin)",
+      label: isEn ? "Net Margin" : "อัตรากำไรสุทธิ (Net Margin)",
       score: marginScore,
       maxScore: 40,
       summary: `${formatCurrency(baseMetrics.netMarginPercent, 1)}%`,
     },
     {
       key: "ads",
-      label: "ประสิทธิภาพค่าแอด (Ad Ratio)",
+      label: isEn ? "Ad Efficiency (Ad Ratio)" : "ประสิทธิภาพค่าแอด (Ad Ratio)",
       score: adCostScore,
       maxScore: 25,
-      summary: `${formatCurrency(adCostRatioPercent, 1)}% ของราคาขาย`,
+      summary: isEn
+        ? `${formatCurrency(adCostRatioPercent, 1)}% of selling price`
+        : `${formatCurrency(adCostRatioPercent, 1)}% ของราคาขาย`,
     },
     {
       key: "discount",
-      label: "กันชนส่วนลด (Discount Buffer)",
+      label: isEn ? "Discount Buffer" : "กันชนส่วนลด (Discount Buffer)",
       score: discountBufferScore,
       maxScore: 20,
-      summary: `ลดปลอดภัยสูงสุด ${formatCurrency(maxSafeDiscountPercent, 1)}%`,
+      summary: isEn
+        ? `Max safe discount ${formatCurrency(maxSafeDiscountPercent, 1)}%`
+        : `ลดปลอดภัยสูงสุด ${formatCurrency(maxSafeDiscountPercent, 1)}%`,
     },
     {
       key: "unit_risk",
-      label: "ความคุ้มทุนต่อความเสี่ยง (Unit Risk)",
+      label: isEn ? "Unit Risk Return" : "ความคุ้มทุนต่อความเสี่ยง (Unit Risk)",
       score: unitRiskScore,
       maxScore: 15,
       summary:
         baseMetrics.netProfitPerUnit > 0
-          ? `${formatCurrency(unitRiskRatioValue * 100, 0)}% ต่อทุนผันแปร`
-          : "ขาดทุนต่อชิ้น",
+          ? isEn
+            ? `${formatCurrency(unitRiskRatioValue * 100, 0)}% on variable cost`
+            : `${formatCurrency(unitRiskRatioValue * 100, 0)}% ต่อทุนผันแปร`
+          : isEn
+            ? "Losing money per unit"
+            : "ขาดทุนต่อชิ้น",
     },
   ];
 
@@ -669,20 +832,29 @@ export function buildFinancialAnalysis(
     const shortfall = Math.abs(baseMetrics.netProfitPerUnit);
     insights.push({
       severity: "danger",
-      title: `ราคาขายปัจจุบันขาดทุนชิ้นละ ฿${formatCurrency(shortfall)}`,
+      title: isEn
+        ? `Current price loses ฿${formatCurrency(shortfall)} per unit`
+        : `ราคาขายปัจจุบันขาดทุนชิ้นละ ฿${formatCurrency(shortfall)}`,
       detail:
         minBreakEvenSellingPrice !== null
-          ? `ควรปรับราคาขายขึ้นเป็นอย่างน้อย ฿${formatCurrency(minBreakEvenSellingPrice)} เพื่อหยุดการขาดทุน หรือปรับเป็น ฿${formatCurrency(targetPriceForFix ?? minBreakEvenSellingPrice)} เพื่อสร้างกำไรสุทธิ 25%`
-          : "ค่าธรรมเนียมแพลตฟอร์มสูงถึง 100% ทำให้ไม่สามารถทำกำไรได้ กรุณาตรวจสอบค่าธรรมเนียม (GP)",
+          ? isEn
+            ? `Raise your selling price to at least ฿${formatCurrency(minBreakEvenSellingPrice)} to stop losing money, or set it to ฿${formatCurrency(targetPriceForFix ?? minBreakEvenSellingPrice)} for a 25% net margin.`
+            : `ควรปรับราคาขายขึ้นเป็นอย่างน้อย ฿${formatCurrency(minBreakEvenSellingPrice)} เพื่อหยุดการขาดทุน หรือปรับเป็น ฿${formatCurrency(targetPriceForFix ?? minBreakEvenSellingPrice)} เพื่อสร้างกำไรสุทธิ 25%`
+          : isEn
+            ? "Platform fee is 100%, making profitability impossible. Please verify the platform GP rate."
+            : "ค่าธรรมเนียมแพลตฟอร์มสูงถึง 100% ทำให้ไม่สามารถทำกำไรได้ กรุณาตรวจสอบค่าธรรมเนียม (GP)",
     });
   }
 
   if (costPrice > 0 && adsCost > costPrice) {
     insights.push({
       severity: "danger",
-      title: `งบโฆษณาต่อชิ้น (฿${formatCurrency(adsCost)}) สูงกว่าต้นทุนสินค้า (฿${formatCurrency(costPrice)})`,
-      detail:
-        "งบโฆษณาต่อชิ้นสูงกว่าต้นทุนตัวสินค้าแล้ว เสี่ยงกำไรหายทันทีหากค่าแอดผันผวน แนะนำจัดเซตขายพ่วง (Bundle) เพื่อเพิ่มยอดต่อบิลและกดค่าแอดเฉลี่ยต่อชิ้นลง",
+      title: isEn
+        ? `Ad spend per unit (฿${formatCurrency(adsCost)}) exceeds product cost (฿${formatCurrency(costPrice)})`
+        : `งบโฆษณาต่อชิ้น (฿${formatCurrency(adsCost)}) สูงกว่าต้นทุนสินค้า (฿${formatCurrency(costPrice)})`,
+      detail: isEn
+        ? "Your ad spend per unit is higher than the product cost itself, leaving margins exposed to CPA spikes. Consider product bundles to raise AOV and lower blended ad cost per unit."
+        : "งบโฆษณาต่อชิ้นสูงกว่าต้นทุนตัวสินค้าแล้ว เสี่ยงกำไรหายทันทีหากค่าแอดผันผวน แนะนำจัดเซตขายพ่วง (Bundle) เพื่อเพิ่มยอดต่อบิลและกดค่าแอดเฉลี่ยต่อชิ้นลง",
     });
   }
 
@@ -692,9 +864,12 @@ export function buildFinancialAnalysis(
   ) {
     insights.push({
       severity: "warning",
-      title: `ค่า GP แพลตฟอร์ม (฿${formatCurrency(baseMetrics.platformFeeBaht)}) สูงกว่ากำไรสุทธิของคุณ`,
-      detail:
-        "แพลตฟอร์มได้ส่วนแบ่งต่อชิ้นมากกว่ากำไรที่คุณได้รับ ควรพิจารณาดันยอดขายช่องทางขายตรงหรือจัดเซตสินค้าเพื่อเพิ่มยอดต่อบิล",
+      title: isEn
+        ? `Platform GP (฿${formatCurrency(baseMetrics.platformFeeBaht)}) exceeds your net profit`
+        : `ค่า GP แพลตฟอร์ม (฿${formatCurrency(baseMetrics.platformFeeBaht)}) สูงกว่ากำไรสุทธิของคุณ`,
+      detail: isEn
+        ? "The marketplace earns more per unit than you do. Consider shifting volume to direct channels or offering bundles to improve unit economics."
+        : "แพลตฟอร์มได้ส่วนแบ่งต่อชิ้นมากกว่ากำไรที่คุณได้รับ ควรพิจารณาดันยอดขายช่องทางขายตรงหรือจัดเซตสินค้าเพื่อเพิ่มยอดต่อบิล",
     });
   }
 
@@ -704,27 +879,36 @@ export function buildFinancialAnalysis(
   ) {
     insights.push({
       severity: "warning",
-      title: `กำไรสุทธิบางเสี่ยงเข้าเนื้อ (${formatCurrency(baseMetrics.netMarginPercent, 1)}%)`,
-      detail:
-        "กำไรสุทธิต่ำกว่า 15% ถือว่าบางมาก หากลูกค้ากดใช้โค้ดส่วนลดร้านค้าหรือมีพัสดุตีกลับเพียงไม่กี่ออเดอร์ ภาพรวมทั้งเดือนอาจขาดทุนทันที",
+      title: isEn
+        ? `Thin net margin (${formatCurrency(baseMetrics.netMarginPercent, 1)}%) — vulnerable to losses`
+        : `กำไรสุทธิบางเสี่ยงเข้าเนื้อ (${formatCurrency(baseMetrics.netMarginPercent, 1)}%)`,
+      detail: isEn
+        ? "A net margin under 15% leaves very little cushion. Store vouchers or just a few returned parcels can wipe out your monthly profit."
+        : "กำไรสุทธิต่ำกว่า 15% ถือว่าบางมาก หากลูกค้ากดใช้โค้ดส่วนลดร้านค้าหรือมีพัสดุตีกลับเพียงไม่กี่ออเดอร์ ภาพรวมทั้งเดือนอาจขาดทุนทันที",
     });
   }
 
   if (returnLossMultiplier !== null && returnLossMultiplier >= 4) {
     insights.push({
       severity: "warning",
-      title: `ความเสี่ยงพัสดุตีกลับสูง (ต้องขายเพิ่ม ${returnLossMultiplier} ชิ้นต่อการตีกลับ 1 ชิ้น)`,
-      detail:
-        "อัตราต้นทุนที่สูญเสียต่อการตีกลับค่อนข้างสูง แนะนำเพิ่มความเข้มงวดในการคัดกรองออเดอร์เก็บเงินปลายทาง (COD) และมาตรฐานการแพ็กสินค้า",
+      title: isEn
+        ? `High return risk (${returnLossMultiplier} extra sales needed per 1 returned parcel)`
+        : `ความเสี่ยงพัสดุตีกลับสูง (ต้องขายเพิ่ม ${returnLossMultiplier} ชิ้นต่อการตีกลับ 1 ชิ้น)`,
+      detail: isEn
+        ? "Cost lost per return is relatively high. Tighten COD order verification and upgrade packaging protection to minimize returns."
+        : "อัตราต้นทุนที่สูญเสียต่อการตีกลับค่อนข้างสูง แนะนำเพิ่มความเข้มงวดในการคัดกรองออเดอร์เก็บเงินปลายทาง (COD) และมาตรฐานการแพ็กสินค้า",
     });
   }
 
   if (baseMetrics.netMarginPercent >= 30 && maxSafeDiscountPercent >= 20) {
     insights.push({
       severity: "healthy",
-      title: `โครงสร้างกำไรแข็งแรงมาก (Net Margin ${formatCurrency(baseMetrics.netMarginPercent, 1)}%)`,
-      detail:
-        "โครงสร้างกำไรแข็งแรงมาก สามารถจัดโปรโมชันลดราคา 10%–15% ช่วงแคมเปญเลขเบิ้ลเพื่อดึงยอดขายได้โดยไม่เข้าเนื้อ",
+      title: isEn
+        ? `Strong profit structure (Net Margin ${formatCurrency(baseMetrics.netMarginPercent, 1)}%)`
+        : `โครงสร้างกำไรแข็งแรงมาก (Net Margin ${formatCurrency(baseMetrics.netMarginPercent, 1)}%)`,
+      detail: isEn
+        ? "Your margin structure is very resilient. You can confidently run 10%–15% double-day campaign discounts to boost volume without losing money."
+        : "โครงสร้างกำไรแข็งแรงมาก สามารถจัดโปรโมชันลดราคา 10%–15% ช่วงแคมเปญเลขเบิ้ลเพื่อดึงยอดขายได้โดยไม่เข้าเนื้อ",
     });
   } else if (
     baseMetrics.netMarginPercent >= 15 &&
@@ -732,8 +916,12 @@ export function buildFinancialAnalysis(
   ) {
     insights.push({
       severity: "healthy",
-      title: `โครงสร้างกำไรอยู่ในเกณฑ์สมดุล (Net Margin ${formatCurrency(baseMetrics.netMarginPercent, 1)}%)`,
-      detail: `มีกันชนส่วนลดปลอดภัยสูงสุด ${formatCurrency(maxSafeDiscountPercent, 1)}% และสามารถเพิ่มงบโฆษณาได้อีก +฿${formatCurrency(maxSafeAdditionalAds)}/ชิ้นก่อนชนจุดคุ้มทุน`,
+      title: isEn
+        ? `Balanced profit structure (Net Margin ${formatCurrency(baseMetrics.netMarginPercent, 1)}%)`
+        : `โครงสร้างกำไรอยู่ในเกณฑ์สมดุล (Net Margin ${formatCurrency(baseMetrics.netMarginPercent, 1)}%)`,
+      detail: isEn
+        ? `You have a max safe discount buffer of ${formatCurrency(maxSafeDiscountPercent, 1)}% and room to spend up to +฿${formatCurrency(maxSafeAdditionalAds)}/unit more on ads before breaking even.`
+        : `มีกันชนส่วนลดปลอดภัยสูงสุด ${formatCurrency(maxSafeDiscountPercent, 1)}% และสามารถเพิ่มงบโฆษณาได้อีก +฿${formatCurrency(maxSafeAdditionalAds)}/ชิ้นก่อนชนจุดคุ้มทุน`,
     });
   }
 
@@ -745,14 +933,22 @@ export function buildFinancialAnalysis(
     if (baseMetrics.breakEvenUnits > 300) {
       insights.push({
         severity: "warning",
-        title: `จุดคุ้มทุนรายเดือนสูง (${baseMetrics.breakEvenUnits.toLocaleString("th-TH")} ชิ้น/เดือน)`,
-        detail: `ด้วยต้นทุนคงที่ ฿${formatCurrency(fixedCost, 0)} ต้องทำยอดขายเฉลี่ยวันละ ${Math.ceil(baseMetrics.breakEvenUnits / 30).toLocaleString("th-TH")} ชิ้นจึงจะคุ้มทุน ควรเพิ่มกำไรต่อชิ้นเพื่อลดแรงกดดันด้านยอดขาย`,
+        title: isEn
+          ? `High monthly break-even target (${baseMetrics.breakEvenUnits.toLocaleString(locale)} units/mo)`
+          : `จุดคุ้มทุนรายเดือนสูง (${baseMetrics.breakEvenUnits.toLocaleString("th-TH")} ชิ้น/เดือน)`,
+        detail: isEn
+          ? `With ฿${formatCurrency(fixedCost, 0)} in fixed costs, you need ~${Math.ceil(baseMetrics.breakEvenUnits / 30).toLocaleString(locale)} units/day just to break even. Raising per-unit margin will ease volume pressure.`
+          : `ด้วยต้นทุนคงที่ ฿${formatCurrency(fixedCost, 0)} ต้องทำยอดขายเฉลี่ยวันละ ${Math.ceil(baseMetrics.breakEvenUnits / 30).toLocaleString("th-TH")} ชิ้นจึงจะคุ้มทุน ควรเพิ่มกำไรต่อชิ้นเพื่อลดแรงกดดันด้านยอดขาย`,
       });
     } else {
       insights.push({
         severity: "healthy",
-        title: `จุดคุ้มทุนอยู่ในระดับจัดการได้ (${baseMetrics.breakEvenUnits.toLocaleString("th-TH")} ชิ้น/เดือน)`,
-        detail: `ขายเฉลี่ยเพียงวันละ ${Math.max(1, Math.ceil(baseMetrics.breakEvenUnits / 30)).toLocaleString("th-TH")} ชิ้นก็ครอบคลุมต้นทุนคงที่ ฿${formatCurrency(fixedCost, 0)} แล้ว`,
+        title: isEn
+          ? `Manageable monthly break-even (${baseMetrics.breakEvenUnits.toLocaleString(locale)} units/mo)`
+          : `จุดคุ้มทุนอยู่ในระดับจัดการได้ (${baseMetrics.breakEvenUnits.toLocaleString("th-TH")} ชิ้น/เดือน)`,
+        detail: isEn
+          ? `Averaging just ${Math.max(1, Math.ceil(baseMetrics.breakEvenUnits / 30)).toLocaleString(locale)} units/day covers your ฿${formatCurrency(fixedCost, 0)} monthly fixed costs.`
+          : `ขายเฉลี่ยเพียงวันละ ${Math.max(1, Math.ceil(baseMetrics.breakEvenUnits / 30)).toLocaleString("th-TH")} ชิ้นก็ครอบคลุมต้นทุนคงที่ ฿${formatCurrency(fixedCost, 0)} แล้ว`,
       });
     }
   }

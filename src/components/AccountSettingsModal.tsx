@@ -195,7 +195,7 @@ export function AccountSettingsModal({
     setUploadingAvatar(true);
 
     try {
-      const result = await uploadUserAvatar(file, avatarUrl);
+      const result = await uploadUserAvatar(file, avatarUrl, language);
       onAvatarUpdated(result.avatarUrl);
       setAvatarSuccess(
         isEn
@@ -282,7 +282,7 @@ export function AccountSettingsModal({
       );
 
       if (rpcError) {
-        setUsernameError(translateSupabaseError(rpcError));
+        setUsernameError(translateSupabaseError(rpcError, language));
         return;
       }
 
@@ -303,7 +303,7 @@ export function AccountSettingsModal({
         .single();
 
       if (profileError) {
-        setUsernameError(translateSupabaseError(profileError));
+        setUsernameError(translateSupabaseError(profileError, language));
         return;
       }
 
@@ -312,7 +312,7 @@ export function AccountSettingsModal({
       });
 
       if (authMetaError) {
-        setUsernameError(translateSupabaseError(authMetaError));
+        setUsernameError(translateSupabaseError(authMetaError, language));
         return;
       }
 
@@ -328,7 +328,7 @@ export function AccountSettingsModal({
       );
       router.refresh();
     } catch (err) {
-      setUsernameError(translateSupabaseError(err));
+      setUsernameError(translateSupabaseError(err, language));
     } finally {
       setSavingUsername(false);
     }
@@ -428,7 +428,7 @@ export function AccountSettingsModal({
       });
 
       if (error) {
-        setPasswordError(translateSupabaseError(error));
+        setPasswordError(translateSupabaseError(error, language));
         return;
       }
 
@@ -451,7 +451,7 @@ export function AccountSettingsModal({
           : "เปลี่ยนรหัสผ่านเรียบร้อยแล้ว"
       );
     } catch (err) {
-      setPasswordError(translateSupabaseError(err));
+      setPasswordError(translateSupabaseError(err, language));
     } finally {
       setSavingPassword(false);
     }
@@ -802,7 +802,10 @@ export function AccountSettingsModal({
                         )}
                       </button>
                     </div>
-                    <PasswordStrengthMeter password={newPassword} />
+                    <PasswordStrengthMeter
+                      password={newPassword}
+                      language={language}
+                    />
                   </div>
 
                   <div>

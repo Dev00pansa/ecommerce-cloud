@@ -27,6 +27,7 @@ export interface UserProfile {
 export interface PlatformPreset {
   id: string;
   label: string;
+  labelEn: string;
   badge: string;
   feePercent: number;
 }
@@ -124,6 +125,7 @@ export type CsvExportColumnKey =
 export interface CsvExportColumnOption {
   key: CsvExportColumnKey;
   label: string;
+  labelEn: string;
   defaultSelected: boolean;
 }
 

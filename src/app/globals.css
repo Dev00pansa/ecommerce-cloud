@@ -237,10 +237,10 @@ body {
     transform: translate3d(0, 0px, 0) rotate(-6deg);
   }
   50% {
-    transform: translate3d(10px, -18px, 0) rotate(-2deg);
+    transform: translate3d(16px, -24px, 0) rotate(-1deg);
   }
   100% {
-    transform: translate3d(-6px, 12px, 0) rotate(-7deg);
+    transform: translate3d(-12px, 18px, 0) rotate(-8deg);
   }
 }
 
@@ -249,10 +249,10 @@ body {
     transform: translate3d(0, 0px, 0) rotate(5deg);
   }
   50% {
-    transform: translate3d(-12px, 16px, 0) rotate(2deg);
+    transform: translate3d(-18px, 22px, 0) rotate(1deg);
   }
   100% {
-    transform: translate3d(8px, -14px, 0) rotate(7deg);
+    transform: translate3d(14px, -20px, 0) rotate(8deg);
   }
 }
 
@@ -261,10 +261,10 @@ body {
     transform: translate3d(0, 0px, 0) rotate(-4deg);
   }
   50% {
-    transform: translate3d(12px, 14px, 0) rotate(1deg);
+    transform: translate3d(18px, 20px, 0) rotate(2deg);
   }
   100% {
-    transform: translate3d(-8px, -16px, 0) rotate(-6deg);
+    transform: translate3d(-14px, -22px, 0) rotate(-7deg);
   }
 }
 
@@ -273,10 +273,10 @@ body {
     transform: translate3d(0, 0px, 0) rotate(6deg);
   }
   50% {
-    transform: translate3d(-10px, -20px, 0) rotate(3deg);
+    transform: translate3d(-16px, -26px, 0) rotate(2deg);
   }
   100% {
-    transform: translate3d(6px, 10px, 0) rotate(8deg);
+    transform: translate3d(12px, 16px, 0) rotate(9deg);
   }
 }
 
@@ -285,36 +285,87 @@ body {
     transform: translate3d(0, 0px, 0) rotate(-5deg);
   }
   50% {
-    transform: translate3d(-12px, -14px, 0) rotate(-1deg);
+    transform: translate3d(-18px, -20px, 0) rotate(0deg);
   }
   100% {
-    transform: translate3d(10px, 16px, 0) rotate(-7deg);
+    transform: translate3d(14px, 22px, 0) rotate(-8deg);
+  }
+}
+
+@keyframes floatingDocDrift6 {
+  0% {
+    transform: translate3d(0, 0px, 0) rotate(4deg);
+  }
+  50% {
+    transform: translate3d(20px, -18px, 0) rotate(-2deg);
+  }
+  100% {
+    transform: translate3d(-14px, 20px, 0) rotate(6deg);
+  }
+}
+
+@keyframes floatingDocDrift7 {
+  0% {
+    transform: translate3d(0, 0px, 0) rotate(-3deg);
+  }
+  50% {
+    transform: translate3d(-16px, 24px, 0) rotate(3deg);
+  }
+  100% {
+    transform: translate3d(14px, -16px, 0) rotate(-5deg);
+  }
+}
+
+@keyframes floatingDocDrift8 {
+  0% {
+    transform: translate3d(0, 0px, 0) rotate(7deg);
+  }
+  50% {
+    transform: translate3d(14px, 20px, 0) rotate(2deg);
+  }
+  100% {
+    transform: translate3d(-18px, -18px, 0) rotate(9deg);
   }
 }
 
 .animate-floating-doc-1 {
   will-change: transform;
-  animation: floatingDocDrift1 26s ease-in-out infinite alternate;
+  animation: floatingDocDrift1 16s ease-in-out infinite alternate;
 }
 
 .animate-floating-doc-2 {
   will-change: transform;
-  animation: floatingDocDrift2 31s ease-in-out infinite alternate;
+  animation: floatingDocDrift2 19s ease-in-out infinite alternate;
 }
 
 .animate-floating-doc-3 {
   will-change: transform;
-  animation: floatingDocDrift3 28s ease-in-out infinite alternate;
+  animation: floatingDocDrift3 17s ease-in-out infinite alternate;
 }
 
 .animate-floating-doc-4 {
   will-change: transform;
-  animation: floatingDocDrift4 34s ease-in-out infinite alternate;
+  animation: floatingDocDrift4 21s ease-in-out infinite alternate;
 }
 
 .animate-floating-doc-5 {
   will-change: transform;
-  animation: floatingDocDrift5 24s ease-in-out infinite alternate;
+  animation: floatingDocDrift5 15s ease-in-out infinite alternate;
+}
+
+.animate-floating-doc-6 {
+  will-change: transform;
+  animation: floatingDocDrift6 18s ease-in-out infinite alternate;
+}
+
+.animate-floating-doc-7 {
+  will-change: transform;
+  animation: floatingDocDrift7 22s ease-in-out infinite alternate;
+}
+
+.animate-floating-doc-8 {
+  will-change: transform;
+  animation: floatingDocDrift8 14s ease-in-out infinite alternate;
 }
 
 @keyframes toastCountdownShrink {

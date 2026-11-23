@@ -6,7 +6,9 @@ import {
   ArrowUpDown,
   Check,
   ChevronDown,
+  Database,
   Download,
+  FileSpreadsheet,
   Image as ImageIcon,
   ListChecks,
   Loader2,
@@ -20,7 +22,9 @@ import {
   MAX_CLOUD_RECORDS,
   calculateEcommerceMetrics,
   formatCurrency,
+  formatPlatformDisplayName,
 } from "@/lib/calculator";
+import { useAppLanguage } from "@/lib/language";
 import type {
   CsvExportColumnKey,
   EcommerceCalculationRecord,
@@ -49,11 +53,31 @@ type DeleteModalTarget =
   | { mode: "single"; record: EcommerceCalculationRecord }
   | { mode: "bulk"; records: EcommerceCalculationRecord[] };
 
-const SORT_OPTIONS: readonly { value: HistorySortOrder; label: string }[] = [
-  { value: "date_desc", label: "วันที่บันทึก: ใหม่ล่าสุด → เก่าสุด" },
-  { value: "date_asc", label: "วันที่บันทึก: เก่าสุด → ใหม่ล่าสุด" },
-  { value: "profit_desc", label: "กำไรสุทธิ: มากที่สุด → น้อยที่สุด" },
-  { value: "profit_asc", label: "กำไรสุทธิ: น้อยที่สุด → มากที่สุด" },
+const SORT_OPTIONS: readonly {
+  value: HistorySortOrder;
+  labelTh: string;
+  labelEn: string;
+}[] = [
+  {
+    value: "date_desc",
+    labelTh: "วันที่บันทึก: ใหม่ล่าสุด → เก่าสุด",
+    labelEn: "Date Saved: Newest → Oldest",
+  },
+  {
+    value: "date_asc",
+    labelTh: "วันที่บันทึก: เก่าสุด → ใหม่ล่าสุด",
+    labelEn: "Date Saved: Oldest → Newest",
+  },
+  {
+    value: "profit_desc",
+    labelTh: "กำไรสุทธิ: มากที่สุด → น้อยที่สุด",
+    labelEn: "Net Profit: Highest → Lowest",
+  },
+  {
+    value: "profit_asc",
+    labelTh: "กำไรสุทธิ: น้อยที่สุด → มากที่สุด",
+    labelEn: "Net Profit: Lowest → Highest",
+  },
 ];
 
 export function HistoryPanel({
@@ -66,6 +90,10 @@ export function HistoryPanel({
   onConfirmDeleteSingle,
   onConfirmDeleteBulk,
 }: HistoryPanelProps) {
+  const [language] = useAppLanguage();
+  const isEn = language === "en";
+  const locale = isEn ? "en-US" : "th-TH";
+
   const sortDropdownRef = useRef<HTMLDivElement | null>(null);
   const [sortOrder, setSortOrder] = useState<HistorySortOrder>("date_desc");
   const [sortDropdownOpen, setSortDropdownOpen] = useState(false);
@@ -173,9 +201,11 @@ export function HistoryPanel({
   const isAllRecordsSelected =
     records.length > 0 && selectedCount === records.length;
 
-  const currentSortLabel =
-    SORT_OPTIONS.find((opt) => opt.value === sortOrder)?.label ??
-    SORT_OPTIONS[0].label;
+  const activeSortOption =
+    SORT_OPTIONS.find((opt) => opt.value === sortOrder) ?? SORT_OPTIONS[0];
+  const currentSortLabel = isEn
+    ? activeSortOption.labelEn
+    : activeSortOption.labelTh;
 
   function toggleExportColumn(key: CsvExportColumnKey) {
     setSelectedExportKeys((prev) =>
@@ -227,15 +257,17 @@ export function HistoryPanel({
 
   return (
     <>
-      <section className="space-y-5">
+      <section className="space-y-6">
         {isCloudFull && (
           <div
             role="alert"
-            className="flex items-center gap-2.5 rounded-2xl border border-amber-500/45 bg-[#050505] px-4 py-3 text-xs sm:text-sm text-amber-300 shadow-[0_0_20px_-6px_rgba(245,158,11,0.25)]"
+            className="flex items-center gap-2.5 rounded-2xl border border-amber-500/45 bg-[#060807]/90 backdrop-blur-md px-4 py-3 text-xs sm:text-sm text-amber-300 shadow-[0_0_20px_-6px_rgba(245,158,11,0.25)]"
           >
             <AlertCircle className="h-4 w-4 shrink-0 text-amber-400" />
             <span>
-              พื้นที่คลาวด์เต็ม ({MAX_CLOUD_RECORDS}/{MAX_CLOUD_RECORDS} รายการ) กรุณาลบรายการเก่าออกก่อนบันทึกเพิ่ม
+              {isEn
+                ? `Cloud storage is full (${MAX_CLOUD_RECORDS}/${MAX_CLOUD_RECORDS} items). Delete older records before saving more.`
+                : `พื้นที่คลาวด์เต็ม (${MAX_CLOUD_RECORDS}/${MAX_CLOUD_RECORDS} รายการ) กรุณาลบรายการเก่าออกก่อนบันทึกเพิ่ม`}
             </span>
           </div>
         )}
@@ -247,7 +279,7 @@ export function HistoryPanel({
               onClick={() => setSortDropdownOpen((prev) => !prev)}
               aria-expanded={sortDropdownOpen}
               aria-haspopup="listbox"
-              className="inline-flex items-center gap-2.5 rounded-xl border border-emerald-500/30 bg-[#050505] px-4 py-2.5 text-xs sm:text-sm font-medium text-zinc-200 shadow-[0_0_20px_-6px_rgba(16,185,129,0.18)] transition-all duration-200 hover:border-emerald-400/60 hover:text-white focus:outline-none"
+              className="inline-flex items-center gap-2.5 rounded-xl border border-emerald-500/30 bg-[#060807]/85 backdrop-blur-md px-4 py-2.5 text-xs sm:text-sm font-medium text-zinc-200 shadow-[0_0_20px_-6px_rgba(16,185,129,0.18)] transition-all duration-200 hover:border-emerald-400/60 hover:text-white focus:outline-none"
             >
               <ArrowUpDown className="h-4 w-4 shrink-0 text-emerald-400" />
               <span>{currentSortLabel}</span>
@@ -291,7 +323,7 @@ export function HistoryPanel({
                           : "text-zinc-300 hover:bg-emerald-500/10 hover:text-white"
                       }`}
                     >
-                      <span>{option.label}</span>
+                      <span>{isEn ? option.labelEn : option.labelTh}</span>
                       {active && (
                         <Check className="h-4 w-4 shrink-0 text-emerald-400" />
                       )}
@@ -306,46 +338,77 @@ export function HistoryPanel({
             type="button"
             onClick={handleRefreshClick}
             disabled={loading}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-500/25 bg-[#050505] px-4 py-2.5 text-xs sm:text-sm font-medium text-zinc-300 shadow-[0_0_20px_-6px_rgba(16,185,129,0.16)] transition-all duration-200 hover:border-emerald-400/50 hover:text-white disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-500/25 bg-[#060807]/85 backdrop-blur-md px-4 py-2.5 text-xs sm:text-sm font-medium text-zinc-300 shadow-[0_0_20px_-6px_rgba(16,185,129,0.16)] transition-all duration-200 hover:border-emerald-400/50 hover:text-white disabled:opacity-50"
           >
             <RefreshCw
               className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`}
             />
-            <span>รีเฟรช</span>
+            <span>{isEn ? "Refresh" : "รีเฟรช"}</span>
           </button>
         </div>
 
         <div
           aria-disabled={hasNoSelectedRecords}
-          className={`rounded-2xl border p-4 sm:p-5 space-y-3.5 transition-all duration-200 ${
+          className={`rounded-2xl overflow-hidden border transition-all duration-200 ${
             hasNoSelectedRecords
               ? "bg-[#0d0d0f] border-zinc-800 pointer-events-none select-none shadow-none"
-              : "bg-[#050505] border-emerald-500/20 shadow-[0_0_20px_-6px_rgba(16,185,129,0.14)]"
+              : "bg-[#060807]/85 backdrop-blur-md border-emerald-500/20 shadow-[0_16px_40px_rgba(0,0,0,0.75)]"
           }`}
         >
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <div className="flex flex-wrap items-center gap-2">
-              <span
-                className={`text-xs sm:text-sm font-semibold ${
-                  hasNoSelectedRecords ? "text-zinc-500" : "text-zinc-100"
-                }`}
-              >
-                เลือกหัวข้อข้อมูลที่ต้องการส่งออกลงไฟล์
-              </span>
-              <span
-                className={`rounded-full border px-2.5 py-0.5 font-mono text-[11px] font-medium ${
+          <div
+            className={`px-5 sm:px-6 py-4 flex flex-wrap items-center justify-between gap-3 border-b ${
+              hasNoSelectedRecords
+                ? "bg-[#121215] border-zinc-800"
+                : "bg-gradient-to-r from-emerald-950/60 via-[#0a100e] to-[#070908] border-emerald-500/15"
+            }`}
+          >
+            <div className="flex items-center gap-3.5 min-w-0">
+              <div
+                className={`w-10 h-10 shrink-0 rounded-xl border flex items-center justify-center ${
                   hasNoSelectedRecords
-                    ? "border-zinc-800 bg-[#141417] text-zinc-500"
-                    : "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+                    ? "bg-[#19191e] border-zinc-800 text-zinc-500"
+                    : "bg-gradient-to-br from-emerald-400/25 to-emerald-600/10 border-emerald-400/35 text-emerald-400 shadow-[0_0_16px_rgba(16,185,129,0.2)]"
                 }`}
               >
-                เลือกอยู่ {selectedExportKeys.length}/{CSV_EXPORT_COLUMNS.length} หัวข้อ
-              </span>
-              {hasNoSelectedRecords && (
-                <span className="text-xs text-zinc-500">
-                  (กรุณาเลือกรายการสินค้าด้านล่างก่อน)
-                </span>
-              )}
+                <FileSpreadsheet className="h-5 w-5" />
+              </div>
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h2
+                    className={`text-sm sm:text-base font-bold ${
+                      hasNoSelectedRecords ? "text-zinc-500" : "text-white"
+                    }`}
+                  >
+                    {isEn
+                      ? "Select Columns for CSV Export"
+                      : "เลือกหัวข้อข้อมูลที่ต้องการส่งออกลงไฟล์"}
+                  </h2>
+                  <span
+                    className={`rounded-full border px-2.5 py-0.5 font-mono text-[11px] font-medium ${
+                      hasNoSelectedRecords
+                        ? "border-zinc-800 bg-[#18181c] text-zinc-500"
+                        : "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+                    }`}
+                  >
+                    {isEn
+                      ? `${selectedExportKeys.length}/${CSV_EXPORT_COLUMNS.length} selected`
+                      : `เลือกอยู่ ${selectedExportKeys.length}/${CSV_EXPORT_COLUMNS.length} หัวข้อ`}
+                  </span>
+                </div>
+                <p
+                  className={`text-xs mt-0.5 ${
+                    hasNoSelectedRecords ? "text-zinc-600" : "text-zinc-400"
+                  }`}
+                >
+                  {hasNoSelectedRecords
+                    ? isEn
+                      ? "Select at least one product below to customize CSV export columns."
+                      : "กรุณาเลือกรายการสินค้าด้านล่างก่อน เพื่อเปิดใช้งานการเลือกคอลัมน์ส่งออก"
+                    : isEn
+                      ? "Customize which data columns appear in your Excel / Google Sheets file."
+                      : "กำหนดคอลัมน์ข้อมูลที่ต้องการนำไปเปิดใช้งานต่อใน Excel หรือ Google Sheets"}
+                </p>
+              </div>
             </div>
 
             <div className="flex flex-wrap items-center gap-1.5">
@@ -353,278 +416,335 @@ export function HistoryPanel({
                 type="button"
                 disabled={hasNoSelectedRecords}
                 onClick={() => setSelectedExportKeys(ALL_CSV_EXPORT_KEYS)}
-                className={`rounded-lg border px-2.5 py-1 text-[11px] font-medium transition-colors ${
+                className={`rounded-lg border px-2.5 py-1.5 text-[11px] font-medium transition-colors ${
                   hasNoSelectedRecords
-                    ? "border-zinc-800 bg-[#141417] text-zinc-600"
-                    : "border-zinc-800 bg-black text-zinc-300 hover:border-emerald-500/50 hover:text-emerald-300"
+                    ? "border-zinc-800 bg-[#18181c] text-zinc-600"
+                    : "border-zinc-800 bg-black/80 text-zinc-300 hover:border-emerald-500/50 hover:text-emerald-300"
                 }`}
               >
-                เลือกทั้งหมด
+                {isEn ? "Select All" : "เลือกทั้งหมด"}
               </button>
               <button
                 type="button"
                 disabled={hasNoSelectedRecords}
                 onClick={() => setSelectedExportKeys(DEFAULT_CSV_EXPORT_KEYS)}
-                className={`rounded-lg border px-2.5 py-1 text-[11px] font-medium transition-colors ${
+                className={`rounded-lg border px-2.5 py-1.5 text-[11px] font-medium transition-colors ${
                   hasNoSelectedRecords
-                    ? "border-zinc-800 bg-[#141417] text-zinc-600"
-                    : "border-zinc-800 bg-black text-zinc-300 hover:border-emerald-500/50 hover:text-emerald-300"
+                    ? "border-zinc-800 bg-[#18181c] text-zinc-600"
+                    : "border-zinc-800 bg-black/80 text-zinc-300 hover:border-emerald-500/50 hover:text-emerald-300"
                 }`}
               >
-                เฉพาะค่าสำคัญ
+                {isEn ? "Essentials Only" : "เฉพาะค่าสำคัญ"}
               </button>
               <button
                 type="button"
                 disabled={hasNoSelectedRecords}
                 onClick={() => setSelectedExportKeys([])}
-                className={`rounded-lg border px-2.5 py-1 text-[11px] font-medium transition-colors ${
+                className={`rounded-lg border px-2.5 py-1.5 text-[11px] font-medium transition-colors ${
                   hasNoSelectedRecords
-                    ? "border-zinc-800 bg-[#141417] text-zinc-600"
-                    : "border-zinc-800 bg-black text-zinc-400 hover:border-rose-500/50 hover:text-rose-300"
+                    ? "border-zinc-800 bg-[#18181c] text-zinc-600"
+                    : "border-zinc-800 bg-black/80 text-zinc-400 hover:border-rose-500/50 hover:text-rose-300"
                 }`}
               >
-                ล้างทั้งหมด
+                {isEn ? "Clear All" : "ล้างทั้งหมด"}
               </button>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
-            {CSV_EXPORT_COLUMNS.map((column) => {
-              const checked = selectedExportKeys.includes(column.key);
-              return (
-                <button
-                  key={column.key}
-                  type="button"
-                  role="checkbox"
-                  aria-checked={checked}
-                  disabled={hasNoSelectedRecords}
-                  onClick={() => toggleExportColumn(column.key)}
-                  className={`flex items-center gap-2.5 rounded-xl border px-3 py-2 text-left text-xs select-none transition-all duration-150 focus:outline-none ${
-                    hasNoSelectedRecords
-                      ? "border-zinc-800/90 bg-[#141417] text-zinc-500"
-                      : checked
-                        ? "border-emerald-500/45 bg-emerald-950/25 text-zinc-100"
-                        : "border-zinc-800/90 bg-black text-zinc-400 hover:border-zinc-700 hover:text-zinc-200"
-                  }`}
-                >
-                  <span
-                    className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-md border transition-colors ${
-                      hasNoSelectedRecords
-                        ? checked
-                          ? "border-zinc-700 bg-[#1c1c21] text-zinc-500"
-                          : "border-zinc-800 bg-[#0d0d0f] text-transparent"
-                        : checked
-                          ? "border-emerald-400 bg-emerald-500/20 text-emerald-400"
-                          : "border-zinc-700 bg-black text-transparent"
-                    }`}
-                  >
-                    <Check className="h-3 w-3 stroke-[2.5]" />
-                  </span>
-                  <span className="truncate">{column.label}</span>
-                </button>
-              );
-            })}
-          </div>
-
-          {!hasNoSelectedRecords && hasNoExportColumns && (
-            <p className="flex items-center gap-1.5 text-xs font-medium text-amber-400">
-              <AlertCircle className="h-3.5 w-3.5 shrink-0" />
-              <span>กรุณาติ๊กเลือกข้อมูลอย่างน้อย 1 หัวข้อก่อนส่งออกไฟล์</span>
-            </p>
-          )}
-        </div>
-
-        <div className="rounded-2xl border border-emerald-500/20 bg-[#050505]/90 p-5 sm:p-6 shadow-[0_0_24px_-8px_rgba(16,185,129,0.16)] space-y-4">
-          {records.length > 0 && (
-            <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-zinc-800/70">
-              <div className="flex flex-wrap items-center gap-2.5">
-                <button
-                  type="button"
-                  onClick={handleToggleSelectAllRecords}
-                  className={`inline-flex items-center gap-2 rounded-xl border px-3.5 py-2 text-xs sm:text-sm font-medium transition-all duration-200 ${
-                    isAllRecordsSelected
-                      ? "border-emerald-500/40 bg-emerald-500/12 text-emerald-300 hover:border-emerald-400"
-                      : "border-zinc-800 bg-black text-zinc-300 hover:border-emerald-500/40 hover:text-white"
-                  }`}
-                >
-                  <ListChecks className="h-4 w-4 text-emerald-400 shrink-0" />
-                  <span>
-                    {isAllRecordsSelected
-                      ? "ยกเลิกเลือกทั้งหมด"
-                      : "เลือกทั้งหมด"}
-                  </span>
-                </button>
-
-                <button
-                  type="button"
-                  disabled={!canBulkDelete || deleting}
-                  onClick={() =>
-                    setDeleteTarget({
-                      mode: "bulk",
-                      records: selectedSortedRecords,
-                    })
-                  }
-                  className={`inline-flex items-center gap-2 rounded-xl border px-3.5 py-2 text-xs sm:text-sm font-medium transition-all duration-200 ${
-                    canBulkDelete
-                      ? "bg-red-500/15 hover:bg-red-500/25 border-red-500/40 text-red-400 shadow-[0_0_16px_-6px_rgba(239,68,68,0.35)]"
-                      : "bg-zinc-900/70 border-zinc-800 text-zinc-500 opacity-50 cursor-not-allowed"
-                  }`}
-                >
-                  <Trash2 className="h-4 w-4 shrink-0" />
-                  <span>ลบรายการที่เลือก ({selectedCount})</span>
-                </button>
-
-                {showBulkDeleteHint && (
-                  <span className="text-xs text-zinc-500">
-                    (เลือกมากกว่า 2 รายการเพื่อลบพร้อมกัน)
-                  </span>
-                )}
-              </div>
-
-              <span className="font-mono text-xs text-zinc-400">
-                เลือกรายการสำหรับดาวน์โหลด{" "}
-                <strong className="text-emerald-400">
-                  {selectedCount}/{records.length}
-                </strong>{" "}
-                รายการ
-              </span>
-            </div>
-          )}
-
-          {loading && records.length === 0 ? (
-            <div className="py-12 text-center space-y-2">
-              <Loader2 className="mx-auto h-6 w-6 animate-spin text-emerald-400" />
-              <p className="text-sm text-zinc-400">
-                กำลังโหลดรายการที่บันทึกไว้บน Cloud...
-              </p>
-            </div>
-          ) : enrichedSortedRecords.length === 0 ? (
-            <div className="py-12 px-4 text-center space-y-2">
-              <p className="text-base font-semibold text-zinc-200">
-                ยังไม่มีรายการที่บันทึกไว้
-              </p>
-              <p className="text-xs sm:text-sm text-zinc-500">
-                กดปุ่ม “+ คำนวณรายการใหม่” ด้านบน แล้วบันทึกข้อมูลลง Cloud เพื่อเก็บไว้ดูและส่งออกเป็นไฟล์ตารางภายหลัง
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-3.5">
-              {enrichedSortedRecords.map(({ item, metrics }) => {
-                const isLoss = metrics.netProfitPerUnit < 0;
-                const isSelected = selectedIdSet.has(item.id);
-
+          <div className="p-5 sm:p-6 space-y-3.5">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+              {CSV_EXPORT_COLUMNS.map((column) => {
+                const checked = selectedExportKeys.includes(column.key);
                 return (
-                  <article
-                    key={item.id}
-                    className={`p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl bg-black/80 border transition-all duration-200 ${
-                      isSelected
-                        ? "border-emerald-500/45 shadow-[0_0_24px_-6px_rgba(16,185,129,0.22)] hover:border-emerald-400/70"
-                        : "border-zinc-800/90 hover:border-emerald-500/30"
+                  <button
+                    key={column.key}
+                    type="button"
+                    role="checkbox"
+                    aria-checked={checked}
+                    disabled={hasNoSelectedRecords}
+                    onClick={() => toggleExportColumn(column.key)}
+                    className={`flex items-center gap-2.5 rounded-xl border px-3 py-2 text-left text-xs select-none transition-all duration-150 focus:outline-none ${
+                      hasNoSelectedRecords
+                        ? "border-zinc-800/90 bg-[#141417] text-zinc-500"
+                        : checked
+                          ? "border-emerald-500/45 bg-emerald-950/30 text-zinc-100"
+                          : "border-zinc-800/90 bg-black/75 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200"
                     }`}
                   >
-                    <div className="flex items-center gap-3.5 sm:gap-4 min-w-0">
-                      <button
-                        type="button"
-                        onClick={() => toggleRecordSelection(item.id)}
-                        aria-pressed={isSelected}
-                        aria-label={
-                          isSelected
-                            ? `ยกเลิกเลือก ${item.product_name}`
-                            : `เลือก ${item.product_name} สำหรับดาวน์โหลด`
-                        }
-                        className={`h-8 w-8 shrink-0 rounded-xl border flex items-center justify-center transition-all duration-200 focus:outline-none ${
-                          isSelected
-                            ? "bg-emerald-500/20 border-emerald-400 text-emerald-400 shadow-[0_0_12px_rgba(16,185,129,0.3)]"
-                            : "bg-black border-zinc-800 text-zinc-700 hover:border-zinc-600 hover:text-zinc-400"
-                        }`}
-                      >
-                        <Check
-                          className={`h-4 w-4 transition-transform duration-150 ${
-                            isSelected
-                              ? "scale-100 opacity-100"
-                              : "scale-75 opacity-35"
-                          }`}
-                        />
-                      </button>
-
-                      {item.product_image_url ? (
-                        <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-emerald-500/25 bg-black">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src={item.product_image_url}
-                            alt={item.product_name}
-                            className="h-full w-full object-cover object-center"
-                          />
-                        </div>
-                      ) : (
-                        <div className="h-16 w-16 shrink-0 rounded-xl bg-zinc-900 border border-zinc-800 flex flex-col items-center justify-center gap-1 select-none">
-                          <ImageIcon className="h-5 w-5 text-zinc-500" />
-                          <span className="text-[10px] font-medium tracking-tight text-zinc-500 leading-none">
-                            ไม่มีรูปภาพ
-                          </span>
-                        </div>
-                      )}
-
-                      <div className="min-w-0 space-y-1">
-                        <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-400">
-                          <span className="font-medium text-emerald-400">
-                            {item.platform} (GP {Number(item.platform_fee_percent)}%)
-                          </span>
-                          <span className="text-zinc-700">|</span>
-                          <span>
-                            ราคาขาย ฿{formatCurrency(Number(item.selling_price) || 0)}
-                          </span>
-                          <span className="text-zinc-700">|</span>
-                          <span className="text-zinc-500">
-                            {new Date(item.created_at).toLocaleString("th-TH")}
-                          </span>
-                        </div>
-
-                        <h3 className="text-base sm:text-lg font-semibold text-zinc-100 truncate">
-                          {item.product_name}
-                        </h3>
-
-                        <div className="flex flex-wrap items-center gap-3 text-xs sm:text-sm font-mono tabular-nums">
-                          <span
-                            className={`font-bold ${
-                              isLoss ? "text-rose-400" : "text-emerald-400"
-                            }`}
-                          >
-                            กำไรสุทธิ {metrics.netProfitPerUnit >= 0 ? "+" : "-"}฿
-                            {formatCurrency(Math.abs(metrics.netProfitPerUnit))}/ชิ้น
-                          </span>
-                          <span className="text-zinc-500">
-                            (Margin {formatCurrency(metrics.netMarginPercent, 1)}%)
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2 shrink-0 pl-11 sm:pl-0">
-                      <button
-                        type="button"
-                        onClick={() => onLoadRecord(item)}
-                        className="rounded-xl border border-emerald-500/30 bg-[#050505] px-3.5 py-2 text-xs font-semibold text-zinc-100 transition-all duration-200 hover:border-emerald-400 hover:text-emerald-400"
-                      >
-                        เปิดดู / แก้ไข
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setDeleteTarget({ mode: "single", record: item })
-                        }
-                        disabled={deleting}
-                        className="inline-flex items-center justify-center gap-1 rounded-xl border border-zinc-800 bg-[#050505] px-3 py-2 text-xs font-medium text-rose-400 transition-colors hover:border-rose-500/60 disabled:opacity-50"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                        <span>ลบ</span>
-                      </button>
-                    </div>
-                  </article>
+                    <span
+                      className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-md border transition-colors ${
+                        hasNoSelectedRecords
+                          ? checked
+                            ? "border-zinc-700 bg-[#1c1c21] text-zinc-500"
+                            : "border-zinc-800 bg-[#0d0d0f] text-transparent"
+                          : checked
+                            ? "border-emerald-400 bg-emerald-500/20 text-emerald-400"
+                            : "border-zinc-700 bg-black text-transparent"
+                      }`}
+                    >
+                      <Check className="h-3 w-3 stroke-[2.5]" />
+                    </span>
+                    <span className="truncate">
+                      {isEn ? column.labelEn : column.label}
+                    </span>
+                  </button>
                 );
               })}
             </div>
-          )}
+
+            {!hasNoSelectedRecords && hasNoExportColumns && (
+              <p className="flex items-center gap-1.5 text-xs font-medium text-amber-400">
+                <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                <span>
+                  {isEn
+                    ? "Please select at least 1 column before exporting."
+                    : "กรุณาติ๊กเลือกข้อมูลอย่างน้อย 1 หัวข้อก่อนส่งออกไฟล์"}
+                </span>
+              </p>
+            )}
+          </div>
+        </div>
+
+        <div className="rounded-2xl overflow-hidden bg-[#060807]/85 backdrop-blur-md border border-emerald-500/20 shadow-[0_16px_40px_rgba(0,0,0,0.75)]">
+          <div className="bg-gradient-to-r from-emerald-950/60 via-[#0a100e] to-[#070908] border-b border-emerald-500/15 px-5 sm:px-6 py-4 flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-3.5 min-w-0">
+              <div className="w-10 h-10 shrink-0 rounded-xl bg-gradient-to-br from-emerald-400/25 to-emerald-600/10 border border-emerald-400/35 text-emerald-400 flex items-center justify-center shadow-[0_0_16px_rgba(16,185,129,0.2)]">
+                <Database className="h-5 w-5" />
+              </div>
+              <div className="min-w-0">
+                <h2 className="text-sm sm:text-base font-bold text-white">
+                  {isEn ? "Saved Pricing Plans" : "รายการคำนวณที่บันทึกไว้บนคลาวด์"}
+                </h2>
+                <p className="text-xs text-zinc-400 mt-0.5">
+                  {isEn
+                    ? "Check items to export as CSV or delete in bulk, or click View / Edit to revise."
+                    : "ติ๊กเลือกรายการเพื่อส่งออกไฟล์ตารางหรือลบพร้อมกัน หรือกดเปิดดูเพื่อแก้ไขตัวเลข"}
+                </p>
+              </div>
+            </div>
+
+            {records.length > 0 && (
+              <span className="rounded-full border border-emerald-500/25 bg-black/60 px-3 py-1 font-mono text-xs text-zinc-300">
+                {isEn ? "Selected " : "เลือกสำหรับดาวน์โหลด "}
+                <strong className="text-emerald-400">
+                  {selectedCount}/{records.length}
+                </strong>
+                {isEn ? " items" : " รายการ"}
+              </span>
+            )}
+          </div>
+
+          <div className="p-5 sm:p-6 space-y-4">
+            {records.length > 0 && (
+              <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-zinc-800/70">
+                <div className="flex flex-wrap items-center gap-2.5">
+                  <button
+                    type="button"
+                    onClick={handleToggleSelectAllRecords}
+                    className={`inline-flex items-center gap-2 rounded-xl border px-3.5 py-2 text-xs sm:text-sm font-medium transition-all duration-200 ${
+                      isAllRecordsSelected
+                        ? "border-emerald-500/40 bg-emerald-500/12 text-emerald-300 hover:border-emerald-400"
+                        : "border-zinc-800 bg-black/80 text-zinc-300 hover:border-emerald-500/40 hover:text-white"
+                    }`}
+                  >
+                    <ListChecks className="h-4 w-4 text-emerald-400 shrink-0" />
+                    <span>
+                      {isAllRecordsSelected
+                        ? isEn
+                          ? "Deselect All"
+                          : "ยกเลิกเลือกทั้งหมด"
+                        : isEn
+                          ? "Select All"
+                          : "เลือกทั้งหมด"}
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={!canBulkDelete || deleting}
+                    onClick={() =>
+                      setDeleteTarget({
+                        mode: "bulk",
+                        records: selectedSortedRecords,
+                      })
+                    }
+                    className={`inline-flex items-center gap-2 rounded-xl border px-3.5 py-2 text-xs sm:text-sm font-medium transition-all duration-200 ${
+                      canBulkDelete
+                        ? "bg-red-500/15 hover:bg-red-500/25 border-red-500/40 text-red-400 shadow-[0_0_16px_-6px_rgba(239,68,68,0.35)]"
+                        : "bg-zinc-900/70 border-zinc-800 text-zinc-500 opacity-50 cursor-not-allowed"
+                    }`}
+                  >
+                    <Trash2 className="h-4 w-4 shrink-0" />
+                    <span>
+                      {isEn
+                        ? `Delete Selected (${selectedCount})`
+                        : `ลบรายการที่เลือก (${selectedCount})`}
+                    </span>
+                  </button>
+
+                  {showBulkDeleteHint && (
+                    <span className="text-xs text-zinc-500">
+                      {isEn
+                        ? "(Select more than 2 items to bulk delete)"
+                        : "(เลือกมากกว่า 2 รายการเพื่อลบพร้อมกัน)"}
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {loading && records.length === 0 ? (
+              <div className="py-12 text-center space-y-2">
+                <Loader2 className="mx-auto h-6 w-6 animate-spin text-emerald-400" />
+                <p className="text-sm text-zinc-400">
+                  {isEn
+                    ? "Loading your saved Cloud records..."
+                    : "กำลังโหลดรายการที่บันทึกไว้บน Cloud..."}
+                </p>
+              </div>
+            ) : enrichedSortedRecords.length === 0 ? (
+              <div className="py-12 px-4 text-center space-y-2">
+                <p className="text-base font-semibold text-zinc-200">
+                  {isEn ? "No Saved Records Yet" : "ยังไม่มีรายการที่บันทึกไว้"}
+                </p>
+                <p className="text-xs sm:text-sm text-zinc-500">
+                  {isEn
+                    ? 'Click "+ New Calculation" above to analyze a product and save it to Cloud for editing or CSV export.'
+                    : "กดปุ่ม “+ คำนวณรายการใหม่” ด้านบน แล้วบันทึกข้อมูลลง Cloud เพื่อเก็บไว้ดูและส่งออกเป็นไฟล์ตารางภายหลัง"}
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-3.5">
+                {enrichedSortedRecords.map(({ item, metrics }) => {
+                  const isLoss = metrics.netProfitPerUnit < 0;
+                  const isSelected = selectedIdSet.has(item.id);
+                  const displayPlatform = formatPlatformDisplayName(
+                    item.platform,
+                    language
+                  );
+
+                  return (
+                    <article
+                      key={item.id}
+                      className={`p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl bg-black/70 border transition-all duration-200 ${
+                        isSelected
+                          ? "border-emerald-500/45 shadow-[0_0_24px_-6px_rgba(16,185,129,0.22)] hover:border-emerald-400/70"
+                          : "border-zinc-800/90 hover:border-emerald-500/30"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3.5 sm:gap-4 min-w-0">
+                        <button
+                          type="button"
+                          onClick={() => toggleRecordSelection(item.id)}
+                          aria-pressed={isSelected}
+                          aria-label={
+                            isSelected
+                              ? isEn
+                                ? `Deselect ${item.product_name}`
+                                : `ยกเลิกเลือก ${item.product_name}`
+                              : isEn
+                                ? `Select ${item.product_name} for export`
+                                : `เลือก ${item.product_name} สำหรับดาวน์โหลด`
+                          }
+                          className={`h-8 w-8 shrink-0 rounded-xl border flex items-center justify-center transition-all duration-200 focus:outline-none ${
+                            isSelected
+                              ? "bg-emerald-500/20 border-emerald-400 text-emerald-400 shadow-[0_0_12px_rgba(16,185,129,0.3)]"
+                              : "bg-black border-zinc-800 text-zinc-700 hover:border-zinc-600 hover:text-zinc-400"
+                          }`}
+                        >
+                          <Check
+                            className={`h-4 w-4 transition-transform duration-150 ${
+                              isSelected
+                                ? "scale-100 opacity-100"
+                                : "scale-75 opacity-35"
+                            }`}
+                          />
+                        </button>
+
+                        {item.product_image_url ? (
+                          <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-emerald-500/25 bg-black">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={item.product_image_url}
+                              alt={item.product_name}
+                              className="h-full w-full object-cover object-center"
+                            />
+                          </div>
+                        ) : (
+                          <div className="h-16 w-16 shrink-0 rounded-xl bg-zinc-900 border border-zinc-800 flex flex-col items-center justify-center gap-1 select-none">
+                            <ImageIcon className="h-5 w-5 text-zinc-500" />
+                            <span className="text-[10px] font-medium tracking-tight text-zinc-500 leading-none">
+                              {isEn ? "No Image" : "ไม่มีรูปภาพ"}
+                            </span>
+                          </div>
+                        )}
+
+                        <div className="min-w-0 space-y-1">
+                          <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-400">
+                            <span className="font-medium text-purple-400">
+                              {displayPlatform} (GP{" "}
+                              {Number(item.platform_fee_percent)}%)
+                            </span>
+                            <span className="text-zinc-700">|</span>
+                            <span className="text-cyan-400/90">
+                              {isEn ? "Price" : "ราคาขาย"} ฿
+                              {formatCurrency(Number(item.selling_price) || 0)}
+                            </span>
+                            <span className="text-zinc-700">|</span>
+                            <span className="text-zinc-500">
+                              {new Date(item.created_at).toLocaleString(locale)}
+                            </span>
+                          </div>
+
+                          <h3 className="text-base sm:text-lg font-semibold text-zinc-100 truncate">
+                            {item.product_name}
+                          </h3>
+
+                          <div className="flex flex-wrap items-center gap-3 text-xs sm:text-sm font-mono tabular-nums">
+                            <span
+                              className={`font-bold ${
+                                isLoss ? "text-rose-400" : "text-emerald-400"
+                              }`}
+                            >
+                              {isEn ? "Net Profit" : "กำไรสุทธิ"}{" "}
+                              {metrics.netProfitPerUnit >= 0 ? "+" : "-"}฿
+                              {formatCurrency(Math.abs(metrics.netProfitPerUnit))}
+                              {isEn ? "/unit" : "/ชิ้น"}
+                            </span>
+                            <span className="text-zinc-500">
+                              (Margin {formatCurrency(metrics.netMarginPercent, 1)}
+                              %)
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 shrink-0 pl-11 sm:pl-0">
+                        <button
+                          type="button"
+                          onClick={() => onLoadRecord(item)}
+                          className="rounded-xl border border-emerald-500/30 bg-[#050505] px-3.5 py-2 text-xs font-semibold text-zinc-100 transition-all duration-200 hover:border-emerald-400 hover:text-emerald-400"
+                        >
+                          {isEn ? "View / Edit" : "เปิดดู / แก้ไข"}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setDeleteTarget({ mode: "single", record: item })
+                          }
+                          disabled={deleting}
+                          className="inline-flex items-center justify-center gap-1 rounded-xl border border-zinc-800 bg-[#050505] px-3 py-2 text-xs font-medium text-rose-400 transition-colors hover:border-rose-500/60 disabled:opacity-50"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                          <span>{isEn ? "Delete" : "ลบ"}</span>
+                        </button>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </div>
       </section>
 
@@ -641,10 +761,16 @@ export function HistoryPanel({
             <Download className="h-4 w-4 shrink-0" />
             <span>
               {hasNoExportColumns
-                ? "เลือกอย่างน้อย 1 หัวข้อก่อนดาวน์โหลด"
+                ? isEn
+                  ? "Select at least 1 column to export"
+                  : "เลือกอย่างน้อย 1 หัวข้อก่อนดาวน์โหลด"
                 : hasNoSelectedRecords
-                  ? "เลือกรายการสินค้าก่อนดาวน์โหลด"
-                  : `ดาวน์โหลดตาราง (${selectedCount} รายการ)`}
+                  ? isEn
+                    ? "Select products before downloading"
+                    : "เลือกรายการสินค้าก่อนดาวน์โหลด"
+                  : isEn
+                    ? `Download CSV (${selectedCount} ${selectedCount === 1 ? "item" : "items"})`
+                    : `ดาวน์โหลดตาราง (${selectedCount} รายการ)`}
             </span>
           </button>
         </div>
@@ -677,19 +803,25 @@ export function HistoryPanel({
                 className="text-lg font-semibold tracking-tight text-white"
               >
                 {deleteTarget.mode === "bulk"
-                  ? "ยืนยันการลบข้อมูลที่เลือกทั้งหมด?"
-                  : "ยืนยันการลบรายการนี้?"}
+                  ? isEn
+                    ? "Delete all selected records?"
+                    : "ยืนยันการลบข้อมูลที่เลือกทั้งหมด?"
+                  : isEn
+                    ? "Delete this record?"
+                    : "ยืนยันการลบรายการนี้?"}
               </h2>
             </div>
 
             <div className="mt-5 rounded-xl border border-red-500/15 bg-red-500/[0.06] px-4 py-3 text-sm font-medium text-zinc-100">
               {deleteTarget.mode === "bulk" ? (
                 <span>
-                  รายการที่เลือกทั้งหมด{" "}
+                  {isEn ? "All " : "รายการที่เลือกทั้งหมด "}
                   <strong className="font-mono text-red-300">
                     {deleteTarget.records.length}
-                  </strong>{" "}
-                  รายการ (รวมรูปภาพสินค้าที่แนบไว้)
+                  </strong>
+                  {isEn
+                    ? " selected items (including attached product images)"
+                    : " รายการ (รวมรูปภาพสินค้าที่แนบไว้)"}
                 </span>
               ) : (
                 <span className="block truncate">
@@ -699,7 +831,9 @@ export function HistoryPanel({
             </div>
 
             <p className="mt-3.5 text-xs text-zinc-400 leading-relaxed">
-              ข้อมูลและรูปภาพที่แนบไว้จะถูกลบออกจากคลาวด์อย่างถาวร และไม่สามารถกู้คืนได้ในภายหลัง
+              {isEn
+                ? "These records and any attached product images will be permanently removed from Cloud storage and cannot be recovered."
+                : "ข้อมูลและรูปภาพที่แนบไว้จะถูกลบออกจากคลาวด์อย่างถาวร และไม่สามารถกู้คืนได้ในภายหลัง"}
             </p>
 
             <div className="mt-6 grid grid-cols-2 gap-3">
@@ -709,7 +843,7 @@ export function HistoryPanel({
                 disabled={deleting}
                 className="w-full rounded-xl border border-zinc-800 bg-zinc-900 py-2.5 text-sm font-medium text-zinc-300 transition-colors hover:bg-zinc-800 hover:text-white disabled:opacity-50"
               >
-                ยกเลิก
+                {isEn ? "Cancel" : "ยกเลิก"}
               </button>
               <button
                 type="button"
@@ -718,7 +852,15 @@ export function HistoryPanel({
                 className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-red-500 py-2.5 text-sm font-semibold text-white shadow-[0_0_20px_rgba(239,68,68,0.3)] transition-all hover:bg-red-600 disabled:opacity-60"
               >
                 {deleting && <Loader2 className="h-4 w-4 animate-spin" />}
-                <span>{deleting ? "กำลังลบ..." : "ยืนยันการลบ"}</span>
+                <span>
+                  {deleting
+                    ? isEn
+                      ? "Deleting..."
+                      : "กำลังลบ..."
+                    : isEn
+                      ? "Confirm Delete"
+                      : "ยืนยันการลบ"}
+                </span>
               </button>
             </div>
           </div>
