@@ -14,6 +14,7 @@ import type {
 } from "@/types";
 
 export const MAX_CLOUD_RECORDS = 20;
+export const MAX_MONETARY_VALUE = 299_999;
 
 export const PLATFORM_PRESETS: PlatformPreset[] = [
   { id: "Shopee", label: "Shopee 13%", badge: "Marketplace", feePercent: 13 },

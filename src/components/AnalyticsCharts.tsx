@@ -139,7 +139,7 @@ export function AnalyticsCharts({
   return (
     <div className="space-y-6 sm:space-y-8">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <div className="lg:col-span-5 rounded-2xl bg-[#070707] border border-emerald-500/20 p-5 sm:p-6 flex flex-col justify-between gap-5">
+        <div className="lg:col-span-5 min-w-0 overflow-hidden rounded-2xl bg-[#070707] border border-emerald-500/20 p-5 sm:p-6 flex flex-col justify-between gap-5">
           <div className="space-y-1">
             <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-emerald-400">
               CHART 01 — COST STRUCTURE
@@ -152,8 +152,8 @@ export function AnalyticsCharts({
             </p>
           </div>
 
-          <div className="flex flex-col sm:flex-row lg:flex-col xl:flex-row items-center gap-6">
-            <div className="relative h-48 w-48 shrink-0">
+          <div className="flex flex-col sm:flex-row lg:flex-col 2xl:flex-row items-center gap-5 min-w-0">
+            <div className="relative h-44 w-44 shrink-0">
               <svg
                 viewBox="0 0 200 200"
                 className="h-full w-full"
@@ -204,7 +204,7 @@ export function AnalyticsCharts({
               <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4">
                 <span className="text-[11px] text-zinc-400">กำไรสุทธิ/ชิ้น</span>
                 <span
-                  className={`mt-0.5 font-mono text-lg sm:text-xl font-bold tabular-nums ${
+                  className={`mt-0.5 font-mono text-base sm:text-lg font-bold tabular-nums ${
                     isLoss ? "text-rose-400" : "text-emerald-400"
                   }`}
                 >
@@ -217,7 +217,7 @@ export function AnalyticsCharts({
               </div>
             </div>
 
-            <div className="w-full flex-1 space-y-2.5">
+            <div className="w-full min-w-0 flex-1 space-y-2.5">
               {donutSegments.map((seg) => {
                 const displayShare =
                   inputs.sellingPrice > 0
@@ -227,7 +227,7 @@ export function AnalyticsCharts({
                 return (
                   <div
                     key={seg.label}
-                    className="flex items-center justify-between gap-2 text-xs"
+                    className="flex items-center justify-between gap-2 text-xs min-w-0"
                   >
                     <div className="flex items-center gap-2 min-w-0">
                       <span
@@ -240,7 +240,7 @@ export function AnalyticsCharts({
                       <span className="text-zinc-100 font-medium">
                         ฿{formatCurrency(seg.amount)}
                       </span>
-                      <span className="w-11 text-right text-zinc-500">
+                      <span className="min-w-[44px] text-right text-zinc-500">
                         {formatCurrency(displayShare, 1)}%
                       </span>
                     </div>
@@ -260,7 +260,7 @@ export function AnalyticsCharts({
           </div>
         </div>
 
-        <div className="lg:col-span-7 rounded-2xl bg-[#070707] border border-emerald-500/20 p-5 sm:p-6 flex flex-col justify-between gap-4">
+        <div className="lg:col-span-7 min-w-0 overflow-hidden rounded-2xl bg-[#070707] border border-emerald-500/20 p-5 sm:p-6 flex flex-col justify-between gap-4">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="space-y-1">
               <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-emerald-400">

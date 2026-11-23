@@ -8,6 +8,7 @@ import { sanitizePlainText, translateSupabaseError } from "@/lib/auth";
 import { useAppLanguage } from "@/lib/language";
 import {
   MAX_CLOUD_RECORDS,
+  MAX_MONETARY_VALUE,
   buildFinancialAnalysis,
   calculateEcommerceMetrics,
   exportCalculationsToCsv,
@@ -44,17 +45,6 @@ type DashboardTab = "calculator" | "history" | "summary";
 
 const SAVE_COOLDOWN_MS = 20_000;
 const SAVE_COOLDOWN_STORAGE_KEY = "khumlab_save_cooldown_until";
-
-const DEFAULT_FORM_VALUES: CalculatorFormStrings = {
-  productName: "เสื้อยืดคอกลมสีดำ รุ่นพรีเมียม",
-  platform: "Shopee",
-  costPrice: "120",
-  packagingCost: "15",
-  adsCost: "35",
-  platformFeePercent: "13",
-  sellingPrice: "290",
-  fixedCost: "15000",
-};
 
 const EMPTY_FORM_VALUES: CalculatorFormStrings = {
   productName: "",
@@ -102,9 +92,12 @@ export function DashboardClient({
   const summaryEnteredRef = useRef(false);
 
   const [formValues, setFormValues] =
-    useState<CalculatorFormStrings>(DEFAULT_FORM_VALUES);
+    useState<CalculatorFormStrings>(EMPTY_FORM_VALUES);
   const [discountPercent, setDiscountPercent] = useState<number>(15);
   const [hasCalculated, setHasCalculated] = useState<boolean>(false);
+  const [pendingExitTab, setPendingExitTab] = useState<
+    "history" | "calculator" | null
+  >(null);
   const [editingRecord, setEditingRecord] =
     useState<EcommerceCalculationRecord | null>(null);
 
@@ -124,13 +117,17 @@ export function DashboardClient({
   const [toast, setToast] = useState<DashboardToastData | null>(null);
 
   const rawTab = searchParams.get("tab");
-  const needsRedirectFromSummary = rawTab === "summary" && !hasCalculated;
+  const needsRedirectFromSummary =
+    rawTab === "summary" && !hasCalculated && pendingExitTab === null;
+
   const activeTab: DashboardTab =
-    rawTab === "summary" && hasCalculated
-      ? "summary"
-      : rawTab === "calculator" || needsRedirectFromSummary
-        ? "calculator"
-        : "history";
+    pendingExitTab !== null
+      ? pendingExitTab
+      : rawTab === "summary" && hasCalculated
+        ? "summary"
+        : rawTab === "calculator" || needsRedirectFromSummary
+          ? "calculator"
+          : "history";
 
   const isCloudFull = records.length >= MAX_CLOUD_RECORDS;
 
@@ -164,12 +161,27 @@ export function DashboardClient({
   }, [needsRedirectFromSummary, router]);
 
   useEffect(() => {
-    if (rawTab === "summary" && hasCalculated) {
+    if (pendingExitTab !== null && rawTab === pendingExitTab) {
+      summaryEnteredRef.current = false;
+      const timerId = window.setTimeout(() => {
+        setPendingExitTab(null);
+        setHasCalculated(false);
+      }, 0);
+      return () => {
+        window.clearTimeout(timerId);
+      };
+    }
+
+    if (rawTab === "summary" && hasCalculated && pendingExitTab === null) {
       summaryEnteredRef.current = true;
       return;
     }
 
-    if (rawTab !== "summary" && summaryEnteredRef.current) {
+    if (
+      rawTab !== "summary" &&
+      pendingExitTab === null &&
+      summaryEnteredRef.current
+    ) {
       summaryEnteredRef.current = false;
       const timerId = window.setTimeout(() => {
         setHasCalculated(false);
@@ -178,7 +190,7 @@ export function DashboardClient({
         window.clearTimeout(timerId);
       };
     }
-  }, [rawTab, hasCalculated]);
+  }, [rawTab, hasCalculated, pendingExitTab]);
 
   useEffect(() => {
     const syncCooldown = () => {
@@ -206,24 +218,45 @@ export function DashboardClient({
     () => ({
       productName: sanitizePlainText(formValues.productName, 120),
       platform: sanitizePlainText(formValues.platform, 60) || "Shopee",
-      costPrice: parseSafeNonNegativeNumber(formValues.costPrice, 10_000_000),
+      costPrice: parseSafeNonNegativeNumber(
+        formValues.costPrice,
+        MAX_MONETARY_VALUE
+      ),
       packagingCost: parseSafeNonNegativeNumber(
         formValues.packagingCost,
-        1_000_000
+        MAX_MONETARY_VALUE
       ),
-      adsCost: parseSafeNonNegativeNumber(formValues.adsCost, 1_000_000),
+      adsCost: parseSafeNonNegativeNumber(
+        formValues.adsCost,
+        MAX_MONETARY_VALUE
+      ),
       platformFeePercent: parseSafeNonNegativeNumber(
         formValues.platformFeePercent,
         100
       ),
       sellingPrice: parseSafeNonNegativeNumber(
         formValues.sellingPrice,
-        10_000_000
+        MAX_MONETARY_VALUE
       ),
-      fixedCost: parseSafeNonNegativeNumber(formValues.fixedCost, 100_000_000),
+      fixedCost: parseSafeNonNegativeNumber(
+        formValues.fixedCost,
+        MAX_MONETARY_VALUE
+      ),
     }),
     [formValues]
   );
+
+  const isDuplicateProductName = useMemo(() => {
+    const normalized = sanitizePlainText(formValues.productName, 120)
+      .trim()
+      .toLowerCase();
+    if (!normalized) return false;
+    return records.some(
+      (item) =>
+        item.id !== editingRecord?.id &&
+        item.product_name.trim().toLowerCase() === normalized
+    );
+  }, [formValues.productName, records, editingRecord]);
 
   const metrics = useMemo(
     () => calculateEcommerceMetrics(numericInputs),
@@ -358,7 +391,9 @@ export function DashboardClient({
   }
 
   function handleCalculate() {
+    if (!numericInputs.productName.trim() || isDuplicateProductName) return;
     summaryEnteredRef.current = false;
+    setPendingExitTab(null);
     setHasCalculated(true);
     handleSwitchTab("summary");
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -366,13 +401,14 @@ export function DashboardClient({
 
   function handleBackToCalculator() {
     summaryEnteredRef.current = false;
-    setHasCalculated(false);
+    setPendingExitTab("calculator");
     handleSwitchTab("calculator");
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function handleReset() {
     summaryEnteredRef.current = false;
+    setPendingExitTab(null);
     setFormValues(EMPTY_FORM_VALUES);
     setDiscountPercent(15);
     setHasCalculated(false);
@@ -381,6 +417,7 @@ export function DashboardClient({
 
   function handleStartNewCalculation() {
     summaryEnteredRef.current = false;
+    setPendingExitTab(null);
     setEditingRecord(null);
     setFormValues(EMPTY_FORM_VALUES);
     setDiscountPercent(15);
@@ -392,6 +429,7 @@ export function DashboardClient({
 
   function handleCancelEdit() {
     summaryEnteredRef.current = false;
+    setPendingExitTab(null);
     setEditingRecord(null);
     setFormValues(EMPTY_FORM_VALUES);
     setDiscountPercent(15);
@@ -405,6 +443,20 @@ export function DashboardClient({
     if (!supabase || saving) return;
 
     const isEditing = editingRecord !== null;
+    const safeProductName = sanitizePlainText(numericInputs.productName, 120);
+
+    if (!safeProductName) {
+      showToast("กรุณาระบุชื่อสินค้าก่อนบันทึกข้อมูล", "error");
+      return;
+    }
+
+    if (isDuplicateProductName) {
+      showToast(
+        "ชื่อสินค้านี้มีอยู่ในคลาวด์แล้ว กรุณาตั้งชื่อใหม่ไม่ให้ซ้ำกัน",
+        "error"
+      );
+      return;
+    }
 
     if (!isEditing) {
       const activeCooldown = getStoredCooldownSeconds();
@@ -428,8 +480,6 @@ export function DashboardClient({
 
     setSaving(true);
 
-    const safeProductName =
-      sanitizePlainText(numericInputs.productName, 120) || "สินค้าไม่ระบุชื่อ";
     const safePlatform =
       sanitizePlainText(numericInputs.platform, 60) || "ทั่วไป";
 
@@ -514,8 +564,9 @@ export function DashboardClient({
           );
           summaryEnteredRef.current = false;
           setEditingRecord(null);
-          setHasCalculated(false);
+          setFormValues(EMPTY_FORM_VALUES);
           handleRemoveImage();
+          setPendingExitTab("history");
           handleSwitchTab("history");
           window.scrollTo({ top: 0, behavior: "smooth" });
           showToast("บันทึกการแก้ไขเรียบร้อยแล้ว", "success");
@@ -562,8 +613,9 @@ export function DashboardClient({
           setSaveCooldownSeconds(Math.ceil(SAVE_COOLDOWN_MS / 1000));
 
           summaryEnteredRef.current = false;
-          setHasCalculated(false);
+          setFormValues(EMPTY_FORM_VALUES);
           handleRemoveImage();
+          setPendingExitTab("history");
           handleSwitchTab("history");
           window.scrollTo({ top: 0, behavior: "smooth" });
           showToast(
@@ -667,6 +719,7 @@ export function DashboardClient({
 
   function handleLoadRecord(record: EcommerceCalculationRecord) {
     summaryEnteredRef.current = false;
+    setPendingExitTab(null);
     handleRemoveImage();
     setEditingRecord(record);
     setFormValues({
@@ -742,7 +795,7 @@ export function DashboardClient({
       </div>
 
       <main
-        className={`relative z-10 w-full max-w-6xl mx-auto flex-1 px-4 sm:px-6 lg:px-8 pt-10 sm:pt-12 space-y-8 ${
+        className={`relative z-10 w-full max-w-[1440px] mx-auto flex-1 px-4 sm:px-8 lg:px-10 pt-10 sm:pt-12 space-y-8 ${
           activeTab === "history" ? "pb-28" : "pb-14"
         }`}
       >
@@ -843,6 +896,7 @@ export function DashboardClient({
             compressingImage={compressingImage}
             imageError={imageError}
             editingProductName={editingRecord?.product_name ?? null}
+            isDuplicateProductName={isDuplicateProductName}
             onCancelEdit={handleCancelEdit}
             onChangeField={handleChangeField}
             onSelectPreset={handleSelectPreset}

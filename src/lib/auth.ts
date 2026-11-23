@@ -143,6 +143,9 @@ export function translateSupabaseError(error: unknown): string {
   ) {
     return "อีเมลนี้ถูกสมัครใช้งานแล้ว กรุณาเข้าสู่ระบบแทน";
   }
+  if (msg.includes("ecommerce_calculations_user_product_name_unique_idx")) {
+    return "ชื่อสินค้านี้มีอยู่ในคลาวด์แล้ว กรุณาตั้งชื่อใหม่ไม่ให้ซ้ำกัน";
+  }
   if (
     msg.includes("duplicate key") ||
     msg.includes("profiles_username_key") ||

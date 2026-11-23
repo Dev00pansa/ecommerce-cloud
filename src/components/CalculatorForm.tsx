@@ -1,7 +1,14 @@
 "use client";
 
-import { useRef, type ChangeEvent, type DragEvent, type FormEvent } from "react";
 import {
+  useRef,
+  useState,
+  type ChangeEvent,
+  type DragEvent,
+  type FormEvent,
+} from "react";
+import {
+  AlertCircle,
   ArrowRight,
   ImagePlus,
   Loader2,
@@ -10,7 +17,7 @@ import {
   Trash2,
   X,
 } from "lucide-react";
-import { PLATFORM_PRESETS } from "@/lib/calculator";
+import { MAX_MONETARY_VALUE, PLATFORM_PRESETS } from "@/lib/calculator";
 import { formatFileSizeKb } from "@/lib/image-compression";
 import type {
   CalculatorFormStrings,
@@ -25,6 +32,7 @@ interface CalculatorFormProps {
   compressingImage: boolean;
   imageError: string | null;
   editingProductName?: string | null;
+  isDuplicateProductName?: boolean;
   onCancelEdit?: () => void;
   onChangeField: (field: keyof CalculatorFormStrings, value: string) => void;
   onSelectPreset: (preset: PlatformPreset) => void;
@@ -34,9 +42,45 @@ interface CalculatorFormProps {
   onReset: () => void;
 }
 
-function sanitizeNumericInput(raw: string): string {
-  if (raw === "") return "";
-  return raw.replace(/[^0-9.]/g, "");
+type MonetaryField =
+  | "costPrice"
+  | "packagingCost"
+  | "adsCost"
+  | "sellingPrice"
+  | "fixedCost";
+
+function sanitizeBoundedDecimal(
+  raw: string,
+  maxValue: number
+): { value: string; clamped: boolean } {
+  const trimmed = raw.trim();
+  if (trimmed === "") {
+    return { value: "", clamped: false };
+  }
+
+  const cleaned = trimmed.replace(/[^0-9.]/g, "");
+  if (cleaned === "") {
+    return { value: "0", clamped: false };
+  }
+
+  const dotIndex = cleaned.indexOf(".");
+  let normalized = cleaned;
+  if (dotIndex !== -1) {
+    const intPart = cleaned.slice(0, dotIndex) || "0";
+    const decPart = cleaned.slice(dotIndex + 1).replace(/\./g, "").slice(0, 2);
+    normalized = `${intPart}.${decPart}`;
+  }
+
+  const parsed = Number(normalized);
+  if (!Number.isFinite(parsed) || parsed < 0) {
+    return { value: "0", clamped: false };
+  }
+
+  if (parsed > maxValue) {
+    return { value: String(maxValue), clamped: true };
+  }
+
+  return { value: normalized, clamped: false };
 }
 
 const INPUT_SURFACE_CLASS =
@@ -55,6 +99,7 @@ export function CalculatorForm({
   compressingImage,
   imageError,
   editingProductName = null,
+  isDuplicateProductName = false,
   onCancelEdit,
   onChangeField,
   onSelectPreset,
@@ -64,10 +109,65 @@ export function CalculatorForm({
   onReset,
 }: CalculatorFormProps) {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const productNameInputRef = useRef<HTMLInputElement | null>(null);
+
+  const [attemptedEmptyName, setAttemptedEmptyName] = useState(false);
+  const [clampedFields, setClampedFields] = useState<
+    Partial<Record<MonetaryField, boolean>>
+  >({});
+
+  const isEmptyNameError =
+    attemptedEmptyName && values.productName.trim().length === 0;
+  const productNameErrorMessage = isEmptyNameError
+    ? "กรุณาระบุชื่อสินค้าก่อนประมวลผล"
+    : isDuplicateProductName
+      ? "ชื่อสินค้านี้มีอยู่ในคลาวด์แล้ว กรุณาตั้งชื่อใหม่ไม่ให้ซ้ำกัน"
+      : null;
+
+  function focusProductNameField() {
+    const el = productNameInputRef.current;
+    if (!el) return;
+    el.scrollIntoView({ behavior: "smooth", block: "center" });
+    window.setTimeout(() => {
+      el.focus();
+    }, 220);
+  }
 
   function handleFormSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    if (values.productName.trim().length === 0) {
+      setAttemptedEmptyName(true);
+      focusProductNameField();
+      return;
+    }
+
+    if (isDuplicateProductName) {
+      focusProductNameField();
+      return;
+    }
+
+    setAttemptedEmptyName(false);
     onCalculate();
+  }
+
+  function handleMonetaryChange(field: MonetaryField, raw: string) {
+    const { value, clamped } = sanitizeBoundedDecimal(raw, MAX_MONETARY_VALUE);
+    onChangeField(field, value);
+    setClampedFields((prev) =>
+      prev[field] === clamped ? prev : { ...prev, [field]: clamped }
+    );
+  }
+
+  function handleFeePercentChange(raw: string) {
+    const { value } = sanitizeBoundedDecimal(raw, 100);
+    onChangeField("platformFeePercent", value);
+  }
+
+  function handleResetClick() {
+    setAttemptedEmptyName(false);
+    setClampedFields({});
+    onReset();
   }
 
   function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
@@ -89,7 +189,7 @@ export function CalculatorForm({
   const activePreviewUrl = compressedImage?.previewUrl ?? existingImageUrl;
 
   return (
-    <form onSubmit={handleFormSubmit} className="space-y-6 sm:space-y-8">
+    <form onSubmit={handleFormSubmit} noValidate className="space-y-6 sm:space-y-8">
       {editingProductName && (
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl border border-emerald-500/40 bg-[#050505] px-5 py-4 shadow-[0_0_24px_-6px_rgba(16,185,129,0.25)]">
           <div className="flex items-start sm:items-center gap-3 min-w-0">
@@ -192,12 +292,7 @@ export function CalculatorForm({
               step="0.1"
               inputMode="decimal"
               value={values.platformFeePercent}
-              onChange={(e) =>
-                onChangeField(
-                  "platformFeePercent",
-                  sanitizeNumericInput(e.target.value)
-                )
-              }
+              onChange={(e) => handleFeePercentChange(e.target.value)}
               placeholder="0"
               className={`${INPUT_SURFACE_CLASS} px-3.5 py-2.5 text-base font-mono tabular-nums text-zinc-100`}
             />
@@ -214,7 +309,7 @@ export function CalculatorForm({
             สินค้าที่คุณจะขายคืออะไร?
           </h2>
           <p className="text-sm text-zinc-400">
-            ตั้งชื่อสินค้าและแนบรูปสินค้า 1 รูป (ไม่บังคับ) เพื่อใช้ดูคู่กับรายงานและประวัติที่บันทึกไว้
+            ระบุชื่อสินค้าหรือรุ่นสินค้า (บังคับกรอก) และแนบรูปสินค้าได้ 1 รูป
           </p>
         </div>
 
@@ -224,16 +319,40 @@ export function CalculatorForm({
             className="block text-sm font-medium text-zinc-200"
           >
             ชื่อสินค้า หรือ รุ่นสินค้า
+            <span className="ml-1 text-emerald-400" aria-hidden="true">
+              *
+            </span>
           </label>
           <input
+            ref={productNameInputRef}
             id="calc-product-name"
             type="text"
+            required
+            aria-invalid={Boolean(productNameErrorMessage)}
             value={values.productName}
-            onChange={(e) => onChangeField("productName", e.target.value)}
+            onChange={(e) => {
+              onChangeField("productName", e.target.value);
+              if (attemptedEmptyName && e.target.value.trim().length > 0) {
+                setAttemptedEmptyName(false);
+              }
+            }}
             placeholder="เช่น เสื้อยืดคอกลมสีดำ รุ่นพรีเมียม"
             maxLength={120}
-            className={`${INPUT_SURFACE_CLASS} px-4 py-3 text-base text-zinc-100 placeholder-zinc-600`}
+            className={`w-full rounded-xl bg-[#050505] px-4 py-3 text-base text-zinc-100 placeholder-zinc-600 transition-all duration-200 focus:outline-none ${
+              productNameErrorMessage
+                ? "border border-rose-500/80 shadow-[0_0_20px_-6px_rgba(244,63,94,0.35)] focus:border-rose-400"
+                : "border border-emerald-500/25 shadow-[0_0_20px_-6px_rgba(16,185,129,0.16)] hover:border-emerald-400/50 focus:border-emerald-400 focus:shadow-[0_0_25px_-4px_rgba(16,185,129,0.3)]"
+            }`}
           />
+          {productNameErrorMessage && (
+            <p
+              role="alert"
+              className="flex items-center gap-1.5 text-xs font-medium text-rose-400"
+            >
+              <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+              <span>{productNameErrorMessage}</span>
+            </p>
+          )}
         </div>
 
         <div className="space-y-2">
@@ -350,7 +469,7 @@ export function CalculatorForm({
             กรอกต้นทุนและราคาขาย
           </h2>
           <p className="text-sm text-zinc-400">
-            กรอกตัวเลขตามความจริง ช่องไหนไม่มีค่าใช้จ่ายให้ใส่เลข 0 ได้เลย
+            กรอกตัวเลขตามความจริง ช่องไหนไม่มีค่าใช้จ่ายให้ใส่เลข 0 ได้เลย (สูงสุดไม่เกิน 299,999 บาทต่อช่อง)
           </p>
         </div>
 
@@ -367,20 +486,26 @@ export function CalculatorForm({
                 ราคาทุนที่คุณรับสินค้ามา หรือต้นทุนผลิตต่อ 1 ชิ้น
               </p>
             </div>
-            <div className="sm:col-span-5">
+            <div className="sm:col-span-5 space-y-1.5">
               <input
                 id="calc-cost-price"
                 type="number"
                 min="0"
+                max={MAX_MONETARY_VALUE}
                 step="0.01"
                 inputMode="decimal"
                 value={values.costPrice}
                 onChange={(e) =>
-                  onChangeField("costPrice", sanitizeNumericInput(e.target.value))
+                  handleMonetaryChange("costPrice", e.target.value)
                 }
                 placeholder="0"
                 className={`${INPUT_SURFACE_CLASS} px-4 py-3 text-lg font-mono tabular-nums text-zinc-100`}
               />
+              {clampedFields.costPrice && (
+                <p className="text-[11px] font-medium text-amber-400">
+                  กรอกได้สูงสุดไม่เกิน 299,999 บาท
+                </p>
+              )}
             </div>
           </div>
 
@@ -396,23 +521,26 @@ export function CalculatorForm({
                 รวมค่ากล่องพัสดุ บับเบิลกันกระแทก เทปกาว และใบปะหน้าต่อ 1 ชิ้น
               </p>
             </div>
-            <div className="sm:col-span-5">
+            <div className="sm:col-span-5 space-y-1.5">
               <input
                 id="calc-packaging-cost"
                 type="number"
                 min="0"
+                max={MAX_MONETARY_VALUE}
                 step="0.01"
                 inputMode="decimal"
                 value={values.packagingCost}
                 onChange={(e) =>
-                  onChangeField(
-                    "packagingCost",
-                    sanitizeNumericInput(e.target.value)
-                  )
+                  handleMonetaryChange("packagingCost", e.target.value)
                 }
                 placeholder="0"
                 className={`${INPUT_SURFACE_CLASS} px-4 py-3 text-lg font-mono tabular-nums text-zinc-100`}
               />
+              {clampedFields.packagingCost && (
+                <p className="text-[11px] font-medium text-amber-400">
+                  กรอกได้สูงสุดไม่เกิน 299,999 บาท
+                </p>
+              )}
             </div>
           </div>
 
@@ -428,20 +556,24 @@ export function CalculatorForm({
                 ค่าแอดเฉลี่ยเพื่อให้ขายสินค้าได้ 1 ชิ้น (ถ้าไม่ได้ยิงแอดให้ใส่ 0)
               </p>
             </div>
-            <div className="sm:col-span-5">
+            <div className="sm:col-span-5 space-y-1.5">
               <input
                 id="calc-ads-cost"
                 type="number"
                 min="0"
+                max={MAX_MONETARY_VALUE}
                 step="0.01"
                 inputMode="decimal"
                 value={values.adsCost}
-                onChange={(e) =>
-                  onChangeField("adsCost", sanitizeNumericInput(e.target.value))
-                }
+                onChange={(e) => handleMonetaryChange("adsCost", e.target.value)}
                 placeholder="0"
                 className={`${INPUT_SURFACE_CLASS} px-4 py-3 text-lg font-mono tabular-nums text-zinc-100`}
               />
+              {clampedFields.adsCost && (
+                <p className="text-[11px] font-medium text-amber-400">
+                  กรอกได้สูงสุดไม่เกิน 299,999 บาท
+                </p>
+              )}
             </div>
           </div>
 
@@ -457,23 +589,26 @@ export function CalculatorForm({
                 ราคาขายหน้าร้านที่คุณตั้งใจจะขายให้ลูกค้า
               </p>
             </div>
-            <div className="sm:col-span-5">
+            <div className="sm:col-span-5 space-y-1.5">
               <input
                 id="calc-selling-price"
                 type="number"
                 min="0"
+                max={MAX_MONETARY_VALUE}
                 step="0.01"
                 inputMode="decimal"
                 value={values.sellingPrice}
                 onChange={(e) =>
-                  onChangeField(
-                    "sellingPrice",
-                    sanitizeNumericInput(e.target.value)
-                  )
+                  handleMonetaryChange("sellingPrice", e.target.value)
                 }
                 placeholder="0"
                 className="w-full rounded-xl bg-[#050505] border-2 border-emerald-500/65 px-4 py-3 text-lg font-mono font-bold tabular-nums text-emerald-400 shadow-[0_0_24px_-6px_rgba(16,185,129,0.28)] transition-all duration-200 hover:border-emerald-400 focus:border-emerald-400 focus:shadow-[0_0_28px_-4px_rgba(16,185,129,0.42)] focus:outline-none"
               />
+              {clampedFields.sellingPrice && (
+                <p className="text-[11px] font-medium text-amber-400">
+                  กรอกได้สูงสุดไม่เกิน 299,999 บาท
+                </p>
+              )}
             </div>
           </div>
 
@@ -489,20 +624,26 @@ export function CalculatorForm({
                 เช่น ค่าเช่าที่ ค่าไฟ ค่าจ้างพนักงาน เพื่อคำนวณว่าต้องขายกี่ชิ้นจึงจะคุ้มทุน (ถ้าไม่มีใส่ 0)
               </p>
             </div>
-            <div className="sm:col-span-5">
+            <div className="sm:col-span-5 space-y-1.5">
               <input
                 id="calc-fixed-cost"
                 type="number"
                 min="0"
-                step="1"
+                max={MAX_MONETARY_VALUE}
+                step="0.01"
                 inputMode="decimal"
                 value={values.fixedCost}
                 onChange={(e) =>
-                  onChangeField("fixedCost", sanitizeNumericInput(e.target.value))
+                  handleMonetaryChange("fixedCost", e.target.value)
                 }
                 placeholder="0"
                 className={`${INPUT_SURFACE_CLASS} px-4 py-3 text-lg font-mono tabular-nums text-zinc-100`}
               />
+              {clampedFields.fixedCost && (
+                <p className="text-[11px] font-medium text-amber-400">
+                  กรอกได้สูงสุดไม่เกิน 299,999 บาท
+                </p>
+              )}
             </div>
           </div>
         </div>
@@ -510,7 +651,7 @@ export function CalculatorForm({
         <div className="pt-4 flex flex-wrap items-center gap-3">
           <button
             type="button"
-            onClick={onReset}
+            onClick={handleResetClick}
             className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#050505] border border-emerald-500/25 px-4 py-3.5 text-sm font-medium text-zinc-400 shadow-[0_0_20px_-6px_rgba(16,185,129,0.16)] transition-all duration-200 hover:border-emerald-400/50 hover:text-zinc-100"
           >
             <RotateCcw className="h-3.5 w-3.5" />

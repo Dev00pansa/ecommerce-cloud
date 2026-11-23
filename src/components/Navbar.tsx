@@ -342,7 +342,7 @@ export function Navbar({
   return (
     <>
       <header className="sticky top-0 z-40 h-16 border-b border-zinc-800/90 bg-[#000000]/90 backdrop-blur-md">
-        <div className="w-full max-w-[1600px] mx-auto h-full flex items-center justify-between gap-4 px-4 md:px-8">
+        <div className="w-full max-w-[1440px] mx-auto h-full flex items-center justify-between gap-4 px-4 sm:px-8 lg:px-10">
           <div className="flex items-center">
             <Link
               href={homeHref}

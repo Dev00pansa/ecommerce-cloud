@@ -319,7 +319,7 @@ export function HistoryPanel({
           aria-disabled={hasNoSelectedRecords}
           className={`rounded-2xl border p-4 sm:p-5 space-y-3.5 transition-all duration-200 ${
             hasNoSelectedRecords
-              ? "bg-zinc-900/70 border-zinc-800 opacity-50 pointer-events-none select-none shadow-none"
+              ? "bg-[#0d0d0f] border-zinc-800 pointer-events-none select-none shadow-none"
               : "bg-[#050505] border-emerald-500/20 shadow-[0_0_20px_-6px_rgba(16,185,129,0.14)]"
           }`}
         >
@@ -327,7 +327,7 @@ export function HistoryPanel({
             <div className="flex flex-wrap items-center gap-2">
               <span
                 className={`text-xs sm:text-sm font-semibold ${
-                  hasNoSelectedRecords ? "text-zinc-400" : "text-zinc-100"
+                  hasNoSelectedRecords ? "text-zinc-500" : "text-zinc-100"
                 }`}
               >
                 เลือกหัวข้อข้อมูลที่ต้องการส่งออกลงไฟล์
@@ -335,14 +335,14 @@ export function HistoryPanel({
               <span
                 className={`rounded-full border px-2.5 py-0.5 font-mono text-[11px] font-medium ${
                   hasNoSelectedRecords
-                    ? "border-zinc-700 bg-zinc-800/80 text-zinc-400"
+                    ? "border-zinc-800 bg-[#141417] text-zinc-500"
                     : "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
                 }`}
               >
                 เลือกอยู่ {selectedExportKeys.length}/{CSV_EXPORT_COLUMNS.length} หัวข้อ
               </span>
               {hasNoSelectedRecords && (
-                <span className="text-xs text-zinc-400">
+                <span className="text-xs text-zinc-500">
                   (กรุณาเลือกรายการสินค้าด้านล่างก่อน)
                 </span>
               )}
@@ -353,7 +353,11 @@ export function HistoryPanel({
                 type="button"
                 disabled={hasNoSelectedRecords}
                 onClick={() => setSelectedExportKeys(ALL_CSV_EXPORT_KEYS)}
-                className="rounded-lg border border-zinc-800 bg-black px-2.5 py-1 text-[11px] font-medium text-zinc-300 transition-colors hover:border-emerald-500/50 hover:text-emerald-300 disabled:text-zinc-500 disabled:hover:border-zinc-800 disabled:hover:text-zinc-500"
+                className={`rounded-lg border px-2.5 py-1 text-[11px] font-medium transition-colors ${
+                  hasNoSelectedRecords
+                    ? "border-zinc-800 bg-[#141417] text-zinc-600"
+                    : "border-zinc-800 bg-black text-zinc-300 hover:border-emerald-500/50 hover:text-emerald-300"
+                }`}
               >
                 เลือกทั้งหมด
               </button>
@@ -361,7 +365,11 @@ export function HistoryPanel({
                 type="button"
                 disabled={hasNoSelectedRecords}
                 onClick={() => setSelectedExportKeys(DEFAULT_CSV_EXPORT_KEYS)}
-                className="rounded-lg border border-zinc-800 bg-black px-2.5 py-1 text-[11px] font-medium text-zinc-300 transition-colors hover:border-emerald-500/50 hover:text-emerald-300 disabled:text-zinc-500 disabled:hover:border-zinc-800 disabled:hover:text-zinc-500"
+                className={`rounded-lg border px-2.5 py-1 text-[11px] font-medium transition-colors ${
+                  hasNoSelectedRecords
+                    ? "border-zinc-800 bg-[#141417] text-zinc-600"
+                    : "border-zinc-800 bg-black text-zinc-300 hover:border-emerald-500/50 hover:text-emerald-300"
+                }`}
               >
                 เฉพาะค่าสำคัญ
               </button>
@@ -369,7 +377,11 @@ export function HistoryPanel({
                 type="button"
                 disabled={hasNoSelectedRecords}
                 onClick={() => setSelectedExportKeys([])}
-                className="rounded-lg border border-zinc-800 bg-black px-2.5 py-1 text-[11px] font-medium text-zinc-400 transition-colors hover:border-rose-500/50 hover:text-rose-300 disabled:text-zinc-500 disabled:hover:border-zinc-800 disabled:hover:text-zinc-500"
+                className={`rounded-lg border px-2.5 py-1 text-[11px] font-medium transition-colors ${
+                  hasNoSelectedRecords
+                    ? "border-zinc-800 bg-[#141417] text-zinc-600"
+                    : "border-zinc-800 bg-black text-zinc-400 hover:border-rose-500/50 hover:text-rose-300"
+                }`}
               >
                 ล้างทั้งหมด
               </button>
@@ -389,18 +401,18 @@ export function HistoryPanel({
                   onClick={() => toggleExportColumn(column.key)}
                   className={`flex items-center gap-2.5 rounded-xl border px-3 py-2 text-left text-xs select-none transition-all duration-150 focus:outline-none ${
                     hasNoSelectedRecords
-                      ? "border-zinc-800 bg-zinc-950/60 text-zinc-500"
+                      ? "border-zinc-800/90 bg-[#141417] text-zinc-500"
                       : checked
                         ? "border-emerald-500/45 bg-emerald-950/25 text-zinc-100"
-                        : "border-zinc-800/90 bg-black/70 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200"
+                        : "border-zinc-800/90 bg-black text-zinc-400 hover:border-zinc-700 hover:text-zinc-200"
                   }`}
                 >
                   <span
                     className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-md border transition-colors ${
                       hasNoSelectedRecords
                         ? checked
-                          ? "border-zinc-700 bg-zinc-800 text-zinc-400"
-                          : "border-zinc-800 bg-zinc-950 text-transparent"
+                          ? "border-zinc-700 bg-[#1c1c21] text-zinc-500"
+                          : "border-zinc-800 bg-[#0d0d0f] text-transparent"
                         : checked
                           ? "border-emerald-400 bg-emerald-500/20 text-emerald-400"
                           : "border-zinc-700 bg-black text-transparent"
