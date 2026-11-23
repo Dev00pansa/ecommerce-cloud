@@ -39,6 +39,9 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
+  verification: {
+    google: "JEcBvWHZNHzyVdzt5HthC8q1MEl_Uegpb90xvexdm7Q",
+  },
   icons: {
     icon: "/images/khumlab-logo.svg",
   },
