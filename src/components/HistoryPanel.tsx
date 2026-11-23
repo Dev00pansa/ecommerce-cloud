@@ -72,7 +72,7 @@ export function HistoryPanel({
   const [selectedExportKeys, setSelectedExportKeys] = useState<
     CsvExportColumnKey[]
   >(DEFAULT_CSV_EXPORT_KEYS);
-  const [excludedRecordIds, setExcludedRecordIds] = useState<string[]>([]);
+  const [selectedRecordIds, setSelectedRecordIds] = useState<string[]>([]);
   const [deleteTarget, setDeleteTarget] = useState<DeleteModalTarget | null>(
     null
   );
@@ -151,17 +151,17 @@ export function HistoryPanel({
     return withMetrics;
   }, [records, sortOrder]);
 
-  const excludedIdSet = useMemo(
-    () => new Set(excludedRecordIds),
-    [excludedRecordIds]
+  const selectedIdSet = useMemo(
+    () => new Set(selectedRecordIds),
+    [selectedRecordIds]
   );
 
   const selectedSortedRecords = useMemo(
     () =>
       enrichedSortedRecords
-        .filter((entry) => !excludedIdSet.has(entry.item.id))
+        .filter((entry) => selectedIdSet.has(entry.item.id))
         .map((entry) => entry.item),
-    [enrichedSortedRecords, excludedIdSet]
+    [enrichedSortedRecords, selectedIdSet]
   );
 
   const selectedCount = selectedSortedRecords.length;
@@ -184,7 +184,7 @@ export function HistoryPanel({
   }
 
   function toggleRecordSelection(recordId: string) {
-    setExcludedRecordIds((prev) =>
+    setSelectedRecordIds((prev) =>
       prev.includes(recordId)
         ? prev.filter((id) => id !== recordId)
         : [...prev, recordId]
@@ -193,10 +193,15 @@ export function HistoryPanel({
 
   function handleToggleSelectAllRecords() {
     if (isAllRecordsSelected) {
-      setExcludedRecordIds(records.map((r) => r.id));
+      setSelectedRecordIds([]);
     } else {
-      setExcludedRecordIds([]);
+      setSelectedRecordIds(records.map((r) => r.id));
     }
+  }
+
+  function handleRefreshClick() {
+    setSelectedRecordIds([]);
+    onRefresh();
   }
 
   async function handleConfirmModalDelete() {
@@ -206,7 +211,7 @@ export function HistoryPanel({
       const targetId = deleteTarget.record.id;
       const ok = await onConfirmDeleteSingle(deleteTarget.record);
       if (ok) {
-        setExcludedRecordIds((prev) => prev.filter((id) => id !== targetId));
+        setSelectedRecordIds((prev) => prev.filter((id) => id !== targetId));
         setDeleteTarget(null);
       }
       return;
@@ -215,10 +220,7 @@ export function HistoryPanel({
     const deletedIds = new Set(deleteTarget.records.map((item) => item.id));
     const ok = await onConfirmDeleteBulk(deleteTarget.records);
     if (ok) {
-      const remainingIds = records
-        .filter((item) => !deletedIds.has(item.id))
-        .map((item) => item.id);
-      setExcludedRecordIds(remainingIds);
+      setSelectedRecordIds((prev) => prev.filter((id) => !deletedIds.has(id)));
       setDeleteTarget(null);
     }
   }
@@ -302,7 +304,7 @@ export function HistoryPanel({
 
           <button
             type="button"
-            onClick={onRefresh}
+            onClick={handleRefreshClick}
             disabled={loading}
             className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-500/25 bg-[#050505] px-4 py-2.5 text-xs sm:text-sm font-medium text-zinc-300 shadow-[0_0_20px_-6px_rgba(16,185,129,0.16)] transition-all duration-200 hover:border-emerald-400/50 hover:text-white disabled:opacity-50"
           >
@@ -497,15 +499,15 @@ export function HistoryPanel({
             <div className="space-y-3.5">
               {enrichedSortedRecords.map(({ item, metrics }) => {
                 const isLoss = metrics.netProfitPerUnit < 0;
-                const isSelected = !excludedIdSet.has(item.id);
+                const isSelected = selectedIdSet.has(item.id);
 
                 return (
                   <article
                     key={item.id}
                     className={`p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl bg-black/80 border transition-all duration-200 ${
                       isSelected
-                        ? "border-emerald-500/35 shadow-[0_0_24px_-6px_rgba(16,185,129,0.2)] hover:border-emerald-400/60"
-                        : "border-zinc-800/90 opacity-75 hover:opacity-100 hover:border-zinc-700"
+                        ? "border-emerald-500/45 shadow-[0_0_24px_-6px_rgba(16,185,129,0.22)] hover:border-emerald-400/70"
+                        : "border-zinc-800/90 hover:border-emerald-500/30"
                     }`}
                   >
                     <div className="flex items-center gap-3.5 sm:gap-4 min-w-0">
