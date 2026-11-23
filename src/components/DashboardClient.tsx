@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Cloud, Loader2, Plus, Trash2 } from "lucide-react";
+import { AlertCircle, Cloud, Loader2, Plus, Trash2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { sanitizePlainText, translateSupabaseError } from "@/lib/auth";
 import { useAppLanguage } from "@/lib/language";
@@ -78,7 +78,7 @@ export function DashboardClient({
   const topFormRef = useRef<HTMLDivElement | null>(null);
   const toastCounterRef = useRef(0);
   const activeTab: DashboardTab =
-    searchParams.get("tab") === "history" ? "history" : "calculator";
+    searchParams.get("tab") === "calculator" ? "calculator" : "history";
 
   function handleSwitchTab(nextTab: DashboardTab) {
     router.replace(`/dashboard?tab=${nextTab}`, { scroll: false });
@@ -675,23 +675,34 @@ export function DashboardClient({
               <span>{isEn ? "New Calculation" : "คำนวณรายการใหม่"}</span>
             </button>
           ) : (
-            <button
-              type="button"
-              onClick={() => handleSwitchTab("history")}
-              className="inline-flex shrink-0 self-start lg:self-auto items-center gap-2 rounded-2xl border border-emerald-500/30 bg-[#050505] px-5 py-3 text-sm font-semibold text-zinc-200 shadow-[0_0_20px_-6px_rgba(16,185,129,0.18)] transition-all duration-200 hover:border-emerald-400/60 hover:text-emerald-300 whitespace-nowrap"
+            <div
+              aria-live="polite"
+              className={`inline-flex shrink-0 self-start lg:self-auto items-center gap-2 rounded-2xl border px-4 py-2.5 text-xs sm:text-sm pointer-events-none select-none cursor-default whitespace-nowrap ${
+                isCloudFull
+                  ? "border-amber-500/40 bg-amber-500/10 font-semibold text-amber-300"
+                  : "border-emerald-500/25 bg-emerald-500/[0.06] font-medium text-emerald-300/90"
+              }`}
             >
-              <Cloud className="h-4 w-4 text-emerald-400" />
+              {isCloudFull ? (
+                <AlertCircle className="h-4 w-4 shrink-0 text-amber-400" />
+              ) : (
+                <Cloud className="h-4 w-4 shrink-0 text-emerald-400" />
+              )}
               <span>
-                {isEn
-                  ? `Cloud Storage (${records.length}/${MAX_CLOUD_RECORDS})`
-                  : `คลาวด์เก็บข้อมูล (${records.length}/${MAX_CLOUD_RECORDS})`}
+                {isCloudFull
+                  ? isEn
+                    ? `Cloud Storage Full (${MAX_CLOUD_RECORDS}/${MAX_CLOUD_RECORDS}) — Cannot save more`
+                    : `พื้นที่คลาวด์เต็ม (${MAX_CLOUD_RECORDS}/${MAX_CLOUD_RECORDS}) — ไม่สามารถบันทึกเพิ่มได้`
+                  : isEn
+                    ? `Cloud Storage: ${records.length}/${MAX_CLOUD_RECORDS} items`
+                    : `พื้นที่คลาวด์: ${records.length}/${MAX_CLOUD_RECORDS} รายการ`}
               </span>
-            </button>
+            </div>
           )}
         </div>
 
         {activeTab === "calculator" ? (
-          <div className="space-y-14">
+          <div className="space-y-6 sm:space-y-8">
             <CalculatorForm
               values={formValues}
               compressedImage={compressedImage}

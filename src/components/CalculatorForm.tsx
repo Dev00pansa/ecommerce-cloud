@@ -2,7 +2,7 @@
 
 import { useRef, type ChangeEvent, type DragEvent, type FormEvent } from "react";
 import {
-  ArrowDown,
+  ArrowRight,
   ImagePlus,
   Loader2,
   Pencil,
@@ -45,6 +45,9 @@ const INPUT_SURFACE_CLASS =
 const BOX_SURFACE_CLASS =
   "rounded-2xl bg-[#050505] border border-emerald-500/25 shadow-[0_0_20px_-6px_rgba(16,185,129,0.16)] transition-all duration-200 hover:border-emerald-400/50 hover:shadow-[0_0_25px_-4px_rgba(16,185,129,0.3)]";
 
+const STEP_CARD_CLASS =
+  "rounded-2xl bg-[#050505] border border-emerald-500/20 p-6 sm:p-8 shadow-[0_10px_30px_rgba(0,0,0,0.6)]";
+
 export function CalculatorForm({
   values,
   compressedImage,
@@ -86,7 +89,7 @@ export function CalculatorForm({
   const activePreviewUrl = compressedImage?.previewUrl ?? existingImageUrl;
 
   return (
-    <form onSubmit={handleFormSubmit} className="space-y-12">
+    <form onSubmit={handleFormSubmit} className="space-y-6 sm:space-y-8">
       {editingProductName && (
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl border border-emerald-500/40 bg-[#050505] px-5 py-4 shadow-[0_0_24px_-6px_rgba(16,185,129,0.25)]">
           <div className="flex items-start sm:items-center gap-3 min-w-0">
@@ -116,7 +119,7 @@ export function CalculatorForm({
         </div>
       )}
 
-      <section className="border-t border-zinc-800/80 pt-8 space-y-5">
+      <section className={`${STEP_CARD_CLASS} space-y-5`}>
         <div className="space-y-1">
           <span className="font-mono text-xs font-semibold uppercase tracking-[0.18em] text-emerald-400">
             STEP 01
@@ -202,7 +205,7 @@ export function CalculatorForm({
         </div>
       </section>
 
-      <section className="border-t border-zinc-800/80 pt-8 space-y-5">
+      <section className={`${STEP_CARD_CLASS} space-y-5`}>
         <div className="space-y-1">
           <span className="font-mono text-xs font-semibold uppercase tracking-[0.18em] text-emerald-400">
             STEP 02
@@ -338,7 +341,7 @@ export function CalculatorForm({
         </div>
       </section>
 
-      <section className="border-t border-zinc-800/80 pt-8 space-y-6">
+      <section className={`${STEP_CARD_CLASS} space-y-6`}>
         <div className="space-y-1">
           <span className="font-mono text-xs font-semibold uppercase tracking-[0.18em] text-emerald-400">
             STEP 03
@@ -506,20 +509,20 @@ export function CalculatorForm({
 
         <div className="pt-4 flex flex-wrap items-center gap-3">
           <button
-            type="submit"
-            className="inline-flex items-center justify-center gap-2.5 rounded-xl bg-emerald-500 px-7 py-3.5 text-base font-semibold text-slate-950 shadow-[0_0_24px_-4px_rgba(16,185,129,0.45)] transition-all duration-200 hover:bg-emerald-400"
-          >
-            <span>ประมวลผลและสรุปกำไร</span>
-            <ArrowDown className="h-4 w-4" />
-          </button>
-
-          <button
             type="button"
             onClick={onReset}
             className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#050505] border border-emerald-500/25 px-4 py-3.5 text-sm font-medium text-zinc-400 shadow-[0_0_20px_-6px_rgba(16,185,129,0.16)] transition-all duration-200 hover:border-emerald-400/50 hover:text-zinc-100"
           >
             <RotateCcw className="h-3.5 w-3.5" />
             <span>ล้างค่า</span>
+          </button>
+
+          <button
+            type="submit"
+            className="inline-flex items-center justify-center gap-2.5 rounded-xl bg-emerald-500 px-7 py-3.5 text-base font-semibold text-slate-950 shadow-[0_0_24px_-4px_rgba(16,185,129,0.45)] transition-all duration-200 hover:bg-emerald-400"
+          >
+            <span>ประมวลผลและสรุปกำไร</span>
+            <ArrowRight className="h-4 w-4" />
           </button>
         </div>
       </section>

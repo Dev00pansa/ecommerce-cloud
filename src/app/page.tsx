@@ -1,10 +1,21 @@
 import { Suspense } from "react";
+import { redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { Navbar } from "@/components/Navbar";
 import { LandingView } from "@/components/LandingView";
 import { PageLoader } from "@/components/PageLoader";
 
-async function HomeContent() {
+interface HomePageProps {
+  searchParams: Promise<{ landing?: string | string[] }>;
+}
+
+async function HomeContent({ searchParams }: HomePageProps) {
+  const resolvedSearchParams = await searchParams;
+  const landingParam = resolvedSearchParams.landing;
+  const allowLanding =
+    landingParam === "1" ||
+    (Array.isArray(landingParam) && landingParam.includes("1"));
+
   let isAuthenticated = false;
   let username: string | null = null;
   let email: string | null = null;
@@ -42,6 +53,10 @@ async function HomeContent() {
     isAuthenticated = false;
   }
 
+  if (isAuthenticated && !allowLanding) {
+    redirect("/dashboard");
+  }
+
   return (
     <>
       <Navbar
@@ -56,10 +71,10 @@ async function HomeContent() {
   );
 }
 
-export default function HomePage() {
+export default function HomePage({ searchParams }: HomePageProps) {
   return (
     <Suspense fallback={<PageLoader label="กำลังโหลดหน้าแรก..." />}>
-      <HomeContent />
+      <HomeContent searchParams={searchParams} />
     </Suspense>
   );
 }

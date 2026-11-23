@@ -76,7 +76,7 @@ export function CalculationReport({
   return (
     <section
       id="calculation-report"
-      className="relative scroll-mt-20 overflow-hidden rounded-2xl bg-[#050505] border border-emerald-500/30 p-6 sm:p-8 shadow-[0_0_32px_-8px_rgba(16,185,129,0.22)] space-y-10"
+      className="relative scroll-mt-20 overflow-hidden rounded-2xl bg-[#050505] border border-emerald-500/25 p-6 sm:p-8 shadow-[0_10px_30px_rgba(0,0,0,0.6),0_0_32px_-8px_rgba(16,185,129,0.2)] space-y-10"
     >
       <div
         aria-hidden="true"

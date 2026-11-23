@@ -66,7 +66,7 @@ export default function DashboardPage() {
   return (
     <Suspense
       fallback={
-        <PageLoader label="กำลังตรวจสอบสิทธิ์และโหลดเครื่องมือคำนวณ..." />
+        <PageLoader label="กำลังตรวจสอบสิทธิ์และโหลดคลาวด์เก็บข้อมูล..." />
       }
     >
       <DashboardContent />

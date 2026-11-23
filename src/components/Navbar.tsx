@@ -46,56 +46,11 @@ function ToolsDropdownItems({
   const searchParams = useSearchParams();
   const isOnDashboard = pathname.startsWith("/dashboard");
   const activeTabParam = searchParams.get("tab");
-  const isCalculatorActive = isOnDashboard && activeTabParam !== "history";
-  const isCloudActive = isOnDashboard && activeTabParam === "history";
+  const isCalculatorActive = isOnDashboard && activeTabParam === "calculator";
+  const isCloudActive = isOnDashboard && activeTabParam !== "calculator";
 
   return (
     <div className="p-2 space-y-1">
-      <Link
-        href={calculatorTabHref}
-        scroll={false}
-        onClick={onSelect}
-        className={`group flex items-start gap-3 rounded-xl px-3.5 py-3 border transition-colors ${
-          isCalculatorActive
-            ? "bg-emerald-500/12 border-emerald-500/35"
-            : "border-transparent hover:bg-white/[0.05]"
-        }`}
-      >
-        <span
-          className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition-colors ${
-            isCalculatorActive
-              ? "bg-emerald-500/25 text-emerald-300"
-              : "bg-emerald-500/15 text-emerald-400 group-hover:bg-emerald-500/25"
-          }`}
-        >
-          <Calculator className="h-4 w-4" />
-        </span>
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center justify-between gap-2">
-            <span
-              className={`block text-sm font-semibold transition-colors ${
-                isCalculatorActive
-                  ? "text-emerald-400"
-                  : "text-zinc-100 group-hover:text-emerald-300"
-              }`}
-            >
-              {isEn ? "Calculator" : "เครื่องมือคำนวณ"}
-            </span>
-            {isCalculatorActive && (
-              <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-semibold text-emerald-300">
-                <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]" />
-                <span>{isEn ? "Active" : "กำลังใช้งาน"}</span>
-              </span>
-            )}
-          </div>
-          <span className="mt-0.5 block text-xs text-zinc-400 leading-snug">
-            {isEn
-              ? "Calculate costs, selling price, and net profit"
-              : "คำนวณต้นทุน ราคาขาย และกำไรสุทธิ"}
-          </span>
-        </div>
-      </Link>
-
       <Link
         href={cloudTabHref}
         scroll={false}
@@ -137,6 +92,51 @@ function ToolsDropdownItems({
             {isEn
               ? "View saved calculations and product images"
               : "ดูประวัติรายการและรูปสินค้าที่บันทึกไว้"}
+          </span>
+        </div>
+      </Link>
+
+      <Link
+        href={calculatorTabHref}
+        scroll={false}
+        onClick={onSelect}
+        className={`group flex items-start gap-3 rounded-xl px-3.5 py-3 border transition-colors ${
+          isCalculatorActive
+            ? "bg-emerald-500/12 border-emerald-500/35"
+            : "border-transparent hover:bg-white/[0.05]"
+        }`}
+      >
+        <span
+          className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition-colors ${
+            isCalculatorActive
+              ? "bg-emerald-500/25 text-emerald-300"
+              : "bg-emerald-500/15 text-emerald-400 group-hover:bg-emerald-500/25"
+          }`}
+        >
+          <Calculator className="h-4 w-4" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center justify-between gap-2">
+            <span
+              className={`block text-sm font-semibold transition-colors ${
+                isCalculatorActive
+                  ? "text-emerald-400"
+                  : "text-zinc-100 group-hover:text-emerald-300"
+              }`}
+            >
+              {isEn ? "Calculator" : "เครื่องมือคำนวณ"}
+            </span>
+            {isCalculatorActive && (
+              <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-semibold text-emerald-300">
+                <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]" />
+                <span>{isEn ? "Active" : "กำลังใช้งาน"}</span>
+              </span>
+            )}
+          </div>
+          <span className="mt-0.5 block text-xs text-zinc-400 leading-snug">
+            {isEn
+              ? "Calculate costs, selling price, and net profit"
+              : "คำนวณต้นทุน ราคาขาย และกำไรสุทธิ"}
           </span>
         </div>
       </Link>
@@ -275,6 +275,7 @@ export function Navbar({
     setLoggingOut(false);
   }
 
+  const homeHref = isAuthenticated ? "/?landing=1" : "/";
   const calculatorTabHref = isAuthenticated
     ? "/dashboard?tab=calculator"
     : "/login";
@@ -286,7 +287,7 @@ export function Navbar({
         <div className="w-full max-w-[1600px] mx-auto h-full flex items-center justify-between gap-4 px-4 md:px-8">
           <div className="flex items-center">
             <Link
-              href="/"
+              href={homeHref}
               scroll={true}
               onClick={handleLogoClick}
               className="flex items-center gap-2.5 group focus:outline-none"
@@ -312,7 +313,7 @@ export function Navbar({
 
             <nav className="hidden sm:flex items-center gap-1 ml-3 md:ml-0">
               <Link
-                href="/"
+                href={homeHref}
                 scroll={true}
                 onClick={handleLogoClick}
                 className={`rounded-lg px-3.5 py-1.5 text-sm font-medium transition-colors ${
@@ -339,7 +340,7 @@ export function Navbar({
                       : "text-zinc-400 hover:bg-zinc-900 hover:text-zinc-100"
                   }`}
                 >
-                  <span>{isEn ? "Calculator" : "เครื่องมือคำนวณ"}</span>
+                  <span>{isEn ? "Workspace" : "จัดการข้อมูล"}</span>
                   <ChevronDown
                     className={`h-3.5 w-3.5 transition-transform duration-200 ${
                       toolsDropdownOpen ? "rotate-180 text-emerald-400" : ""

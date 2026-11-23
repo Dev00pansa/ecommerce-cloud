@@ -258,36 +258,61 @@ export function HistoryPanel({
           </button>
         </div>
 
-        <div className="rounded-2xl bg-[#050505] border border-emerald-500/20 p-4 sm:p-5 shadow-[0_0_20px_-6px_rgba(16,185,129,0.14)] space-y-3.5">
+        <div
+          aria-disabled={hasNoSelectedRecords}
+          className={`rounded-2xl border p-4 sm:p-5 space-y-3.5 transition-all duration-200 ${
+            hasNoSelectedRecords
+              ? "bg-zinc-900/70 border-zinc-800 opacity-50 pointer-events-none select-none shadow-none"
+              : "bg-[#050505] border-emerald-500/20 shadow-[0_0_20px_-6px_rgba(16,185,129,0.14)]"
+          }`}
+        >
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs sm:text-sm font-semibold text-zinc-100">
+              <span
+                className={`text-xs sm:text-sm font-semibold ${
+                  hasNoSelectedRecords ? "text-zinc-400" : "text-zinc-100"
+                }`}
+              >
                 เลือกหัวข้อข้อมูลที่ต้องการส่งออกลงไฟล์
               </span>
-              <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-0.5 font-mono text-[11px] font-medium text-emerald-400">
+              <span
+                className={`rounded-full border px-2.5 py-0.5 font-mono text-[11px] font-medium ${
+                  hasNoSelectedRecords
+                    ? "border-zinc-700 bg-zinc-800/80 text-zinc-400"
+                    : "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+                }`}
+              >
                 เลือกอยู่ {selectedExportKeys.length}/{CSV_EXPORT_COLUMNS.length} หัวข้อ
               </span>
+              {hasNoSelectedRecords && (
+                <span className="text-xs text-zinc-400">
+                  (กรุณาเลือกรายการสินค้าด้านล่างก่อน)
+                </span>
+              )}
             </div>
 
             <div className="flex flex-wrap items-center gap-1.5">
               <button
                 type="button"
+                disabled={hasNoSelectedRecords}
                 onClick={() => setSelectedExportKeys(ALL_CSV_EXPORT_KEYS)}
-                className="rounded-lg border border-zinc-800 bg-black px-2.5 py-1 text-[11px] font-medium text-zinc-300 transition-colors hover:border-emerald-500/50 hover:text-emerald-300"
+                className="rounded-lg border border-zinc-800 bg-black px-2.5 py-1 text-[11px] font-medium text-zinc-300 transition-colors hover:border-emerald-500/50 hover:text-emerald-300 disabled:text-zinc-500 disabled:hover:border-zinc-800 disabled:hover:text-zinc-500"
               >
                 เลือกทั้งหมด
               </button>
               <button
                 type="button"
+                disabled={hasNoSelectedRecords}
                 onClick={() => setSelectedExportKeys(DEFAULT_CSV_EXPORT_KEYS)}
-                className="rounded-lg border border-zinc-800 bg-black px-2.5 py-1 text-[11px] font-medium text-zinc-300 transition-colors hover:border-emerald-500/50 hover:text-emerald-300"
+                className="rounded-lg border border-zinc-800 bg-black px-2.5 py-1 text-[11px] font-medium text-zinc-300 transition-colors hover:border-emerald-500/50 hover:text-emerald-300 disabled:text-zinc-500 disabled:hover:border-zinc-800 disabled:hover:text-zinc-500"
               >
                 เฉพาะค่าสำคัญ
               </button>
               <button
                 type="button"
+                disabled={hasNoSelectedRecords}
                 onClick={() => setSelectedExportKeys([])}
-                className="rounded-lg border border-zinc-800 bg-black px-2.5 py-1 text-[11px] font-medium text-zinc-400 transition-colors hover:border-rose-500/50 hover:text-rose-300"
+                className="rounded-lg border border-zinc-800 bg-black px-2.5 py-1 text-[11px] font-medium text-zinc-400 transition-colors hover:border-rose-500/50 hover:text-rose-300 disabled:text-zinc-500 disabled:hover:border-zinc-800 disabled:hover:text-zinc-500"
               >
                 ล้างทั้งหมด
               </button>
@@ -303,18 +328,25 @@ export function HistoryPanel({
                   type="button"
                   role="checkbox"
                   aria-checked={checked}
+                  disabled={hasNoSelectedRecords}
                   onClick={() => toggleExportColumn(column.key)}
                   className={`flex items-center gap-2.5 rounded-xl border px-3 py-2 text-left text-xs select-none transition-all duration-150 focus:outline-none ${
-                    checked
-                      ? "border-emerald-500/45 bg-emerald-950/25 text-zinc-100"
-                      : "border-zinc-800/90 bg-black/70 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200"
+                    hasNoSelectedRecords
+                      ? "border-zinc-800 bg-zinc-950/60 text-zinc-500"
+                      : checked
+                        ? "border-emerald-500/45 bg-emerald-950/25 text-zinc-100"
+                        : "border-zinc-800/90 bg-black/70 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200"
                   }`}
                 >
                   <span
                     className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-md border transition-colors ${
-                      checked
-                        ? "border-emerald-400 bg-emerald-500/20 text-emerald-400"
-                        : "border-zinc-700 bg-black text-transparent"
+                      hasNoSelectedRecords
+                        ? checked
+                          ? "border-zinc-700 bg-zinc-800 text-zinc-400"
+                          : "border-zinc-800 bg-zinc-950 text-transparent"
+                        : checked
+                          ? "border-emerald-400 bg-emerald-500/20 text-emerald-400"
+                          : "border-zinc-700 bg-black text-transparent"
                     }`}
                   >
                     <Check className="h-3 w-3 stroke-[2.5]" />
@@ -325,7 +357,7 @@ export function HistoryPanel({
             })}
           </div>
 
-          {hasNoExportColumns && (
+          {!hasNoSelectedRecords && hasNoExportColumns && (
             <p className="flex items-center gap-1.5 text-xs font-medium text-amber-400">
               <AlertCircle className="h-3.5 w-3.5 shrink-0" />
               <span>กรุณาติ๊กเลือกข้อมูลอย่างน้อย 1 หัวข้อก่อนส่งออกไฟล์</span>
