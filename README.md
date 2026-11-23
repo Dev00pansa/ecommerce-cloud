@@ -1,36 +1,46 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# KhumLab `v1.0.0`
 
-## Getting Started
+**Live App:** https://khumlab.vercel.app
 
-First, run the development server:
+เว็บแอปพลิเคชันสำหรับผู้ขายออนไลน์และเจ้าของแบรนด์ E-Commerce ช่วยคำนวณต้นทุนจริง ตั้งราคาขาย หาจุดคุ้มทุน และวิเคราะห์ความเสี่ยงก่อนจัดโปรโมชันหรือยิงโฆษณา
+
+## ความสามารถหลัก
+
+- **คำนวณต้นทุนและค่าธรรมเนียมแพลตฟอร์ม (GP):** รองรับค่าเริ่มต้นของ Shopee (13%), TikTok Shop (12%), Lazada (12%), ขายตรง (0%) และปรับเปอร์เซ็นต์เองได้ตามจริง พร้อมหักค่าแพ็ก ค่าโฆษณา และต้นทุนคงที่ครบถ้วน
+- **กราฟวิเคราะห์และระบบวินิจฉัยกำไรเชิงลึก:** ประเมินคะแนนสุขภาพกำไร (`0–100` / เกรด `S–D`), กราฟวงแหวนสัดส่วนต้นทุน, กราฟจำลองส่วนลด `0%–50%`, กราฟคาดการณ์กำไรตามยอดขาย, คำนวณความเสี่ยงพัสดุตีกลับ, Max Safe CPA / Break-Even ROAS และราคาขายแนะนำ 3 ระดับ
+- **คลาวด์เก็บข้อมูลส่วนตัว (สูงสุด 20 รายการ/บัญชี):** บันทึก แก้ไข ลบแบบเดี่ยวหรือหลายรายการพร้อมกันได้แบบ Realtime พร้อมบีบอัดรูปสินค้าอัตโนมัติ (ไม่เกิน 120 KB) และระบบป้องกันชื่อซ้ำ
+- **ส่งออกตาราง CSV แบบเลือกคอลัมน์ได้:** เลือกรายการสินค้าและหัวข้อข้อมูลที่ต้องการส่งออกลงไฟล์เดียว เปิดใช้งานใน Excel และ Google Sheets ได้ทันที
+- **ความปลอดภัยบัญชีผู้ใช้:** ปกป้องเส้นทางฝั่ง Server ด้วย Supabase SSR, ล็อกอินด้วย Username แบบตรงตัวพิมพ์เล็ก-ใหญ่, คูลดาวน์ป้องกันสแปม และ Row-Level Security (RLS) แยกข้อมูลตามบัญชี 100%
+
+## เทคโนโลยีที่ใช้ (Tech Stack)
+
+- **Framework:** Next.js 16 (App Router, Turbopack)
+- **Language:** TypeScript
+- **Styling:** Tailwind CSS v4
+- **Backend & Cloud:** Supabase (Auth, PostgreSQL, Storage, Realtime, RLS)
+- **Hosting:** Vercel (Function Region `sin1` Singapore)
+
+## การติดตั้งเพื่อรันบนเครื่อง (Local Development)
+
+1. โคลนโปรเจกต์และติดตั้ง Dependencies:
+
+```bash
+git clone https://github.com/Dev00pansa/ecommerce-cloud.git
+cd ecommerce-cloud
+npm install
+```
+
+2. สร้างไฟล์ `.env.local` ที่โฟลเดอร์หลักของโปรเจกต์และใส่ค่าจาก Supabase:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+```
+
+3. รันเซิร์ฟเวอร์พัฒนา:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+เปิดเบราว์เซอร์ไปที่ http://localhost:3000 เพื่อเริ่มใช้งาน
