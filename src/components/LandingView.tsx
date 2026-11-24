@@ -42,7 +42,11 @@ export function LandingView({ isAuthenticated }: LandingViewProps) {
         <section className="min-h-[calc(100vh-4rem)] w-full flex flex-col justify-between overflow-x-clip">
           <div className="max-w-[1440px] mx-auto w-full flex-1 flex items-center px-8 lg:px-16 py-10">
             <div className="w-full grid grid-cols-1 lg:grid-cols-12 items-center gap-10 lg:gap-12">
-              <div className="animate-enter lg:col-span-7 text-left space-y-6">
+              <header className="animate-enter lg:col-span-7 text-left space-y-6">
+                <p className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-emerald-400 light:text-emerald-700">
+                  KhumLab • E-Commerce Profit &amp; Break-Even Intelligence
+                </p>
+
                 <h1 className="py-1 text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-zinc-100 light:text-slate-900 leading-[1.15]">
                   {isEn ? (
                     <>
@@ -69,9 +73,12 @@ export function LandingView({ isAuthenticated }: LandingViewProps) {
                         selling price minus product cost alone
                       </span>
                       , forgetting marketplace GP fees (12%–13%), ad spend per
-                      order, boxes & bubble wrap, and flash sale discounts.
-                      KhumLab reveals your true net profit, break-even volume,
-                      and promo impact in seconds before you launch.
+                      order, boxes & bubble wrap, and flash sale discounts.{" "}
+                      <strong className="font-semibold text-emerald-400 light:text-emerald-700">
+                        KhumLab
+                      </strong>{" "}
+                      reveals your true net profit, break-even volume, and promo
+                      impact in seconds before you launch.
                     </>
                   ) : (
                     <>
@@ -80,8 +87,11 @@ export function LandingView({ isAuthenticated }: LandingViewProps) {
                         ราคาขายลบต้นทุนสินค้าเพียงอย่างเดียว
                       </span>{" "}
                       แต่ลืมหักค่า GP แพลตฟอร์ม (12%–13%), ค่าโฆษณาต่อชิ้น,
-                      ค่ากล่องและบับเบิลกันกระแทก รวมถึงส่วนลดช่วงจัดแคมเปญ
-                      KhumLab ช่วยให้คุณเห็นกำไรสุทธิ จุดคุ้มทุน
+                      ค่ากล่องและบับเบิลกันกระแทก รวมถึงส่วนลดช่วงจัดแคมเปญ{" "}
+                      <strong className="font-semibold text-emerald-400 light:text-emerald-700">
+                        KhumLab
+                      </strong>{" "}
+                      ช่วยให้คุณเห็นกำไรสุทธิ จุดคุ้มทุน
                       และผลกระทบจากโปรโมชันก่อนเปิดขายจริงในไม่กี่วินาที
                     </>
                   )}
@@ -118,7 +128,7 @@ export function LandingView({ isAuthenticated }: LandingViewProps) {
                     <ArrowRight className="h-5 w-5" />
                   </Link>
                 </div>
-              </div>
+              </header>
 
               <div className="animate-enter-delay-1 lg:col-span-5 flex items-center justify-center">
                 <KhumLabLogo variant="hero" />

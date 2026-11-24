@@ -73,7 +73,7 @@ async function HomeContent({ searchParams }: HomePageProps) {
 
 export default function HomePage({ searchParams }: HomePageProps) {
   return (
-    <Suspense fallback={<PageLoader label="กำลังโหลดหน้าแรก..." />}>
+    <Suspense fallback={<PageLoader label="กำลังโหลดหน้าแรก KhumLab..." />}>
       <HomeContent searchParams={searchParams} />
     </Suspense>
   );
