@@ -3,22 +3,22 @@
 import Link from "next/link";
 import {
   ArrowLeft,
+  BookOpen,
   Cloud,
   Code2,
   Cpu,
   Crown,
   ExternalLink,
+  FlaskConical,
   GraduationCap,
   Layers,
   Palette,
   Rocket,
   Sparkles,
-  UserCheck,
   Users,
 } from "lucide-react";
 import { useAppLanguage } from "@/lib/language";
 import { FloatingBackgroundDocs } from "@/components/FloatingBackgroundDocs";
-import { KhumLabLogo } from "@/components/KhumLabLogo";
 
 interface CreditsViewProps {
   isAuthenticated: boolean;
@@ -45,6 +45,9 @@ interface TeamMemberItem {
   index: string;
   nameTh: string;
   nameEn: string;
+  roleTh: string;
+  roleEn: string;
+  roleIcon: "tester" | "developer" | "researcher" | "lead";
   isLead?: boolean;
 }
 
@@ -53,29 +56,57 @@ const KATUM_TEAM_MEMBERS: readonly TeamMemberItem[] = [
     index: "01",
     nameTh: "นายพีรพัฒน์ ลำลา",
     nameEn: "Mr. Peerapat Lamla",
+    roleTh: "ผู้ทดลองใช้งาน / Tester",
+    roleEn: "Tester",
+    roleIcon: "tester",
   },
   {
     index: "02",
     nameTh: "นายพรรษา รวมทรัพย์",
     nameEn: "Mr. Pansa Ruamsap",
-    isLead: true,
+    roleTh: "Lead Developer",
+    roleEn: "Lead Developer",
+    roleIcon: "developer",
   },
   {
     index: "03",
     nameTh: "นายพัชรพล พูลสวัสดิ์",
     nameEn: "Mr. Patcharapol Poonsawat",
+    roleTh: "ผู้หาข้อมูล",
+    roleEn: "Researcher",
+    roleIcon: "researcher",
   },
   {
     index: "04",
     nameTh: "นายวิวัฒน์ชัย ธีระพาณิชย์",
     nameEn: "Mr. Wiwatthachai Thiraphanit",
+    roleTh: "ผู้หาข้อมูล",
+    roleEn: "Researcher",
+    roleIcon: "researcher",
   },
   {
     index: "05",
     nameTh: "นายศิริชัย ตอแก้ว",
     nameEn: "Mr. Sirichai Tokaeo",
+    roleTh: "หัวหน้ากลุ่ม",
+    roleEn: "Team Lead",
+    roleIcon: "lead",
+    isLead: true,
   },
 ];
+
+function MemberRoleIcon({ icon }: { icon: TeamMemberItem["roleIcon"] }) {
+  switch (icon) {
+    case "lead":
+      return <Crown className="h-3 w-3 shrink-0" />;
+    case "developer":
+      return <Code2 className="h-3 w-3 shrink-0" />;
+    case "tester":
+      return <FlaskConical className="h-3 w-3 shrink-0" />;
+    case "researcher":
+      return <BookOpen className="h-3 w-3 shrink-0" />;
+  }
+}
 
 interface TechStackItem {
   name: string;
@@ -203,8 +234,8 @@ export function CreditsView({ isAuthenticated }: CreditsViewProps) {
             <Sparkles className="h-3.5 w-3.5" />
             <span>
               {isEn
-                ? "v1.3.1 (Updated Nov 23, 2026)"
-                : "v1.3.1 (อัปเดต 23 พ.ย. 2569)"}
+                ? "v1.3.2 (Updated Nov 29, 2026)"
+                : "v1.3.2 (อัปเดต 29 พ.ย. 2569)"}
             </span>
           </span>
         </div>
@@ -218,8 +249,8 @@ export function CreditsView({ isAuthenticated }: CreditsViewProps) {
           </h1>
           <p className="text-sm sm:text-base text-zinc-400 light:text-slate-600 max-w-2xl leading-relaxed">
             {isEn
-              ? "Meet the creator behind KhumLab and explore the modern web stack powering real-cost e-commerce profit intelligence."
-              : "ข้อมูลผู้พัฒนาเบื้องหลัง KhumLab และชุดเทคโนโลยีสมัยใหม่ที่ขับเคลื่อนเครื่องมือคำนวณต้นทุนและกำไรสำหรับผู้ขายออนไลน์"}
+              ? "Meet the development team behind KhumLab and explore the modern web stack powering real-cost e-commerce profit intelligence."
+              : "คณะผู้จัดทำเบื้องหลังโครงงาน KhumLab และชุดเทคโนโลยีสมัยใหม่ที่ขับเคลื่อนเครื่องมือคำนวณต้นทุนและกำไรสำหรับผู้ขายออนไลน์"}
           </p>
         </div>
 
@@ -227,11 +258,11 @@ export function CreditsView({ isAuthenticated }: CreditsViewProps) {
           <div className="bg-gradient-to-r from-emerald-950/60 via-[#0a100e] to-[#070908] border-b border-emerald-500/15 px-5 sm:px-6 py-4 flex flex-wrap items-center justify-between gap-3 light:from-emerald-50 light:via-teal-50/70 light:to-slate-50 light:border-emerald-200/80">
             <div className="flex items-center gap-3.5 min-w-0">
               <div className="w-10 h-10 shrink-0 rounded-xl bg-gradient-to-br from-emerald-400/25 to-emerald-600/10 border border-emerald-400/35 text-emerald-400 flex items-center justify-center shadow-[0_0_16px_rgba(16,185,129,0.2)] light:from-emerald-100 light:to-emerald-50 light:border-emerald-300 light:text-emerald-700 light:shadow-none">
-                <UserCheck className="h-5 w-5" />
+                <Users className="h-5 w-5" />
               </div>
               <div className="min-w-0">
                 <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-emerald-400 light:text-emerald-700">
-                  CREATOR PROFILE
+                  PROJECT TEAM & ORIGIN
                 </span>
                 <h2 className="text-base sm:text-lg font-bold text-white light:text-slate-900">
                   {isEn ? "Developer & Project Origin" : "ข้อมูลผู้พัฒนาและที่มาของโครงงาน"}
@@ -246,100 +277,7 @@ export function CreditsView({ isAuthenticated }: CreditsViewProps) {
           </div>
 
           <div className="p-6 sm:p-8 space-y-6">
-            <div className="flex flex-col md:flex-row md:items-center gap-6">
-              <div className="flex items-center gap-4 shrink-0">
-                <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl border border-emerald-400/35 bg-gradient-to-br from-emerald-500/20 via-black to-emerald-950/50 shadow-[0_0_24px_rgba(16,185,129,0.22)] light:border-emerald-200 light:from-emerald-50 light:via-white light:to-emerald-100/70 light:shadow-sm">
-                  <KhumLabLogo size={48} />
-                </div>
-                <div className="space-y-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h3 className="text-2xl sm:text-3xl font-bold tracking-tight text-white light:text-slate-900">
-                      Dev00pansa
-                    </h3>
-                    <span className="rounded-lg border border-zinc-800 bg-black/70 px-2.5 py-0.5 text-xs font-medium text-zinc-300 light:border-slate-200 light:bg-slate-100 light:text-slate-700">
-                      Pansa Ruamsap
-                    </span>
-                  </div>
-                  <p className="text-sm font-semibold text-emerald-400 light:text-emerald-700">
-                    Creator & Full-Stack Developer
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="rounded-xl border border-zinc-800/80 bg-black/55 p-5 space-y-3 text-sm sm:text-base leading-relaxed text-zinc-300 light:border-slate-200 light:bg-slate-50/80 light:text-slate-700">
-              <p>
-                {isEn ? (
-                  <>
-                    <strong className="text-white light:text-slate-900">
-                      KhumLab
-                    </strong>{" "}
-                    was designed and engineered by{" "}
-                    <strong className="text-emerald-400 light:text-emerald-700">
-                      Dev00pansa (Pansa Ruamsap)
-                    </strong>{" "}
-                    as a flagship project for the{" "}
-                    <strong className="text-white light:text-slate-900">
-                      Digital for E-Commerce
-                    </strong>{" "}
-                    course.
-                  </>
-                ) : (
-                  <>
-                    <strong className="text-white light:text-slate-900">
-                      KhumLab
-                    </strong>{" "}
-                    ได้รับการออกแบบและพัฒนาโดย{" "}
-                    <strong className="text-emerald-400 light:text-emerald-700">
-                      Dev00pansa (Pansa Ruamsap)
-                    </strong>{" "}
-                    ขึ้นเป็นโครงงานในรายวิชา{" "}
-                    <strong className="text-white light:text-slate-900">
-                      ดิจิทัลฟอร์อีคอมเมิร์ซ (Digital for E-Commerce)
-                    </strong>
-                  </>
-                )}
-              </p>
-              <p className="text-zinc-400 light:text-slate-600 text-sm">
-                {isEn
-                  ? "Created with a clear mission: empower online merchants and brand owners to uncover hidden marketplace GP fees, ad costs, packaging expenses, and flash sale risks so they can price confidently for real net profit — completely free to use."
-                  : "พัฒนาขึ้นด้วยเป้าหมายที่ชัดเจนในการช่วยให้ผู้ขายออนไลน์และเจ้าของแบรนด์สามารถคำนวณต้นทุนแฝง ค่า GP แพลตฟอร์ม ค่าโฆษณา ค่าแพ็ก และผลกระทบจากส่วนลดโปรโมชันได้อย่างแม่นยำ เพื่อตั้งราคาขายที่มีกำไรสุทธิจริง โดยเปิดให้ใช้งานฟรีโดยไม่มีค่าใช้จ่าย"}
-              </p>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-3 pt-1">
-              <a
-                href="https://github.com/Dev00pansa"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2.5 rounded-xl bg-emerald-500 px-5 py-3 text-sm font-semibold text-slate-950 shadow-[0_0_24px_-4px_rgba(16,185,129,0.45)] transition-all hover:bg-emerald-400 hover:-translate-y-0.5 light:bg-emerald-600 light:text-white light:shadow-sm light:hover:bg-emerald-700"
-              >
-                <GitHubLogoSvg className="h-4 w-4 shrink-0" />
-                <span>
-                  {isEn
-                    ? "Visit GitHub Profile (@Dev00pansa)"
-                    : "เยี่ยมชมโปรไฟล์ GitHub (@Dev00pansa)"}
-                </span>
-                <ExternalLink className="h-3.5 w-3.5 shrink-0 opacity-80" />
-              </a>
-
-              <a
-                href="https://github.com/Dev00pansa/ecommerce-cloud"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2.5 rounded-xl border border-emerald-500/30 bg-black/75 px-5 py-3 text-sm font-semibold text-zinc-100 transition-all hover:border-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-300 light:border-slate-300 light:bg-white light:text-slate-800 light:hover:border-emerald-600 light:hover:bg-emerald-50 light:hover:text-emerald-800 light:shadow-xs"
-              >
-                <GitHubLogoSvg className="h-4 w-4 shrink-0" />
-                <span>
-                  {isEn
-                    ? "View Source Code (ecommerce-cloud)"
-                    : "ดูซอร์สโค้ดโปรเจกต์ (ecommerce-cloud)"}
-                </span>
-                <ExternalLink className="h-3.5 w-3.5 shrink-0 opacity-70" />
-              </a>
-            </div>
-
-            <div className="border-t border-zinc-800/80 light:border-slate-200 pt-6 space-y-4">
+            <div className="space-y-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="flex items-center gap-2.5">
                   <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-emerald-500/30 bg-emerald-500/12 text-emerald-400 light:border-emerald-200 light:bg-emerald-50 light:text-emerald-700">
@@ -394,21 +332,46 @@ export function CreditsView({ isAuthenticated }: CreditsViewProps) {
                       </div>
                     </div>
 
-                    {member.isLead && (
-                      <div className="mt-2.5 pt-2 border-t border-emerald-500/20 light:border-emerald-200/80">
-                        <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/40 bg-emerald-500/15 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-300 light:border-emerald-300 light:bg-emerald-100 light:text-emerald-800">
-                          <Crown className="h-3 w-3 shrink-0" />
-                          <span>
-                            {isEn
-                              ? "Team Lead / Lead Developer"
-                              : "หัวหน้ากลุ่ม / Lead Developer"}
-                          </span>
-                        </span>
-                      </div>
-                    )}
+                    <div
+                      className={`mt-2.5 pt-2 border-t ${
+                        member.isLead
+                          ? "border-emerald-500/20 light:border-emerald-200/80"
+                          : "border-zinc-800/75 light:border-slate-200/80"
+                      }`}
+                    >
+                      <span
+                        className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${
+                          member.isLead
+                            ? "border-emerald-400/40 bg-emerald-500/15 text-emerald-300 light:border-emerald-300 light:bg-emerald-100 light:text-emerald-800"
+                            : member.roleIcon === "developer"
+                              ? "border-cyan-500/35 bg-cyan-500/12 text-cyan-300 light:border-cyan-200 light:bg-cyan-50 light:text-cyan-800"
+                              : "border-zinc-700/80 bg-zinc-900/90 text-zinc-300 light:border-slate-200 light:bg-white light:text-slate-700"
+                        }`}
+                      >
+                        <MemberRoleIcon icon={member.roleIcon} />
+                        <span>{isEn ? member.roleEn : member.roleTh}</span>
+                      </span>
+                    </div>
                   </div>
                 ))}
               </div>
+            </div>
+
+            <div className="border-t border-zinc-800/80 light:border-slate-200 pt-5 flex flex-wrap items-center justify-start gap-3">
+              <a
+                href="https://github.com/Dev00pansa/ecommerce-cloud"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2.5 rounded-xl border border-emerald-500/30 bg-black/75 px-5 py-3 text-sm font-semibold text-zinc-100 transition-all hover:border-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-300 light:border-slate-300 light:bg-white light:text-slate-800 light:hover:border-emerald-600 light:hover:bg-emerald-50 light:hover:text-emerald-800 light:shadow-xs"
+              >
+                <GitHubLogoSvg className="h-4 w-4 shrink-0" />
+                <span>
+                  {isEn
+                    ? "View Source Code (ecommerce-cloud)"
+                    : "ดูซอร์สโค้ดโปรเจกต์ (ecommerce-cloud)"}
+                </span>
+                <ExternalLink className="h-3.5 w-3.5 shrink-0 opacity-70" />
+              </a>
             </div>
           </div>
         </section>
@@ -433,8 +396,8 @@ export function CreditsView({ isAuthenticated }: CreditsViewProps) {
 
             <span className="rounded-full border border-emerald-500/30 bg-black/60 px-3 py-1 font-mono text-xs font-medium text-emerald-300 light:border-emerald-200 light:bg-white light:text-emerald-700">
               {isEn
-                ? "v1.3.1 (Updated Nov 23, 2026)"
-                : "v1.3.1 (อัปเดต 23 พ.ย. 2569)"}
+                ? "v1.3.2 (Updated Nov 29, 2026)"
+                : "v1.3.2 (อัปเดต 29 พ.ย. 2569)"}
             </span>
           </div>
 

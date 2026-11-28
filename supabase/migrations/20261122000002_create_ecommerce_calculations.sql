@@ -1,4 +1,3 @@
--- Create ecommerce_calculations table
 create table if not exists public.ecommerce_calculations (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
@@ -13,14 +12,11 @@ create table if not exists public.ecommerce_calculations (
   created_at timestamptz not null default now()
 );
 
--- Index for fast user history queries
 create index if not exists ecommerce_calculations_user_id_created_at_idx
   on public.ecommerce_calculations (user_id, created_at desc);
 
--- Enable Row Level Security (RLS)
 alter table public.ecommerce_calculations enable row level security;
 
--- SELECT policy: each user can read only their own calculations
 drop policy if exists "Users can view their own ecommerce calculations" on public.ecommerce_calculations;
 create policy "Users can view their own ecommerce calculations"
   on public.ecommerce_calculations
@@ -28,7 +24,6 @@ create policy "Users can view their own ecommerce calculations"
   to authenticated
   using ((select auth.uid()) = user_id);
 
--- INSERT policy: each user can insert only their own calculations
 drop policy if exists "Users can insert their own ecommerce calculations" on public.ecommerce_calculations;
 create policy "Users can insert their own ecommerce calculations"
   on public.ecommerce_calculations
@@ -36,7 +31,6 @@ create policy "Users can insert their own ecommerce calculations"
   to authenticated
   with check ((select auth.uid()) = user_id);
 
--- DELETE policy: each user can delete only their own calculations
 drop policy if exists "Users can delete their own ecommerce calculations" on public.ecommerce_calculations;
 create policy "Users can delete their own ecommerce calculations"
   on public.ecommerce_calculations
@@ -44,7 +38,6 @@ create policy "Users can delete their own ecommerce calculations"
   to authenticated
   using ((select auth.uid()) = user_id);
 
--- Enable Supabase Realtime for ecommerce_calculations (idempotent)
 do $$
 begin
   if not exists (

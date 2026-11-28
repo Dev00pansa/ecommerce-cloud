@@ -1,4 +1,4 @@
-# KhumLab `v1.3.1`
+# KhumLab `v1.3.2`
 
 **Live App:** https://khumlab.vercel.app
 
@@ -14,7 +14,7 @@ A real-cost pricing calculator, profit diagnostics engine, and break-even analyt
 - **Full-Site Bilingual Support (TH / EN):** 100% localized Thai and English experience covering every form, diagnostic engine insight, interactive SVG chart, modal, toast notification, footer, credits page, and exported CSV column header.
 - **E-Commerce Financial Diagnostic Engine:** Composite Profit Health Score (`0–100`, Grades `S–D`), multi-color Cost Structure Donut Chart, Discount Sensitivity Simulator (`0%–50%`), paired Revenue vs. Cumulative Net Profit Volume Projection Chart, Return Loss risk multiplier, Max Safe CPA / Break-Even ROAS, 3-tier suggested retail prices, and actionable optimization steps.
 - **Private Cloud Storage (Up to 20 Plans / Account):** Save, edit, single-delete, or bulk-delete pricing plans with Realtime Supabase synchronization, automatic product photo compression (under 120 KB), custom-column CSV export, and duplicate product name protection.
-- **Creator & Katum Group Team Credits (`/credits`):** Dedicated bilingual showcase featuring the project origin, Katum Group development team roster, developer profile (`@Dev00pansa`), open-source repository links, and full technology architecture.
+- **Katum Group Team Credits & Architecture (`/credits`):** Dedicated bilingual showcase featuring the project origin, Katum Group 5-member development team roster with defined roles, open-source repository link, and full technology architecture.
 - **Backend-First Account Security:** Server-side SSR route protection via `@supabase/ssr`, case-sensitive username authentication, anti-bot registration guard, rate-limit cooldowns, and strict PostgreSQL Row-Level Security (RLS) isolating every user's data and storage objects.
 
 ## Tech Stack & Architecture

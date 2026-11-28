@@ -1,7 +1,5 @@
--- Remove legacy test table if it exists
 drop table if exists public.user_projects cascade;
 
--- Create public.profiles table linked to auth.users
 create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   username text unique not null check (username = lower(username) and username ~ '^[a-z0-9_]{4,20}$'),
@@ -11,7 +9,6 @@ create table if not exists public.profiles (
 
 create index if not exists profiles_username_idx on public.profiles (username);
 
--- Enable Row Level Security (RLS) on public.profiles
 alter table public.profiles enable row level security;
 
 drop policy if exists "Users can view their own profile" on public.profiles;
@@ -29,7 +26,6 @@ create policy "Users can update their own profile"
   using ((select auth.uid()) = id)
   with check ((select auth.uid()) = id);
 
--- Trigger function to auto-create profile when a new auth user signs up
 create or replace function public.handle_new_user()
 returns trigger
 language plpgsql
@@ -58,7 +54,6 @@ create trigger on_auth_user_created
   for each row
   execute function public.handle_new_user();
 
--- RPC 1: Check username availability safely without exposing public.profiles
 create or replace function public.check_username_available(p_username text)
 returns boolean
 language plpgsql
@@ -81,7 +76,6 @@ begin
 end;
 $$;
 
--- RPC 2: Resolve username or email to login email safely
 create or replace function public.get_email_for_login(p_identifier text)
 returns text
 language plpgsql
